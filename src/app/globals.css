@@ -1,26 +1,34 @@
+/* =============================================
+   REPAIRAPP - GLOBAL STYLES
+   Imports all theme and component styles
+   ============================================= */
+
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Theme Variables */
+@import "../styles/theme.css";
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* Component Styles */
+@import "../styles/components.css";
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Custom Tailwind Variant for dark mode */
+@custom-variant dark (&:is(.dark *));
+
+/* ========== PRINT STYLES ========== */
+@media print {
+  .no-print {
+    display: none !important;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .card-linear,
+  .stat-card {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
 }
