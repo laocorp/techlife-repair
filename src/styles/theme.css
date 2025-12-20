@@ -1,75 +1,85 @@
 /* =============================================
-   REPAIRAPP - MIDNIGHT PRO THEME
-   Inspirado en Linear - Premium Design System
+   REPAIRAPP - ENTERPRISE DARK THEME
+   Ultra-dark professional design inspired by
+   modern SaaS dashboards
    ============================================= */
 
 :root {
     /* ========== BRAND IDENTITY ========== */
-    --brand-primary: 222 47% 11%;
-    /* Slate 900 - Base oscura */
-    --brand-accent: 217 91% 60%;
-    /* Blue 500 - Acento vibrante */
-    --brand-glow: 217 91% 60%;
-    /* Para efectos de brillo */
+    --brand-primary: 220 15% 6%;
+    /* Almost black base */
+    --brand-accent: 185 85% 50%;
+    /* Cyan accent - modern enterprise */
+    --brand-glow: 185 85% 50%;
+    /* Cyan glow */
+    --brand-secondary: 262 83% 58%;
+    /* Purple secondary for charts */
 
     /* ========== SURFACE COLORS ========== */
-    /* Jerarquía de superficies de más oscuro a más claro */
-    --surface-base: 222 47% 5%;
-    /* Fondo principal */
-    --surface-elevated: 222 47% 8%;
-    /* Cards, modales */
-    --surface-overlay: 222 47% 11%;
-    /* Hover, selección */
-    --surface-highlight: 222 47% 15%;
-    /* Estados activos */
+    /* Ultra-dark hierarchy */
+    --surface-base: 220 15% 4%;
+    /* Main background - near black */
+    --surface-elevated: 220 15% 7%;
+    /* Cards, panels */
+    --surface-overlay: 220 15% 10%;
+    /* Modals, dropdowns */
+    --surface-highlight: 220 15% 13%;
+    /* Hover, active states */
+    --surface-glass: 220 15% 8% / 0.8;
+    /* Glassmorphism */
 
     /* ========== TEXT COLORS ========== */
-    --text-primary: 210 40% 98%;
-    /* Texto principal - casi blanco */
-    --text-secondary: 215 20% 65%;
-    /* Texto secundario */
-    --text-muted: 215 15% 45%;
-    /* Texto deshabilitado/hint */
-    --text-accent: 217 91% 60%;
-    /* Links, destacados */
+    --text-primary: 0 0% 98%;
+    /* Pure white text */
+    --text-secondary: 220 10% 60%;
+    /* Gray secondary */
+    --text-muted: 220 10% 40%;
+    /* Muted/disabled */
+    --text-accent: 185 85% 55%;
+    /* Cyan links */
 
     /* ========== BORDER & DIVIDERS ========== */
-    --border-subtle: 220 13% 18%;
-    /* Bordes sutiles */
-    --border-default: 220 13% 22%;
-    /* Bordes normales */
-    --border-interactive: 217 91% 60%;
-    /* Bordes en focus/hover */
+    --border-subtle: 220 15% 12%;
+    /* Very subtle borders */
+    --border-default: 220 15% 16%;
+    /* Normal borders */
+    --border-interactive: 185 85% 50%;
+    /* Focus/active - cyan */
 
     /* ========== STATUS COLORS ========== */
-    /* Success - Verde esmeralda */
-    --status-success: 160 84% 39%;
-    --status-success-bg: 160 84% 15%;
+    /* Success - Neon green */
+    --status-success: 142 71% 45%;
+    --status-success-bg: 142 71% 10%;
 
-    /* Warning - Ámbar */
-    --status-warning: 38 92% 50%;
-    --status-warning-bg: 38 92% 15%;
+    /* Warning - Neon orange */
+    --status-warning: 32 95% 50%;
+    --status-warning-bg: 32 95% 10%;
 
-    /* Error - Rojo coral */
-    --status-error: 0 84% 60%;
-    --status-error-bg: 0 84% 15%;
+    /* Error - Neon red/pink */
+    --status-error: 350 89% 60%;
+    --status-error-bg: 350 89% 10%;
 
-    /* Info - Azul cielo */
-    --status-info: 199 89% 48%;
-    --status-info-bg: 199 89% 15%;
+    /* Info - Cyan */
+    --status-info: 185 85% 50%;
+    --status-info-bg: 185 85% 10%;
+
+    /* Pending - Purple */
+    --status-pending: 262 83% 58%;
+    --status-pending-bg: 262 83% 10%;
 
     /* ========== INTERACTIVE STATES ========== */
-    --interactive-hover: 217 91% 60% / 0.1;
-    --interactive-active: 217 91% 60% / 0.2;
-    --interactive-focus: 217 91% 60%;
+    --interactive-hover: 185 85% 50% / 0.08;
+    --interactive-active: 185 85% 50% / 0.15;
+    --interactive-focus: 185 85% 50%;
 
     /* ========== EFFECTS ========== */
-    --glow-primary: 0 0 20px hsl(217 91% 60% / 0.4);
-    --glow-success: 0 0 20px hsl(160 84% 39% / 0.4);
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.4);
+    --glow-primary: 0 0 30px hsl(185 85% 50% / 0.25);
+    --glow-success: 0 0 20px hsl(142 71% 45% / 0.25);
+    --glow-purple: 0 0 20px hsl(262 83% 58% / 0.25);
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.7), 0 4px 6px -4px rgb(0 0 0 / 0.6);
+    --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.8);
 
     /* ========== SPACING SCALE ========== */
     --space-1: 0.25rem;
@@ -88,7 +98,7 @@
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
     --radius-xl: 1rem;
-    --radius-2xl: 1.5rem;
+    --radius-2xl: 1.25rem;
     --radius-full: 9999px;
 
     /* ========== TYPOGRAPHY ========== */
@@ -105,6 +115,7 @@
     --text-2xl: 1.5rem;
     --text-3xl: 1.875rem;
     --text-4xl: 2.25rem;
+    --text-5xl: 3rem;
 
     /* Line Heights */
     --leading-tight: 1.25;
@@ -125,8 +136,8 @@
     --z-toast: 500;
 
     /* ========== SIDEBAR ========== */
-    --sidebar-width: 240px;
-    --sidebar-collapsed-width: 64px;
+    --sidebar-width: 220px;
+    --sidebar-collapsed-width: 60px;
     --header-height: 56px;
 }
 
@@ -139,13 +150,13 @@
     --popover: var(--surface-elevated);
     --popover-foreground: var(--text-primary);
     --primary: var(--brand-accent);
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 220 15% 4%;
     --secondary: var(--surface-overlay);
     --secondary-foreground: var(--text-secondary);
     --muted: var(--surface-highlight);
     --muted-foreground: var(--text-muted);
     --accent: var(--brand-accent);
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 220 15% 4%;
     --destructive: var(--status-error);
     --destructive-foreground: 0 0% 100%;
     --border: var(--border-subtle);
@@ -153,10 +164,15 @@
     --ring: var(--border-interactive);
     --radius: var(--radius-lg);
 
-    /* Chart colors */
-    --chart-1: 217 91% 60%;
-    --chart-2: 160 84% 39%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 280 84% 60%;
-    --chart-5: 0 84% 60%;
+    /* Chart colors - Neon palette */
+    --chart-1: 185 85% 50%;
+    /* Cyan */
+    --chart-2: 142 71% 45%;
+    /* Green */
+    --chart-3: 262 83% 58%;
+    /* Purple */
+    --chart-4: 32 95% 50%;
+    /* Orange */
+    --chart-5: 350 89% 60%;
+    /* Pink */
 }

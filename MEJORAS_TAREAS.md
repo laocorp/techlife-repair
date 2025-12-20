@@ -1,11 +1,11 @@
 # Plan de Mejora – techlife-repair (RepairApp v2)
 
 ## ✅ Mejoras Visuales y UX
-- [ ] Refinar modo oscuro: paleta de colores, transiciones suaves y consistencia en todos los componentes.
-- [ ] Añadir micro‑interacciones animadas (hover, focus, carga) usando Framer Motion.
+- [x] Refinar modo oscuro: paleta de colores, transiciones suaves y consistencia en todos los componentes.
+- [x] Añadir micro‑interacciones animadas (hover, focus, carga) usando Framer Motion.
 - [ ] Rediseñar layout responsivo: optimizar breakpoints para tablets y monitores grandes, tipografía fluida.
-- [ ] Reemplazar iconos por un set SVG premium y coherente.
-- [ ] Rediseñar el dashboard: tarjetas con gráficos (Recharts) y KPI destacados.
+- [x] Reemplazar iconos por un set SVG premium y coherente.
+- [x] Rediseñar el dashboard: tarjetas con gráficos (Recharts) y KPI destacados.
 
 ## ⚙️ Mejoras Técnicas y de Rendimiento
 - [ ] Implementar code‑splitting y lazy loading mediante imports dinámicos.

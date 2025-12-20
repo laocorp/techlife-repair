@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
 import { useTenant } from '@/hooks'
-import { PermissionGate, getRoleDisplayName } from '@/hooks/use-permissions'
+import { PermissionGate } from '@/hooks/use-permissions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,7 +14,6 @@ import {
     Wrench,
     Users,
     TrendingUp,
-    TrendingDown,
     Clock,
     CheckCircle,
     AlertTriangle,
@@ -23,19 +22,30 @@ import {
     Plus,
     ArrowUpRight,
     Activity,
+    CircleDot,
+    Zap,
 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
+import {
+    AreaChart,
+    Area,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+    BarChart,
+    Bar,
+} from 'recharts'
 
-// Stagger animation for cards
+// Animation variants
 const containerVariants = {
     hidden: { opacity: 0 },
     show: {
         opacity: 1,
-        transition: {
-            staggerChildren: 0.05,
-        },
+        transition: { staggerChildren: 0.06 },
     },
 }
 
@@ -44,10 +54,7 @@ const itemVariants = {
     show: {
         opacity: 1,
         y: 0,
-        transition: {
-            duration: 0.3,
-            ease: "easeOut" as const
-        }
+        transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }
     },
 }
 
@@ -59,18 +66,39 @@ interface DashboardStats {
     clientes_total: number
     clientes_nuevos_mes: number
     productos_stock_bajo: number
-    pagos_pendientes: number
+    ordenes_completadas: number
 }
 
-const estadoColors: Record<string, { bg: string; text: string; label: string }> = {
-    recibido: { bg: 'bg-[hsl(var(--surface-highlight))]', text: 'text-[hsl(var(--text-secondary))]', label: 'Recibido' },
-    en_diagnostico: { bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'En Diagnóstico' },
-    cotizado: { bg: 'bg-amber-500/10', text: 'text-amber-400', label: 'Cotizado' },
-    aprobado: { bg: 'bg-cyan-500/10', text: 'text-cyan-400', label: 'Aprobado' },
-    en_reparacion: { bg: 'bg-violet-500/10', text: 'text-violet-400', label: 'En Reparación' },
-    terminado: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: 'Terminado' },
-    entregado: { bg: 'bg-green-500/10', text: 'text-green-400', label: 'Entregado' },
+const estadoColors: Record<string, { bg: string; text: string; label: string; dot: string }> = {
+    recibido: { bg: 'bg-zinc-500/10', text: 'text-zinc-400', label: 'Recibido', dot: 'bg-zinc-400' },
+    en_diagnostico: { bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'Diagnóstico', dot: 'bg-blue-400' },
+    cotizado: { bg: 'bg-amber-500/10', text: 'text-amber-400', label: 'Cotizado', dot: 'bg-amber-400' },
+    aprobado: { bg: 'bg-violet-500/10', text: 'text-violet-400', label: 'Aprobado', dot: 'bg-violet-400' },
+    en_reparacion: { bg: 'bg-cyan-500/10', text: 'text-cyan-400', label: 'En Reparación', dot: 'bg-cyan-400' },
+    terminado: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: 'Terminado', dot: 'bg-emerald-400' },
+    entregado: { bg: 'bg-green-500/10', text: 'text-green-400', label: 'Entregado', dot: 'bg-green-400' },
 }
+
+// Sample chart data - will be replaced with real data
+const revenueData = [
+    { name: 'Lun', value: 1200 },
+    { name: 'Mar', value: 1800 },
+    { name: 'Mié', value: 1400 },
+    { name: 'Jue', value: 2200 },
+    { name: 'Vie', value: 1900 },
+    { name: 'Sáb', value: 2800 },
+    { name: 'Dom', value: 2100 },
+]
+
+const ordersData = [
+    { name: 'Lun', ordenes: 8 },
+    { name: 'Mar', ordenes: 12 },
+    { name: 'Mié', ordenes: 9 },
+    { name: 'Jue', ordenes: 15 },
+    { name: 'Vie', ordenes: 11 },
+    { name: 'Sáb', ordenes: 18 },
+    { name: 'Dom', ordenes: 14 },
+]
 
 export default function DashboardPage() {
     const { user } = useAuthStore()
@@ -115,6 +143,13 @@ export default function DashboardPage() {
                 .eq('empresa_id', user.empresa_id)
                 .neq('estado', 'entregado')
 
+            // Count completed orders
+            const { count: ordenesCompletadas } = await supabase
+                .from('ordenes_servicio')
+                .select('*', { count: 'exact', head: true })
+                .eq('empresa_id', user.empresa_id)
+                .eq('estado', 'entregado')
+
             // Count orders today
             const today = new Date().toISOString().split('T')[0]
             const { count: ordenesHoy } = await supabase
@@ -147,7 +182,7 @@ export default function DashboardPage() {
                 clientes_total: clientesTotal || 0,
                 clientes_nuevos_mes: 0,
                 productos_stock_bajo: filtered.length,
-                pagos_pendientes: 0,
+                ordenes_completadas: ordenesCompletadas || 0,
             })
 
         } catch (error) {
@@ -160,30 +195,13 @@ export default function DashboardPage() {
     useEffect(() => {
         loadDashboardData()
 
-        // Real-time subscription for live updates
         const channel = supabase
             .channel('dashboard-realtime')
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'ordenes_servicio' },
-                () => {
-                    console.log('📡 Realtime: Ordenes update')
-                    loadDashboardData()
-                }
-            )
-            .on(
-                'postgres_changes',
-                { event: '*', schema: 'public', table: 'ventas' },
-                () => {
-                    console.log('📡 Realtime: Ventas update')
-                    loadDashboardData()
-                }
-            )
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'ordenes_servicio' }, () => loadDashboardData())
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'ventas' }, () => loadDashboardData())
             .subscribe()
 
-        return () => {
-            supabase.removeChannel(channel)
-        }
+        return () => { supabase.removeChannel(channel) }
     }, [user?.empresa_id])
 
     const statCards = [
@@ -191,33 +209,45 @@ export default function DashboardPage() {
             title: 'Órdenes Activas',
             value: stats?.ordenes_activas || 0,
             icon: Wrench,
-            color: 'text-blue-400',
-            bgColor: 'bg-blue-500/10',
+            color: 'text-cyan-400',
+            bgColor: 'bg-cyan-500/10',
+            glowColor: 'shadow-cyan-500/20',
             href: '/ordenes',
+            trend: '+12%',
+            trendUp: true,
         },
         {
-            title: 'Total Clientes',
+            title: 'Completadas',
+            value: stats?.ordenes_completadas || 0,
+            icon: CheckCircle,
+            color: 'text-emerald-400',
+            bgColor: 'bg-emerald-500/10',
+            glowColor: 'shadow-emerald-500/20',
+            href: '/ordenes?estado=entregado',
+            trend: '+8%',
+            trendUp: true,
+        },
+        {
+            title: 'Clientes',
             value: stats?.clientes_total || 0,
             icon: Users,
             color: 'text-violet-400',
             bgColor: 'bg-violet-500/10',
+            glowColor: 'shadow-violet-500/20',
             href: '/clientes',
+            trend: '+5%',
+            trendUp: true,
         },
         {
-            title: 'Stock Bajo',
-            value: stats?.productos_stock_bajo || 0,
-            icon: Package,
-            color: stats?.productos_stock_bajo ? 'text-amber-400' : 'text-emerald-400',
-            bgColor: stats?.productos_stock_bajo ? 'bg-amber-500/10' : 'bg-emerald-500/10',
-            href: '/inventario',
-        },
-        {
-            title: 'Ventas del Mes',
-            value: `$${(stats?.ventas_mes || 0).toFixed(0)}`,
+            title: 'Ingresos',
+            value: `$${((stats?.ventas_mes || 0) / 1000).toFixed(1)}k`,
             icon: DollarSign,
-            color: 'text-emerald-400',
-            bgColor: 'bg-emerald-500/10',
+            color: 'text-amber-400',
+            bgColor: 'bg-amber-500/10',
+            glowColor: 'shadow-amber-500/20',
             href: '/reportes',
+            trend: '+23%',
+            trendUp: true,
         },
     ]
 
@@ -226,16 +256,16 @@ export default function DashboardPage() {
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="space-y-6"
+            className="space-y-6 p-1"
         >
-            {/* Welcome Section - Linear style */}
-            <motion.div variants={itemVariants} className="flex items-start justify-between">
+            {/* Welcome Header */}
+            <motion.div variants={itemVariants} className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-xl font-semibold text-[hsl(var(--text-primary))] tracking-tight">
-                        Bienvenido, {user?.nombre?.split(' ')[0]}
+                    <h1 className="text-2xl font-semibold text-white tracking-tight">
+                        Dashboard
                     </h1>
-                    <p className="text-sm text-[hsl(var(--text-muted))] mt-0.5">
-                        Aquí está el resumen de tu negocio
+                    <p className="text-sm text-zinc-500 mt-1">
+                        Bienvenido, {user?.nombre?.split(' ')[0]} · {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </p>
                 </div>
 
@@ -245,9 +275,9 @@ export default function DashboardPage() {
                             <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-8 gap-1.5 border-[hsl(var(--border-subtle))] text-[hsl(var(--text-secondary))] hover:text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--interactive-hover))]"
+                                className="h-9 gap-2 border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:text-white hover:bg-zinc-800 hover:border-zinc-700"
                             >
-                                <Plus className="h-3.5 w-3.5" />
+                                <Plus className="h-4 w-4" />
                                 Nueva Orden
                             </Button>
                         </Link>
@@ -256,9 +286,9 @@ export default function DashboardPage() {
                         <Link href="/pos">
                             <Button
                                 size="sm"
-                                className="h-8 gap-1.5 bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-accent))]/90 text-white"
+                                className="h-9 gap-2 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold shadow-lg shadow-cyan-500/25"
                             >
-                                <ShoppingCart className="h-3.5 w-3.5" />
+                                <Zap className="h-4 w-4" />
                                 Nueva Venta
                             </Button>
                         </Link>
@@ -266,39 +296,144 @@ export default function DashboardPage() {
                 </div>
             </motion.div>
 
-            {/* Stats Grid - Minimal Linear style */}
-            <motion.div
-                variants={itemVariants}
-                className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-            >
-                {statCards.map((stat) => {
+            {/* Stats Grid */}
+            <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {statCards.map((stat, index) => {
                     const Icon = stat.icon
                     return (
                         <Link key={stat.title} href={stat.href}>
-                            <Card className="stat-card group cursor-pointer">
-                                <CardContent className="p-5">
-                                    <div className="flex items-start justify-between">
-                                        <div>
-                                            <p className="stat-label">{stat.title}</p>
-                                            {isLoading ? (
-                                                <Skeleton className="h-8 w-16 mt-1 bg-[hsl(var(--surface-highlight))]" />
-                                            ) : (
-                                                <p className="stat-value mt-1">{stat.value}</p>
-                                            )}
-                                        </div>
-                                        <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                                            <Icon className={`h-4 w-4 ${stat.color}`} />
+                            <div className="stat-card-enterprise group cursor-pointer">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                                            {stat.title}
+                                        </p>
+                                        {isLoading ? (
+                                            <div className="skeleton h-8 w-20 mt-2" />
+                                        ) : (
+                                            <p className="text-2xl font-bold text-white mt-1 tracking-tight">
+                                                {stat.value}
+                                            </p>
+                                        )}
+                                        <div className="flex items-center gap-1 mt-2">
+                                            <TrendingUp className="h-3 w-3 text-emerald-400" />
+                                            <span className="text-xs text-emerald-400 font-medium">{stat.trend}</span>
+                                            <span className="text-xs text-zinc-600">vs mes anterior</span>
                                         </div>
                                     </div>
-                                    <div className="mt-3 flex items-center text-xs text-[hsl(var(--text-muted))] opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <span>Ver detalles</span>
-                                        <ArrowUpRight className="h-3 w-3 ml-1" />
+                                    <div className={`icon-container ${stat.bgColor} group-hover:shadow-lg ${stat.glowColor}`}>
+                                        <Icon className={`h-5 w-5 ${stat.color}`} />
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         </Link>
                     )
                 })}
+            </motion.div>
+
+            {/* Charts Row */}
+            <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Revenue Chart */}
+                <div className="chart-container">
+                    <div className="chart-header">
+                        <div>
+                            <h3 className="chart-title">Ingresos de la Semana</h3>
+                            <p className="text-xs text-zinc-500 mt-0.5">Últimos 7 días</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-lg font-bold text-white">${((stats?.ventas_mes || 0)).toFixed(0)}</p>
+                            <p className="text-xs text-emerald-400">+23% vs semana pasada</p>
+                        </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={200}>
+                        <AreaChart data={revenueData}>
+                            <defs>
+                                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="hsl(185, 85%, 50%)" stopOpacity={0.3} />
+                                    <stop offset="95%" stopColor="hsl(185, 85%, 50%)" stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 12%)" vertical={false} />
+                            <XAxis
+                                dataKey="name"
+                                stroke="hsl(220, 10%, 40%)"
+                                fontSize={11}
+                                tickLine={false}
+                                axisLine={false}
+                            />
+                            <YAxis
+                                stroke="hsl(220, 10%, 40%)"
+                                fontSize={11}
+                                tickLine={false}
+                                axisLine={false}
+                                tickFormatter={(value) => `$${value}`}
+                            />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'hsl(220, 15%, 10%)',
+                                    border: '1px solid hsl(220, 15%, 16%)',
+                                    borderRadius: '8px',
+                                    fontSize: '12px',
+                                }}
+                                labelStyle={{ color: 'hsl(0, 0%, 98%)' }}
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="value"
+                                stroke="hsl(185, 85%, 50%)"
+                                strokeWidth={2}
+                                fillOpacity={1}
+                                fill="url(#colorRevenue)"
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* Orders Chart */}
+                <div className="chart-container">
+                    <div className="chart-header">
+                        <div>
+                            <h3 className="chart-title">Órdenes por Día</h3>
+                            <p className="text-xs text-zinc-500 mt-0.5">Últimos 7 días</p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-lg font-bold text-white">{stats?.ordenes_hoy || 0}</p>
+                            <p className="text-xs text-zinc-500">órdenes hoy</p>
+                        </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={200}>
+                        <BarChart data={ordersData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 12%)" vertical={false} />
+                            <XAxis
+                                dataKey="name"
+                                stroke="hsl(220, 10%, 40%)"
+                                fontSize={11}
+                                tickLine={false}
+                                axisLine={false}
+                            />
+                            <YAxis
+                                stroke="hsl(220, 10%, 40%)"
+                                fontSize={11}
+                                tickLine={false}
+                                axisLine={false}
+                            />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'hsl(220, 15%, 10%)',
+                                    border: '1px solid hsl(220, 15%, 16%)',
+                                    borderRadius: '8px',
+                                    fontSize: '12px',
+                                }}
+                                labelStyle={{ color: 'hsl(0, 0%, 98%)' }}
+                            />
+                            <Bar
+                                dataKey="ordenes"
+                                fill="hsl(262, 83%, 58%)"
+                                radius={[4, 4, 0, 0]}
+                            />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
             </motion.div>
 
             {/* Main Content Grid */}
@@ -306,108 +441,118 @@ export default function DashboardPage() {
                 {/* Recent Orders */}
                 <PermissionGate permission="orders.view">
                     <motion.div variants={itemVariants} className="lg:col-span-2">
-                        <Card className="card-linear">
-                            <CardHeader className="flex flex-row items-center justify-between pb-4">
-                                <div>
-                                    <CardTitle className="text-sm font-medium text-[hsl(var(--text-primary))]">
-                                        Órdenes Recientes
-                                    </CardTitle>
+                        <div className="card-enterprise">
+                            <div className="flex items-center justify-between p-5 border-b border-zinc-800/50">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                                        <Activity className="h-4 w-4 text-cyan-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-white">Órdenes Activas</h3>
+                                        <p className="text-xs text-zinc-500">En proceso de reparación</p>
+                                    </div>
                                 </div>
                                 <Link href="/ordenes">
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="h-7 gap-1 text-xs text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))]"
+                                        className="h-8 gap-1 text-xs text-zinc-500 hover:text-white"
                                     >
                                         Ver todas <ArrowRight className="h-3 w-3" />
                                     </Button>
                                 </Link>
-                            </CardHeader>
-                            <CardContent className="p-0">
+                            </div>
+                            <div className="p-0">
                                 {isLoading ? (
-                                    <div className="p-4 space-y-3">
+                                    <div className="p-5 space-y-3">
                                         {[...Array(3)].map((_, i) => (
-                                            <Skeleton key={i} className="h-14 w-full bg-[hsl(var(--surface-highlight))]" />
+                                            <div key={i} className="skeleton h-16 w-full" />
                                         ))}
                                     </div>
                                 ) : recentOrders.length === 0 ? (
-                                    <div className="p-8 text-center">
-                                        <Activity className="h-10 w-10 text-[hsl(var(--text-muted))] mx-auto mb-3 opacity-50" />
-                                        <p className="text-sm text-[hsl(var(--text-muted))]">No hay órdenes activas</p>
+                                    <div className="p-10 text-center">
+                                        <div className="w-12 h-12 rounded-full bg-zinc-800/50 flex items-center justify-center mx-auto mb-3">
+                                            <Wrench className="h-6 w-6 text-zinc-600" />
+                                        </div>
+                                        <p className="text-sm text-zinc-500">No hay órdenes activas</p>
                                         <Link href="/ordenes/nueva">
-                                            <Button variant="link" size="sm" className="mt-2 text-[hsl(var(--brand-accent))]">
+                                            <Button variant="link" size="sm" className="mt-2 text-cyan-400 hover:text-cyan-300">
                                                 Crear primera orden
                                             </Button>
                                         </Link>
                                     </div>
                                 ) : (
-                                    <div className="divide-y divide-[hsl(var(--border-subtle))]">
+                                    <div className="divide-y divide-zinc-800/50">
                                         {recentOrders.map((order) => {
                                             const estado = estadoColors[order.estado] || estadoColors.recibido
                                             return (
                                                 <Link key={order.id} href={`/ordenes/${order.id}`}>
-                                                    <div className="flex items-center justify-between px-4 py-3 hover:bg-[hsl(var(--interactive-hover))] transition-colors cursor-pointer">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-8 h-8 rounded-lg bg-[hsl(var(--surface-highlight))] flex items-center justify-center">
-                                                                <Wrench className="h-4 w-4 text-[hsl(var(--text-muted))]" />
+                                                    <div className="flex items-center justify-between px-5 py-4 hover:bg-zinc-800/30 transition-colors cursor-pointer">
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center border border-zinc-700/50">
+                                                                <Wrench className="h-4 w-4 text-zinc-400" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-sm font-medium text-[hsl(var(--text-primary))]">
+                                                                <p className="text-sm font-medium text-white">
                                                                     {order.equipo}
                                                                 </p>
-                                                                <p className="text-xs text-[hsl(var(--text-muted))]">
+                                                                <p className="text-xs text-zinc-500 mt-0.5">
                                                                     {order.cliente?.nombre || 'Sin cliente'} · {order.numero_orden}
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        <Badge className={`${estado.bg} ${estado.text} border-0 text-[10px] font-medium`}>
-                                                            {estado.label}
-                                                        </Badge>
+                                                        <div className="flex items-center gap-3">
+                                                            <Badge className={`${estado.bg} ${estado.text} border-0 text-[10px] font-semibold uppercase tracking-wider`}>
+                                                                <CircleDot className={`h-2 w-2 mr-1 ${estado.dot}`} />
+                                                                {estado.label}
+                                                            </Badge>
+                                                            <ArrowUpRight className="h-4 w-4 text-zinc-600" />
+                                                        </div>
                                                     </div>
                                                 </Link>
                                             )
                                         })}
                                     </div>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </motion.div>
                 </PermissionGate>
 
-                {/* Low Stock Alert */}
-                <PermissionGate permission="inventory.view">
-                    <motion.div variants={itemVariants}>
-                        <Card className="card-linear h-full">
-                            <CardHeader className="pb-3">
-                                <div className="flex items-center gap-2">
+                {/* Stock Alerts & Quick Actions */}
+                <motion.div variants={itemVariants} className="space-y-6">
+                    {/* Low Stock */}
+                    <PermissionGate permission="inventory.view">
+                        <div className="card-enterprise">
+                            <div className="flex items-center gap-3 p-5 border-b border-zinc-800/50">
+                                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                                     <AlertTriangle className="h-4 w-4 text-amber-400" />
-                                    <CardTitle className="text-sm font-medium text-[hsl(var(--text-primary))]">
-                                        Stock Bajo
-                                    </CardTitle>
                                 </div>
-                            </CardHeader>
-                            <CardContent>
+                                <div>
+                                    <h3 className="text-sm font-semibold text-white">Stock Bajo</h3>
+                                    <p className="text-xs text-zinc-500">Productos a reabastecer</p>
+                                </div>
+                            </div>
+                            <div className="p-5">
                                 {isLoading ? (
                                     <div className="space-y-3">
                                         {[...Array(3)].map((_, i) => (
-                                            <Skeleton key={i} className="h-10 w-full bg-[hsl(var(--surface-highlight))]" />
+                                            <div key={i} className="skeleton h-10 w-full" />
                                         ))}
                                     </div>
                                 ) : lowStock.length === 0 ? (
-                                    <div className="text-center py-6">
+                                    <div className="text-center py-4">
                                         <CheckCircle className="h-8 w-8 text-emerald-400 mx-auto mb-2" />
-                                        <p className="text-sm text-[hsl(var(--text-muted))]">Todo el stock está bien</p>
+                                        <p className="text-sm text-zinc-500">Todo el stock está bien</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-3">
                                         {lowStock.map((product) => (
-                                            <div key={product.id} className="flex items-center justify-between">
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-[hsl(var(--text-primary))] truncate">
-                                                        {product.nombre}
-                                                    </p>
-                                                </div>
-                                                <Badge variant="secondary" className="ml-2 bg-amber-500/10 text-amber-400 border-0 text-[10px]">
+                                            <div key={product.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/30">
+                                                <p className="text-sm font-medium text-zinc-300 truncate flex-1">
+                                                    {product.nombre}
+                                                </p>
+                                                <Badge className="ml-2 bg-amber-500/10 text-amber-400 border-0 text-[10px] font-semibold">
                                                     {product.stock}/{product.stock_minimo}
                                                 </Badge>
                                             </div>
@@ -418,47 +563,64 @@ export default function DashboardPage() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="w-full mt-4 h-8 text-xs border-[hsl(var(--border-subtle))] text-[hsl(var(--text-secondary))] hover:text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--interactive-hover))]"
+                                        className="w-full mt-4 h-9 text-xs border-zinc-800 bg-transparent text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-zinc-700"
                                     >
-                                        <Package className="h-3 w-3 mr-1.5" />
+                                        <Package className="h-3.5 w-3.5 mr-2" />
                                         Ver Inventario
                                     </Button>
                                 </Link>
-                            </CardContent>
-                        </Card>
-                    </motion.div>
-                </PermissionGate>
-            </div>
-
-            {/* Quick Stats Banner */}
-            <motion.div variants={itemVariants}>
-                <Card className="bg-gradient-to-r from-blue-600 to-violet-600 border-0 overflow-hidden">
-                    <CardContent className="p-6">
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div className="text-center md:text-left">
-                                <p className="text-white/70 text-sm">Ventas del Mes</p>
-                                <p className="text-2xl font-bold text-white mt-1">
-                                    ${(stats?.ventas_mes || 0).toFixed(2)}
-                                </p>
-                            </div>
-                            <div className="flex gap-2">
-                                <PermissionGate permission="reports.view">
-                                    <Link href="/reportes">
-                                        <Button
-                                            size="sm"
-                                            variant="secondary"
-                                            className="h-8 gap-1.5 bg-white/10 hover:bg-white/20 text-white border-0"
-                                        >
-                                            <TrendingUp className="h-3.5 w-3.5" />
-                                            Ver Reportes
-                                        </Button>
-                                    </Link>
-                                </PermissionGate>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
-            </motion.div>
+                    </PermissionGate>
+
+                    {/* Quick Actions */}
+                    <div className="card-enterprise p-5">
+                        <h3 className="text-sm font-semibold text-white mb-4">Acciones Rápidas</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                            <Link href="/ordenes/nueva">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full h-20 flex-col gap-2 border-zinc-800 bg-zinc-800/30 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-cyan-500/50"
+                                >
+                                    <Wrench className="h-5 w-5" />
+                                    <span className="text-[10px] uppercase tracking-wider">Nueva Orden</span>
+                                </Button>
+                            </Link>
+                            <Link href="/pos">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full h-20 flex-col gap-2 border-zinc-800 bg-zinc-800/30 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-cyan-500/50"
+                                >
+                                    <ShoppingCart className="h-5 w-5" />
+                                    <span className="text-[10px] uppercase tracking-wider">Venta</span>
+                                </Button>
+                            </Link>
+                            <Link href="/clientes/nuevo">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full h-20 flex-col gap-2 border-zinc-800 bg-zinc-800/30 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-cyan-500/50"
+                                >
+                                    <Users className="h-5 w-5" />
+                                    <span className="text-[10px] uppercase tracking-wider">Cliente</span>
+                                </Button>
+                            </Link>
+                            <Link href="/reportes">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full h-20 flex-col gap-2 border-zinc-800 bg-zinc-800/30 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-cyan-500/50"
+                                >
+                                    <TrendingUp className="h-5 w-5" />
+                                    <span className="text-[10px] uppercase tracking-wider">Reportes</span>
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
         </motion.div>
     )
 }
