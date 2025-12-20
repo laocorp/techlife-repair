@@ -2,22 +2,19 @@
 FROM node:20-slim AS builder
 WORKDIR /app
 
-# Install build dependencies for native modules
+# Install build dependencies
 RUN apt-get update && apt-get install -y \
     openssl \
-    python3 \
-    make \
-    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
 
-# Install ALL dependencies
+# Install dependencies
 RUN npm install
 
-# Rebuild native modules for linux (fixes lightningcss issue)
-RUN npm rebuild lightningcss
+# Install the specific lightningcss binary for linux x64
+RUN npm install lightningcss-linux-x64-gnu --save-optional
 
 # Copy source files
 COPY . .
