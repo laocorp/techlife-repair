@@ -1,0 +1,50 @@
+name: Deploy to Dokploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js app
+        run: npm run build
+
+      - name: Build Docker image
+        run: |
+          docker build -t techlife-repair:${{ github.sha }} .
+
+      - name: Log in to Dokploy registry
+        env:
+          DOKPLOY_REGISTRY: ${{ secrets.DOKPLOY_REGISTRY }}
+          DOKPLOY_USERNAME: ${{ secrets.DOKPLOY_USERNAME }}
+          DOKPLOY_PASSWORD: ${{ secrets.DOKPLOY_PASSWORD }}
+        run: |
+          echo $DOKPLOY_PASSWORD | docker login $DOKPLOY_REGISTRY -u $DOKPLOY_USERNAME --password-stdin
+
+      - name: Push Docker image to Dokploy
+        run: |
+          docker tag techlife-repair:${{ github.sha }} $DOKPLOY_REGISTRY/techlife-repair:${{ github.sha }}
+          docker push $DOKPLOY_REGISTRY/techlife-repair:${{ github.sha }}
+
+      - name: Deploy to Dokploy
+        env:
+          DOKPLOY_API_TOKEN: ${{ secrets.DOKPLOY_API_TOKEN }}
+        run: |
+          curl -X POST https://api.dokploy.com/v1/apps/techlife-repair/deploy \
+            -H "Authorization: Bearer $DOKPLOY_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"image":"$DOKPLOY_REGISTRY/techlife-repair:${{ github.sha }}"}'
