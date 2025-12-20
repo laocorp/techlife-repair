@@ -54,12 +54,7 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-
-// Dynamic import for PDF (client-side only)
-const PDFDownloadLink = dynamic(
-    () => import('@react-pdf/renderer').then(mod => mod.PDFDownloadLink),
-    { ssr: false, loading: () => <Loader2 className="h-4 w-4 animate-spin" /> }
-)
+import { PDFDownloadButton } from '@/components/pdf/pdf-download-wrapper'
 
 interface OrdenServicio {
     id: string
@@ -252,6 +247,18 @@ export default function OrdenDetallePage() {
                 </div>
 
                 <div className="flex gap-2">
+                    <PDFDownloadButton
+                        orden={{
+                            ...orden,
+                            problema: orden.problema_reportado
+                        }}
+                        qrCodeUrl={qrData?.qrDataUrl || ''}
+                        trackingUrl={typeof window !== 'undefined' ? `${window.location.origin}/tracking/${orden.id}` : ''}
+                        fileName={`Orden-${orden.numero_orden}.pdf`}
+                    >
+                        Descargar PDF
+                    </PDFDownloadButton>
+
                     <Button
                         variant="outline"
                         onClick={handleGenerateQR}

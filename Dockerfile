@@ -5,15 +5,21 @@ WORKDIR /app
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
     openssl \
+    python3 \
+    make \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Remove package-lock.json to ensure fresh dependency resolution (fixes linux optional deps)
+RUN rm -f package-lock.json
+
+# Install dependencies (will regenerate package-lock.json with linux binaries)
 RUN npm install
 
-# Install the specific lightningcss binary for linux x64
+# Install the specific lightningcss binary for linux x64 (just in case)
 RUN npm install lightningcss-linux-x64-gnu --save-optional
 
 # Copy source files
