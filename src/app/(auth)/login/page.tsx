@@ -52,8 +52,8 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 relative overflow-hidden">
-            {/* Animated background orbs */}
+        <div className="min-h-screen flex items-center justify-center bg-[hsl(220,15%,4%)] p-4 relative overflow-hidden">
+            {/* Animated background orbs - Enterprise theme */}
             <div className="absolute inset-0">
                 <motion.div
                     animate={{
@@ -65,7 +65,7 @@ export default function LoginPage() {
                         repeat: Infinity,
                         ease: "linear"
                     }}
-                    className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+                    className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"
                 />
                 <motion.div
                     animate={{
@@ -77,7 +77,7 @@ export default function LoginPage() {
                         repeat: Infinity,
                         ease: "linear"
                     }}
-                    className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
+                    className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl"
                 />
                 <motion.div
                     animate={{
@@ -88,16 +88,16 @@ export default function LoginPage() {
                         repeat: Infinity,
                         ease: "linear"
                     }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-3xl"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-3xl"
                 />
             </div>
 
             {/* Grid pattern */}
             <div
-                className="absolute inset-0 opacity-10"
+                className="absolute inset-0 opacity-5"
                 style={{
-                    backgroundImage: `linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)`,
+                    backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
+                           linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
                     backgroundSize: '50px 50px'
                 }}
             />
@@ -115,17 +115,17 @@ export default function LoginPage() {
                     transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
                     className="flex items-center justify-center gap-3 mb-8"
                 >
-                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-                        <Wrench className="w-8 h-8 text-white" />
+                    <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                        <Wrench className="w-8 h-8 text-zinc-900" />
                     </div>
                 </motion.div>
 
-                <Card className="border-0 bg-white/10 backdrop-blur-xl shadow-2xl shadow-black/20">
+                <Card className="border border-zinc-800 bg-zinc-900/80 backdrop-blur-xl shadow-2xl shadow-black/50">
                     <CardHeader className="text-center space-y-2 pb-6">
                         <CardTitle className="text-2xl font-bold text-white">
                             Bienvenido de nuevo
                         </CardTitle>
-                        <CardDescription className="text-slate-400">
+                        <CardDescription className="text-zinc-500">
                             Ingresa tus credenciales para continuar
                         </CardDescription>
                     </CardHeader>
@@ -133,18 +133,18 @@ export default function LoginPage() {
                     <form onSubmit={handleLogin}>
                         <CardContent className="space-y-5">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-slate-300">
+                                <Label htmlFor="email" className="text-sm font-medium text-zinc-400">
                                     Correo electrónico
                                 </Label>
                                 <div className="relative group">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-cyan-400 transition-colors" />
                                     <Input
                                         id="email"
                                         type="email"
                                         placeholder="correo@empresa.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500/20 transition-all"
+                                        className="pl-10 h-12 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500/20 transition-all"
                                         required
                                     />
                                 </div>
@@ -152,25 +152,25 @@ export default function LoginPage() {
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="password" className="text-sm font-medium text-slate-300">
+                                    <Label htmlFor="password" className="text-sm font-medium text-zinc-400">
                                         Contraseña
                                     </Label>
                                     <Link
                                         href="/forgot-password"
-                                        className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                                        className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
                                     >
                                         ¿Olvidaste tu contraseña?
                                     </Link>
                                 </div>
                                 <div className="relative group">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-blue-400 transition-colors" />
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-cyan-400 transition-colors" />
                                     <Input
                                         id="password"
                                         type="password"
                                         placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500/20 transition-all"
+                                        className="pl-10 h-12 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500/20 transition-all"
                                         required
                                     />
                                 </div>
@@ -180,7 +180,7 @@ export default function LoginPage() {
                         <CardFooter className="flex flex-col gap-4 pt-2">
                             <Button
                                 type="submit"
-                                className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium shadow-lg shadow-blue-500/25 transition-all hover:shadow-blue-500/40"
+                                className="w-full h-12 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold shadow-lg shadow-cyan-500/25 transition-all hover:shadow-cyan-500/40"
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
@@ -198,18 +198,18 @@ export default function LoginPage() {
 
                             <div className="relative w-full">
                                 <div className="absolute inset-0 flex items-center">
-                                    <span className="w-full border-t border-white/10" />
+                                    <span className="w-full border-t border-zinc-800" />
                                 </div>
                                 <div className="relative flex justify-center text-xs uppercase">
-                                    <span className="bg-transparent px-2 text-slate-500">o</span>
+                                    <span className="bg-zinc-900 px-2 text-zinc-600">o</span>
                                 </div>
                             </div>
 
-                            <p className="text-sm text-center text-slate-400">
+                            <p className="text-sm text-center text-zinc-500">
                                 ¿No tienes cuenta?{' '}
                                 <Link
                                     href="/register"
-                                    className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                                    className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
                                 >
                                     Regístrate gratis
                                 </Link>
@@ -223,7 +223,7 @@ export default function LoginPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="mt-8 flex items-center justify-center gap-2 text-slate-500 text-sm"
+                    className="mt-8 flex items-center justify-center gap-2 text-zinc-600 text-sm"
                 >
                     <Sparkles className="w-4 h-4" />
                     <span>Servicio Técnico Autorizado · Facturación SRI Ecuador</span>

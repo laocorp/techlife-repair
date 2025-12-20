@@ -143,19 +143,19 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 relative overflow-hidden">
-            {/* Animated background */}
+        <div className="min-h-screen flex items-center justify-center bg-[hsl(220,15%,4%)] p-4 relative overflow-hidden">
+            {/* Animated background - Enterprise theme */}
             <div className="absolute inset-0">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000" />
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
             </div>
 
             {/* Grid pattern */}
             <div
-                className="absolute inset-0 opacity-10"
+                className="absolute inset-0 opacity-5"
                 style={{
-                    backgroundImage: `linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px)`,
+                    backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
+                           linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
                     backgroundSize: '50px 50px'
                 }}
             />
@@ -173,8 +173,8 @@ export default function RegisterPage() {
                     transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
                     className="flex items-center justify-center gap-3 mb-8"
                 >
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-                        <Wrench className="w-7 h-7 text-white" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                        <Wrench className="w-7 h-7 text-zinc-900" />
                     </div>
                     <span className="text-2xl font-bold text-white">RepairApp</span>
                 </motion.div>
@@ -192,28 +192,28 @@ export default function RegisterPage() {
                                     initial={false}
                                     animate={{
                                         scale: isActive ? 1.1 : 1,
-                                        backgroundColor: isCompleted ? 'rgb(34, 197, 94)' : isActive ? 'rgb(59, 130, 246)' : 'rgb(51, 65, 85)'
+                                        backgroundColor: isCompleted ? 'rgb(34, 197, 94)' : isActive ? 'rgb(6, 182, 212)' : 'rgb(39, 39, 42)'
                                     }}
                                     className="w-10 h-10 rounded-full flex items-center justify-center"
                                 >
                                     <Icon className="w-5 h-5 text-white" />
                                 </motion.div>
                                 {index < steps.length - 1 && (
-                                    <div className={`w-12 h-0.5 mx-1 ${isCompleted ? 'bg-green-500' : 'bg-slate-700'}`} />
+                                    <div className={`w-12 h-0.5 mx-1 ${isCompleted ? 'bg-green-500' : 'bg-zinc-700'}`} />
                                 )}
                             </div>
                         )
                     })}
                 </div>
 
-                <Card className="border-0 bg-white/10 backdrop-blur-xl shadow-2xl">
+                <Card className="border border-zinc-800 bg-zinc-900/80 backdrop-blur-xl shadow-2xl shadow-black/50">
                     <CardHeader className="text-center pb-4">
                         <CardTitle className="text-xl font-bold text-white">
                             {currentStep === 1 && 'Datos de tu empresa'}
                             {currentStep === 2 && 'Crea tu cuenta'}
                             {currentStep === 3 && 'Confirma tus datos'}
                         </CardTitle>
-                        <CardDescription className="text-slate-400">
+                        <CardDescription className="text-zinc-500">
                             {currentStep === 1 && 'Ingresa la información de tu servicio técnico'}
                             {currentStep === 2 && 'Serás el administrador principal'}
                             {currentStep === 3 && 'Revisa que todo esté correcto'}
@@ -232,49 +232,49 @@ export default function RegisterPage() {
                                     className="space-y-4"
                                 >
                                     <div className="space-y-2">
-                                        <Label className="text-slate-300">Nombre de la empresa *</Label>
+                                        <Label className="text-zinc-300">Nombre de la empresa *</Label>
                                         <div className="relative">
-                                            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                                            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                                             <Input
                                                 placeholder="Servicio Técnico ABC"
                                                 value={formData.empresaNombre}
                                                 onChange={(e) => updateField('empresaNombre', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-blue-500"
+                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-slate-300">RUC *</Label>
+                                        <Label className="text-zinc-300">RUC *</Label>
                                         <Input
                                             placeholder="1234567890001"
                                             maxLength={13}
                                             value={formData.empresaRuc}
                                             onChange={(e) => updateField('empresaRuc', e.target.value.replace(/\D/g, ''))}
-                                            className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-blue-500"
+                                            className="bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-slate-300">Teléfono</Label>
+                                        <Label className="text-zinc-300">Teléfono</Label>
                                         <div className="relative">
-                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                                             <Input
                                                 placeholder="0999999999"
                                                 value={formData.empresaTelefono}
                                                 onChange={(e) => updateField('empresaTelefono', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-blue-500"
+                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-slate-300">Dirección</Label>
+                                        <Label className="text-zinc-300">Dirección</Label>
                                         <Input
                                             placeholder="Av. Principal y Calle Secundaria"
                                             value={formData.empresaDireccion}
                                             onChange={(e) => updateField('empresaDireccion', e.target.value)}
-                                            className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-blue-500"
+                                            className="bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
                                         />
                                     </div>
                                 </motion.div>
@@ -290,56 +290,56 @@ export default function RegisterPage() {
                                     className="space-y-4"
                                 >
                                     <div className="space-y-2">
-                                        <Label className="text-slate-300">Tu nombre *</Label>
+                                        <Label className="text-zinc-300">Tu nombre *</Label>
                                         <div className="relative">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                                             <Input
                                                 placeholder="Juan Pérez"
                                                 value={formData.nombre}
                                                 onChange={(e) => updateField('nombre', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-blue-500"
+                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-slate-300">Correo electrónico *</Label>
+                                        <Label className="text-zinc-300">Correo electrónico *</Label>
                                         <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                                             <Input
                                                 type="email"
                                                 placeholder="correo@empresa.com"
                                                 value={formData.email}
                                                 onChange={(e) => updateField('email', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-blue-500"
+                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-slate-300">Contraseña *</Label>
+                                        <Label className="text-zinc-300">Contraseña *</Label>
                                         <div className="relative">
-                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                                             <Input
                                                 type="password"
                                                 placeholder="••••••••"
                                                 value={formData.password}
                                                 onChange={(e) => updateField('password', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-blue-500"
+                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-slate-300">Confirmar contraseña *</Label>
+                                        <Label className="text-zinc-300">Confirmar contraseña *</Label>
                                         <div className="relative">
-                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                                             <Input
                                                 type="password"
                                                 placeholder="••••••••"
                                                 value={formData.confirmPassword}
                                                 onChange={(e) => updateField('confirmPassword', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-blue-500"
+                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
                                             />
                                         </div>
                                     </div>
@@ -356,18 +356,18 @@ export default function RegisterPage() {
                                     className="space-y-6"
                                 >
                                     <div className="bg-white/5 rounded-xl p-4 space-y-3">
-                                        <div className="flex items-center gap-2 text-blue-400 font-medium">
+                                        <div className="flex items-center gap-2 text-cyan-400 font-medium">
                                             <Building2 className="w-4 h-4" />
                                             Empresa
                                         </div>
                                         <div className="grid grid-cols-2 gap-2 text-sm">
-                                            <div className="text-slate-400">Nombre:</div>
+                                            <div className="text-zinc-400">Nombre:</div>
                                             <div className="text-white font-medium">{formData.empresaNombre}</div>
-                                            <div className="text-slate-400">RUC:</div>
+                                            <div className="text-zinc-400">RUC:</div>
                                             <div className="text-white font-medium">{formData.empresaRuc}</div>
                                             {formData.empresaTelefono && (
                                                 <>
-                                                    <div className="text-slate-400">Teléfono:</div>
+                                                    <div className="text-zinc-400">Teléfono:</div>
                                                     <div className="text-white">{formData.empresaTelefono}</div>
                                                 </>
                                             )}
@@ -380,9 +380,9 @@ export default function RegisterPage() {
                                             Administrador
                                         </div>
                                         <div className="grid grid-cols-2 gap-2 text-sm">
-                                            <div className="text-slate-400">Nombre:</div>
+                                            <div className="text-zinc-400">Nombre:</div>
                                             <div className="text-white font-medium">{formData.nombre}</div>
-                                            <div className="text-slate-400">Email:</div>
+                                            <div className="text-zinc-400">Email:</div>
                                             <div className="text-white">{formData.email}</div>
                                         </div>
                                     </div>
@@ -391,7 +391,7 @@ export default function RegisterPage() {
                                         <Sparkles className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
                                         <div className="text-sm">
                                             <p className="text-green-400 font-medium">Prueba gratuita de 14 días</p>
-                                            <p className="text-slate-400 mt-1">
+                                            <p className="text-zinc-400 mt-1">
                                                 Tendrás acceso a todas las funciones sin costo durante el período de prueba.
                                             </p>
                                         </div>
@@ -416,7 +416,7 @@ export default function RegisterPage() {
                             {currentStep < 3 ? (
                                 <Button
                                     onClick={handleNext}
-                                    className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                                    className="flex-1 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500"
                                 >
                                     Continuar
                                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -442,9 +442,9 @@ export default function RegisterPage() {
                             )}
                         </div>
 
-                        <p className="text-sm text-center text-slate-400">
+                        <p className="text-sm text-center text-zinc-400">
                             ¿Ya tienes cuenta?{' '}
-                            <Link href="/login" className="text-blue-400 hover:underline font-medium">
+                            <Link href="/login" className="text-cyan-400 hover:underline font-medium">
                                 Inicia sesión
                             </Link>
                         </p>
@@ -452,10 +452,11 @@ export default function RegisterPage() {
                 </Card>
 
                 {/* Footer */}
-                <p className="text-center text-sm text-slate-500 mt-6">
+                <p className="text-center text-sm text-zinc-500 mt-6">
                     Al registrarte aceptas nuestros términos y condiciones
                 </p>
             </motion.div>
         </div>
     )
 }
+
