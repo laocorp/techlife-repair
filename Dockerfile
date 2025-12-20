@@ -2,20 +2,28 @@
 FROM node:20-slim AS builder
 WORKDIR /app
 
-# Install OpenSSL for Prisma (if needed) and other build deps
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+# Install build dependencies for native modules
+RUN apt-get update && apt-get install -y \
+    openssl \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
 
-# Install ALL dependencies (needed for build)
+# Install ALL dependencies
 RUN npm install
+
+# Rebuild native modules for linux (fixes lightningcss issue)
+RUN npm rebuild lightningcss
 
 # Copy source files
 COPY . .
 
-# Build the Next.js app with Webpack (explicitly disable Turbopack)
-RUN npx next build --no-turbopack
+# Build the Next.js app
+RUN npm run build
 
 # ---- Production stage ----
 FROM node:20-slim AS runner

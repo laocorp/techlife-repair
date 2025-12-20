@@ -308,14 +308,14 @@ Receiving objects:  97% (193/198)
 Receiving objects:  98% (195/198)
 Receiving objects:  99% (197/198)
 Receiving objects: 100% (198/198)
-Receiving objects: 100% (198/198), 1.10 MiB | 2.44 MiB/s, done.
+Receiving objects: 100% (198/198), 1.10 MiB | 2.74 MiB/s, done.
 Resolving deltas:   0% (0/32)
 Resolving deltas:   3% (1/32)
 Resolving deltas:   9% (3/32)
 Resolving deltas:  12% (4/32)
 Resolving deltas:  15% (5/32)
 Resolving deltas:  18% (6/32)
-Resolving deltas:  25% (8/32)
+Resolving deltas:  21% (7/32)
 Resolving deltas:  28% (9/32)
 Resolving deltas:  31% (10/32)
 Resolving deltas:  34% (11/32)
@@ -332,8 +332,8 @@ Resolving deltas:  68% (22/32)
 Resolving deltas:  71% (23/32)
 Resolving deltas:  75% (24/32)
 Resolving deltas:  78% (25/32)
+Resolving deltas:  81% (26/32)
 Resolving deltas:  84% (27/32)
-Resolving deltas:  87% (28/32)
 Resolving deltas:  90% (29/32)
 Resolving deltas:  93% (30/32)
 Resolving deltas:  96% (31/32)
@@ -342,51 +342,51 @@ Resolving deltas: 100% (32/32), done.
 Building techliferepairv2-repairapp-wyguf9
 #0 building with "default" instance using docker driver
 #1 [internal] load build definition from Dockerfile
-#1 transferring dockerfile: 995B done
-#1 DONE 0.2s
+#1 transferring dockerfile: 968B done
+#1 DONE 0.1s
 #2 [internal] load metadata for docker.io/library/node:20-slim
-#2 DONE 1.4s
+#2 DONE 1.0s
 #3 [internal] load .dockerignore
 #3 transferring context: 2B done
-#3 DONE 0.1s
+#3 DONE 0.2s
 #4 [internal] load build context
 #4 DONE 0.0s
 #5 [builder 1/7] FROM docker.io/library/node:20-slim@sha256:1b38aaddff63cd0d3a9b5b03863a71fd33ee62047dd2e915f494d96b4b9c18cc
 #5 resolve docker.io/library/node:20-slim@sha256:1b38aaddff63cd0d3a9b5b03863a71fd33ee62047dd2e915f494d96b4b9c18cc
-#5 resolve docker.io/library/node:20-slim@sha256:1b38aaddff63cd0d3a9b5b03863a71fd33ee62047dd2e915f494d96b4b9c18cc 0.4s done
+#5 resolve docker.io/library/node:20-slim@sha256:1b38aaddff63cd0d3a9b5b03863a71fd33ee62047dd2e915f494d96b4b9c18cc 0.3s done
 #5 DONE 0.4s
 #6 [builder 2/7] WORKDIR /app
 #6 CACHED
 #4 [internal] load build context
-#4 transferring context: 3.45MB 0.1s done
-#4 DONE 0.3s
+#4 transferring context: 3.44MB 0.1s done
+#4 DONE 0.4s
 #7 [builder 3/7] RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
-#7 1.515 Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
-#7 1.618 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
-#7 1.652 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
-#7 1.840 Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8791 kB]
-#7 2.127 Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
-#7 2.161 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [290 kB]
-#7 3.874 Fetched 9342 kB in 2s (3804 kB/s)
-#7 3.874 Reading package lists...
-#7 5.076 Reading package lists...
-#7 6.217 Building dependency tree...
-#7 6.424 Reading state information...
-#7 6.848 The following additional packages will be installed:
-#7 6.850   libssl3
-#7 6.854 Suggested packages:
-#7 6.854   ca-certificates
-#7 6.998 The following NEW packages will be installed:
-#7 6.999   libssl3 openssl
-#7 7.103 0 upgraded, 2 newly installed, 0 to remove and 0 not upgraded.
-#7 7.103 Need to get 3463 kB of archives.
-#7 7.103 After this operation, 8524 kB of additional disk space will be used.
-#7 7.103 Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libssl3 amd64 3.0.17-1~deb12u3 [2028 kB]
-#7 7.291 Get:2 http://deb.debian.org/debian-security bookworm-security/main amd64 openssl amd64 3.0.17-1~deb12u3 [1434 kB]
-#7 8.132 debconf: delaying package configuration, since apt-utils is not installed
-#7 8.252 Fetched 3463 kB in 0s (12.2 MB/s)
-#7 8.590 Selecting previously unselected package libssl3:amd64.
-#7 8.590 (Reading database ... 
+#7 1.440 Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+#7 1.534 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+#7 1.567 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
+#7 1.710 Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8791 kB]
+#7 2.051 Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+#7 2.082 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [290 kB]
+#7 3.831 Fetched 9342 kB in 3s (3417 kB/s)
+#7 3.831 Reading package lists...
+#7 5.059 Reading package lists...
+#7 6.181 Building dependency tree...
+#7 6.399 Reading state information...
+#7 6.763 The following additional packages will be installed:
+#7 6.765   libssl3
+#7 6.769 Suggested packages:
+#7 6.769   ca-certificates
+#7 6.952 The following NEW packages will be installed:
+#7 6.954   libssl3 openssl
+#7 7.057 0 upgraded, 2 newly installed, 0 to remove and 0 not upgraded.
+#7 7.057 Need to get 3463 kB of archives.
+#7 7.057 After this operation, 8524 kB of additional disk space will be used.
+#7 7.057 Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libssl3 amd64 3.0.17-1~deb12u3 [2028 kB]
+#7 7.256 Get:2 http://deb.debian.org/debian-security bookworm-security/main amd64 openssl amd64 3.0.17-1~deb12u3 [1434 kB]
+#7 7.823 debconf: delaying package configuration, since apt-utils is not installed
+#7 7.932 Fetched 3463 kB in 0s (11.2 MB/s)
+#7 8.373 Selecting previously unselected package libssl3:amd64.
+#7 8.373 (Reading database ... 
 (Reading database ... 5%
 (Reading database ... 10%
 (Reading database ... 15%
@@ -408,136 +408,58 @@ Building techliferepairv2-repairapp-wyguf9
 (Reading database ... 95%
 (Reading database ... 100%
 (Reading database ... 6095 files and directories currently installed.)
-#7 8.742 Preparing to unpack .../libssl3_3.0.17-1~deb12u3_amd64.deb ...
-#7 8.832 Unpacking libssl3:amd64 (3.0.17-1~deb12u3) ...
-#7 9.403 Selecting previously unselected package openssl.
-#7 9.404 Preparing to unpack .../openssl_3.0.17-1~deb12u3_amd64.deb ...
-#7 9.445 Unpacking openssl (3.0.17-1~deb12u3) ...
-#7 9.890 Setting up libssl3:amd64 (3.0.17-1~deb12u3) ...
-#7 10.06 Setting up openssl (3.0.17-1~deb12u3) ...
-#7 10.31 Processing triggers for libc-bin (2.36-9+deb12u13) ...
-#7 DONE 11.5s
+#7 8.494 Preparing to unpack .../libssl3_3.0.17-1~deb12u3_amd64.deb ...
+#7 8.591 Unpacking libssl3:amd64 (3.0.17-1~deb12u3) ...
+#7 9.124 Selecting previously unselected package openssl.
+#7 9.126 Preparing to unpack .../openssl_3.0.17-1~deb12u3_amd64.deb ...
+#7 9.174 Unpacking openssl (3.0.17-1~deb12u3) ...
+#7 9.630 Setting up libssl3:amd64 (3.0.17-1~deb12u3) ...
+#7 9.756 Setting up openssl (3.0.17-1~deb12u3) ...
+#7 9.973 Processing triggers for libc-bin (2.36-9+deb12u13) ...
+#7 DONE 11.4s
 #8 [builder 4/7] COPY package*.json ./
-#8 DONE 1.4s
+#8 DONE 1.5s
 #9 [builder 5/7] RUN npm install
-#9 12.45 npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
-#9 12.98 npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
-#9 13.11 npm warn deprecated rollup-plugin-terser@7.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-terser
-#9 15.84 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
-#9 16.03 npm warn deprecated workbox-cacheable-response@6.6.0: workbox-background-sync@6.6.0
-#9 16.25 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
-#9 16.93 npm warn deprecated workbox-google-analytics@6.6.0: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
-#9 23.14 npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
-#9 57.04
-#9 57.04 added 833 packages, and audited 834 packages in 56s
-#9 57.04
-#9 57.04 171 packages are looking for funding
-#9 57.04   run `npm fund` for details
-#9 57.04
-#9 57.04 found 0 vulnerabilities
-#9 57.05 npm notice
-#9 57.05 npm notice New major version of npm available! 10.8.2 -> 11.7.0
-#9 57.05 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.7.0
-#9 57.05 npm notice To update run: npm install -g npm@11.7.0
-#9 57.05 npm notice
-#9 DONE 95.8s
+#9 12.96 npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+#9 13.69 npm warn deprecated rollup-plugin-terser@7.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-terser
+#9 13.86 npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+#9 15.41 npm warn deprecated workbox-cacheable-response@6.6.0: workbox-background-sync@6.6.0
+#9 16.19 npm warn deprecated workbox-google-analytics@6.6.0: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
+#9 16.54 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#9 16.88 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+#9 24.14 npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+#9 59.83
+#9 59.83 added 833 packages, and audited 834 packages in 58s
+#9 59.83
+#9 59.83 171 packages are looking for funding
+#9 59.83   run `npm fund` for details
+#9 59.83
+#9 59.83 found 0 vulnerabilities
+#9 59.83 npm notice
+#9 59.83 npm notice New major version of npm available! 10.8.2 -> 11.7.0
+#9 59.83 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.7.0
+#9 59.83 npm notice To update run: npm install -g npm@11.7.0
+#9 59.83 npm notice
+#9 DONE 95.9s
 #10 [builder 6/7] COPY . .
-#10 DONE 4.7s
-#11 [builder 7/7] RUN npm run build
-#11 1.875
-#11 1.875 > repairappv2@0.1.0 build
-#11 1.875 > next build
-#11 1.875
-#11 3.464 Attention: Next.js now collects completely anonymous telemetry regarding usage.
-#11 3.465 This information is used to shape Next.js' roadmap and prioritize features.
-#11 3.465 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-#11 3.466 https://nextjs.org/telemetry
-#11 3.466
-#11 3.523 ▲ Next.js 16.1.0 (Turbopack)
-#11 3.523 - Environments: .env.local, .env
-#11 3.524 - Experiments (use with caution):
-#11 3.524   · serverActions
-#11 3.524
-#11 3.680 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-#11 3.755   Creating an optimized production build ...
-#11 33.90
-#11 33.90 > Build error occurred
-#11 33.91 Error: Turbopack build failed with 2 errors:
-#11 33.91 ./src/app/globals.css
-#11 33.91 Error evaluating Node.js code
-#11 33.91 Error: Cannot find module '../lightningcss.linux-x64-gnu.node'
-#11 33.91 Require stack:
-#11 33.91 - /app/node_modules/lightningcss/node/index.js
-#11 33.91 - /app/node_modules/@tailwindcss/node/dist/index.js
-#11 33.91 - /app/node_modules/@tailwindcss/postcss/dist/index.js
-#11 33.91 - /app/.next/build/chunks/[root-of-the-server]__51225daf._.js
-#11 33.91 - /app/.next/build/chunks/[turbopack]_runtime.js
-#11 33.91 - /app/.next/build/postcss.js
-#11 33.91     [at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)]
-#11 33.91     [at Module._load (node:internal/modules/cjs/loader:1038:27)]
-#11 33.91     [at Module.require (node:internal/modules/cjs/loader:1289:19)]
-#11 33.91     [at require (node:internal/modules/helpers:182:18)]
-#11 33.91     [at Object.<anonymous> (/app/node_modules/lightningcss/node/index.js:22:22)]
-#11 33.91     [at Module._compile (node:internal/modules/cjs/loader:1521:14)]
-#11 33.91     [at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)]
-#11 33.91     [at Module.load (node:internal/modules/cjs/loader:1266:32)]
-#11 33.91     [at Module._load (node:internal/modules/cjs/loader:1091:12)]
-#11 33.91     [at Module.require (node:internal/modules/cjs/loader:1289:19)]
-#11 33.91
-#11 33.91 Import trace:
-#11 33.91   Client Component Browser:
-#11 33.91     ./src/app/globals.css [Client Component Browser]
-#11 33.91     ./src/app/layout.tsx [Server Component]
-#11 33.91
-#11 33.91
-#11 33.91 ./src/app/(dashboard)/ordenes/[id]/page.tsx
-#11 33.91 Code generation for chunk item errored
-#11 33.91 An error occurred while generating the chunk item [project]/src/app/(dashboard)/ordenes/[id]/page.tsx [app-ssr] (ecmascript)
-#11 33.91
-#11 33.91 Caused by:
-#11 33.91 - ModuleId not found for ident: "[externals]/@react-pdf/renderer [external] (@react-pdf/renderer, esm_import, [project]/node_modules/@react-pdf/renderer)"
-#11 33.91
-#11 33.91 Debug info:
-#11 33.91 - An error occurred while generating the chunk item [project]/src/app/(dashboard)/ordenes/[id]/page.tsx [app-ssr] (ecmascript)
-#11 33.91 - Execution of <MergedEcmascriptModuleChunkItem as EcmascriptChunkItem>::content_with_async_module_info failed
-#11 33.91 - Execution of *EcmascriptChunkItemContent::new failed
-#11 33.91 - Execution of EcmascriptModuleContent::new_merged failed
-#11 33.91 - Execution of <GlobalModuleIdStrategy as ModuleIdStrategy>::get_module_id failed
-#11 33.91 - ModuleId not found for ident: "[externals]/@react-pdf/renderer [external] (@react-pdf/renderer, esm_import, [project]/node_modules/@react-pdf/renderer)"
-#11 33.91
-#11 33.91 Import traces:
-#11 33.91   Client Component Browser:
-#11 33.91     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Client Component Browser]
-#11 33.91     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Server Component]
-#11 33.91
-#11 33.91   Client Component SSR:
-#11 33.91     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Client Component SSR]
-#11 33.91     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Server Component]
-#11 33.91
-#11 33.91
-#11 33.91     at ignore-listed frames
-#11 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+#10 DONE 3.9s
+#11 [builder 7/7] RUN npx next build --no-turbopack
+#11 2.428 error: unknown option '--no-turbopack'
+#11 2.428 (Did you mean --turbopack?)
+#11 ERROR: process "/bin/sh -c npx next build --no-turbopack" did not complete successfully: exit code: 1
 ------
-> [builder 7/7] RUN npm run build:
-33.91   Client Component Browser:
-33.91     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Client Component Browser]
-33.91     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Server Component]
-33.91
-33.91   Client Component SSR:
-33.91     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Client Component SSR]
-33.91     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Server Component]
-33.91
-33.91
-33.91     at ignore-listed frames
+> [builder 7/7] RUN npx next build --no-turbopack:
+2.428 error: unknown option '--no-turbopack'
+2.428 (Did you mean --turbopack?)
 ------
-Dockerfile:21
+Dockerfile:18
 --------------------
 |
-|     # Build the Next.js app with Webpack
-| >>> RUN npm run build
+|     # Build the Next.js app with Webpack (explicitly disable Turbopack)
+| >>> RUN npx next build --no-turbopack
 |
 |     # ---- Production stage ----
 --------------------
-ERROR: failed to build: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+ERROR: failed to build: failed to solve: process "/bin/sh -c npx next build --no-turbopack" did not complete successfully: exit code: 1
 ❌ Docker build failed
 Error occurred ❌, check the logs for details.
