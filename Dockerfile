@@ -2,28 +2,31 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Install dependencies (including optional peer deps)
+# Copy package files
 COPY package*.json ./
-RUN npm ci --omit=dev
+
+# Install ALL dependencies (needed for build)
+RUN npm install
 
 # Copy source files
 COPY . .
 
-# Build the Next.js app (static generation + server)
+# Build the Next.js app
 RUN npm run build
 
 # ---- Production stage ----
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Copy only the built output and production dependencies
-COPY --from=builder /app/.next ./.next
+ENV NODE_ENV=production
+
+# Copy built output and necessary files
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
-RUN npm ci --production
 
 # Expose the default Next.js port
 EXPOSE 3000
 
 # Start the server
-CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
