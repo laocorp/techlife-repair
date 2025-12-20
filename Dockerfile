@@ -14,7 +14,10 @@ RUN npm install
 # Copy source files
 COPY . .
 
-# Build the Next.js app
+# Disable Turbopack for build (use Webpack instead)
+ENV NEXT_TURBOPACK=0
+
+# Build the Next.js app with Webpack
 RUN npm run build
 
 # ---- Production stage ----
