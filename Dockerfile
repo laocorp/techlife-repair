@@ -14,11 +14,8 @@ RUN npm install
 # Copy source files
 COPY . .
 
-# Disable Turbopack for build (use Webpack instead)
-ENV NEXT_TURBOPACK=0
-
-# Build the Next.js app with Webpack
-RUN npm run build
+# Build the Next.js app with Webpack (explicitly disable Turbopack)
+RUN npx next build --no-turbopack
 
 # ---- Production stage ----
 FROM node:20-slim AS runner
