@@ -1,5 +1,5 @@
 # ============================================
-# Dockerfile for RepairApp (Next.js 16 + Prisma)
+# Dockerfile for RepairApp (Next.js 16 + Prisma 5)
 # PostgreSQL Direct - Optimized for Dokploy
 # ============================================
 
@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y \
     g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy package files
+# Copy package files and prisma
 COPY package*.json ./
 COPY prisma ./prisma/
 
