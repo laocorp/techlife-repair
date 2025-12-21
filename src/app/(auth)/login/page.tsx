@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Wrench, Mail, Lock, ArrowRight, Loader2, Sparkles } from 'lucide-react'
+import { Wrench, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -36,7 +36,6 @@ export default function LoginPage() {
                 return
             }
 
-            // Check if user is super admin
             if (data.user?.user_metadata?.is_super_admin) {
                 router.push('/superadmin')
             } else {
@@ -52,99 +51,60 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[hsl(220,15%,4%)] p-4 relative overflow-hidden">
-            {/* Animated background orbs - Enterprise theme */}
-            <div className="absolute inset-0">
-                <motion.div
-                    animate={{
-                        x: [0, 100, 0],
-                        y: [0, -50, 0],
-                    }}
-                    transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: "linear"
-                    }}
-                    className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"
-                />
-                <motion.div
-                    animate={{
-                        x: [0, -100, 0],
-                        y: [0, 50, 0],
-                    }}
-                    transition={{
-                        duration: 25,
-                        repeat: Infinity,
-                        ease: "linear"
-                    }}
-                    className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl"
-                />
-                <motion.div
-                    animate={{
-                        scale: [1, 1.2, 1],
-                    }}
-                    transition={{
-                        duration: 15,
-                        repeat: Infinity,
-                        ease: "linear"
-                    }}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-3xl"
-                />
-            </div>
-
-            {/* Grid pattern */}
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+            {/* Subtle background pattern */}
             <div
-                className="absolute inset-0 opacity-5"
+                className="absolute inset-0 opacity-50"
                 style={{
-                    backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
-                    backgroundSize: '50px 50px'
+                    backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.03) 1px, transparent 0)`,
+                    backgroundSize: '32px 32px'
                 }}
             />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.4 }}
                 className="w-full max-w-md relative z-10"
             >
                 {/* Logo */}
                 <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-                    className="flex items-center justify-center gap-3 mb-8"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="flex flex-col items-center justify-center gap-3 mb-8"
                 >
-                    <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/25">
-                        <Wrench className="w-8 h-8 text-zinc-900" />
+                    <div className="w-14 h-14 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg">
+                        <Wrench className="w-7 h-7 text-white" />
                     </div>
+                    <h1 className="text-2xl font-bold text-slate-900">RepairApp</h1>
                 </motion.div>
 
-                <Card className="border border-zinc-800 bg-zinc-900/80 backdrop-blur-xl shadow-2xl shadow-black/50">
-                    <CardHeader className="text-center space-y-2 pb-6">
-                        <CardTitle className="text-2xl font-bold text-white">
-                            Bienvenido de nuevo
+                <Card className="border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+                    <CardHeader className="text-center space-y-1 pb-4">
+                        <CardTitle className="text-xl font-semibold text-slate-900">
+                            Iniciar Sesión
                         </CardTitle>
-                        <CardDescription className="text-zinc-500">
+                        <CardDescription className="text-slate-500">
                             Ingresa tus credenciales para continuar
                         </CardDescription>
                     </CardHeader>
 
                     <form onSubmit={handleLogin}>
-                        <CardContent className="space-y-5">
+                        <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-zinc-400">
+                                <Label htmlFor="email" className="text-sm font-medium text-slate-700">
                                     Correo electrónico
                                 </Label>
-                                <div className="relative group">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-cyan-400 transition-colors" />
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <Input
                                         id="email"
                                         type="email"
                                         placeholder="correo@empresa.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="pl-10 h-12 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500/20 transition-all"
+                                        className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-slate-400/20"
                                         required
                                     />
                                 </div>
@@ -152,25 +112,25 @@ export default function LoginPage() {
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="password" className="text-sm font-medium text-zinc-400">
+                                    <Label htmlFor="password" className="text-sm font-medium text-slate-700">
                                         Contraseña
                                     </Label>
                                     <Link
                                         href="/forgot-password"
-                                        className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
+                                        className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
                                     >
                                         ¿Olvidaste tu contraseña?
                                     </Link>
                                 </div>
-                                <div className="relative group">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-cyan-400 transition-colors" />
+                                <div className="relative">
+                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                     <Input
                                         id="password"
                                         type="password"
                                         placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="pl-10 h-12 bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500/20 transition-all"
+                                        className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-slate-400/20"
                                         required
                                     />
                                 </div>
@@ -180,7 +140,7 @@ export default function LoginPage() {
                         <CardFooter className="flex flex-col gap-4 pt-2">
                             <Button
                                 type="submit"
-                                className="w-full h-12 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold shadow-lg shadow-cyan-500/25 transition-all hover:shadow-cyan-500/40"
+                                className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm"
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
@@ -196,20 +156,11 @@ export default function LoginPage() {
                                 )}
                             </Button>
 
-                            <div className="relative w-full">
-                                <div className="absolute inset-0 flex items-center">
-                                    <span className="w-full border-t border-zinc-800" />
-                                </div>
-                                <div className="relative flex justify-center text-xs uppercase">
-                                    <span className="bg-zinc-900 px-2 text-zinc-600">o</span>
-                                </div>
-                            </div>
-
-                            <p className="text-sm text-center text-zinc-500">
+                            <p className="text-sm text-center text-slate-500">
                                 ¿No tienes cuenta?{' '}
                                 <Link
                                     href="/register"
-                                    className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+                                    className="text-slate-900 hover:underline font-medium"
                                 >
                                     Regístrate gratis
                                 </Link>
@@ -218,16 +169,10 @@ export default function LoginPage() {
                     </form>
                 </Card>
 
-                {/* Features hint */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-8 flex items-center justify-center gap-2 text-zinc-600 text-sm"
-                >
-                    <Sparkles className="w-4 h-4" />
-                    <span>Servicio Técnico Autorizado · Facturación SRI Ecuador</span>
-                </motion.div>
+                {/* Footer text */}
+                <p className="mt-8 text-center text-xs text-slate-400">
+                    Sistema de Gestión para Servicio Técnico · Ecuador
+                </p>
             </motion.div>
         </div>
     )

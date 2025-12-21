@@ -199,17 +199,17 @@ export default function TrackingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[hsl(220,15%,4%)]">
+        <div className="min-h-screen bg-slate-50">
             {/* Header */}
-            <div className="border-b border-zinc-800/50 bg-zinc-900/50 backdrop-blur-xl sticky top-0 z-50">
+            <div className="border-b border-slate-200 bg-white sticky top-0 z-50">
                 <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                        <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center">
                             <Wrench className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-lg font-bold text-white">RepairApp</h1>
-                            <p className="text-xs text-zinc-500">Tracking de Órdenes</p>
+                            <h1 className="text-lg font-bold text-slate-900">RepairApp</h1>
+                            <p className="text-xs text-slate-500">Tracking de Órdenes</p>
                         </div>
                     </div>
                 </div>
@@ -223,10 +223,10 @@ export default function TrackingPage() {
             >
                 {/* Search Section */}
                 <motion.div variants={itemVariants} className="text-center mb-10">
-                    <h2 className="text-3xl font-bold text-white mb-3">
+                    <h2 className="text-3xl font-bold text-slate-900 mb-3">
                         Rastrea tu Orden
                     </h2>
-                    <p className="text-zinc-400 max-w-md mx-auto">
+                    <p className="text-slate-600 max-w-md mx-auto">
                         Ingresa el código de tu orden para ver el estado actual de tu reparación
                     </p>
                 </motion.div>
@@ -234,19 +234,19 @@ export default function TrackingPage() {
                 <motion.div variants={itemVariants} className="mb-10">
                     <div className="flex gap-3 max-w-xl mx-auto">
                         <div className="relative flex-1">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                             <Input
                                 placeholder="Ej: ORD-2024-0001"
                                 value={searchCode}
                                 onChange={(e) => setSearchCode(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                className="pl-12 h-14 bg-zinc-900/50 border-zinc-800 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-cyan-500/20 text-lg"
+                                className="pl-12 h-14 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-slate-400/20 text-lg"
                             />
                         </div>
                         <Button
                             onClick={handleSearch}
                             disabled={isSearching || !searchCode.trim()}
-                            className="h-14 px-8 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold shadow-lg shadow-cyan-500/25 disabled:opacity-50"
+                            className="h-14 px-8 bg-slate-900 hover:bg-slate-800 text-white font-semibold disabled:opacity-50"
                         >
                             {isSearching ? (
                                 <div className="w-5 h-5 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />

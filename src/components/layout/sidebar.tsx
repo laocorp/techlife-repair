@@ -135,7 +135,7 @@ function SidebarInner({ isCollapsed, onToggle, isMobile, onCloseMobile }: { isCo
                             exit={{ opacity: 0 }}
                             className="flex items-center gap-3 flex-1"
                         >
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                            <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center">
                                 <Wrench className="w-4 h-4 text-white" />
                             </div>
                             <span className="font-semibold text-[hsl(var(--text-primary))] text-sm tracking-tight">
@@ -148,7 +148,7 @@ function SidebarInner({ isCollapsed, onToggle, isMobile, onCloseMobile }: { isCo
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/20 mx-auto"
+                            className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center mx-auto"
                         >
                             <Wrench className="w-4 h-4 text-white" />
                         </motion.div>

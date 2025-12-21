@@ -92,12 +92,12 @@ export default function DashboardLayout({
                     animate={{ opacity: 1, scale: 1 }}
                     className="flex flex-col items-center gap-4"
                 >
-                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/20">
-                        <Wrench className="h-7 w-7 text-white" />
+                    <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center">
+                        <Wrench className="h-6 w-6 text-white" />
                     </div>
                     <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-[hsl(var(--brand-accent))]" />
-                        <p className="text-sm text-[hsl(var(--text-muted))]">Cargando...</p>
+                        <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+                        <p className="text-sm text-slate-500">Cargando...</p>
                     </div>
                 </motion.div>
             </div>

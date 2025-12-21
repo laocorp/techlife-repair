@@ -38,10 +38,10 @@ const DashboardCharts = dynamic(
         loading: () => (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="chart-container h-[300px] flex items-center justify-center">
-                    <div className="skeleton h-full w-full rounded-xl bg-zinc-800/50" />
+                    <div className="skeleton h-full w-full rounded-xl bg-slate-100" />
                 </div>
                 <div className="chart-container h-[300px] flex items-center justify-center">
-                    <div className="skeleton h-full w-full rounded-xl bg-zinc-800/50" />
+                    <div className="skeleton h-full w-full rounded-xl bg-slate-100" />
                 </div>
             </div>
         )
@@ -78,13 +78,13 @@ interface DashboardStats {
 }
 
 const estadoColors: Record<string, { bg: string; text: string; label: string; dot: string }> = {
-    recibido: { bg: 'bg-zinc-500/10', text: 'text-zinc-400', label: 'Recibido', dot: 'bg-zinc-400' },
-    en_diagnostico: { bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'Diagnóstico', dot: 'bg-blue-400' },
-    cotizado: { bg: 'bg-amber-500/10', text: 'text-amber-400', label: 'Cotizado', dot: 'bg-amber-400' },
-    aprobado: { bg: 'bg-violet-500/10', text: 'text-violet-400', label: 'Aprobado', dot: 'bg-violet-400' },
-    en_reparacion: { bg: 'bg-cyan-500/10', text: 'text-cyan-400', label: 'En Reparación', dot: 'bg-cyan-400' },
-    terminado: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: 'Terminado', dot: 'bg-emerald-400' },
-    entregado: { bg: 'bg-green-500/10', text: 'text-green-400', label: 'Entregado', dot: 'bg-green-400' },
+    recibido: { bg: 'bg-slate-100', text: 'text-slate-600', label: 'Recibido', dot: 'bg-slate-400' },
+    en_diagnostico: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'Diagnóstico', dot: 'bg-blue-500' },
+    cotizado: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'Cotizado', dot: 'bg-amber-500' },
+    aprobado: { bg: 'bg-violet-50', text: 'text-violet-700', label: 'Aprobado', dot: 'bg-violet-500' },
+    en_reparacion: { bg: 'bg-sky-50', text: 'text-sky-700', label: 'En Reparación', dot: 'bg-sky-500' },
+    terminado: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Terminado', dot: 'bg-emerald-500' },
+    entregado: { bg: 'bg-green-50', text: 'text-green-700', label: 'Entregado', dot: 'bg-green-500' },
 }
 
 export default function DashboardPage() {

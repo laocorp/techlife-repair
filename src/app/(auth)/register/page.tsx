@@ -15,17 +15,18 @@ import {
     Mail,
     Lock,
     ArrowRight,
+    ArrowLeft,
     Loader2,
     Building2,
     User,
     Phone,
     CheckCircle,
-    Sparkles
+    MapPin
 } from 'lucide-react'
 
 const steps = [
-    { id: 1, title: 'Tu empresa', icon: Building2 },
-    { id: 2, title: 'Tu cuenta', icon: User },
+    { id: 1, title: 'Empresa', icon: Building2 },
+    { id: 2, title: 'Cuenta', icon: User },
     { id: 3, title: 'Confirmar', icon: CheckCircle },
 ]
 
@@ -35,14 +36,11 @@ export default function RegisterPage() {
     const router = useRouter()
     const supabase = createClient()
 
-    // Form data
     const [formData, setFormData] = useState({
-        // Empresa
         empresaNombre: '',
         empresaRuc: '',
         empresaTelefono: '',
         empresaDireccion: '',
-        // Usuario
         nombre: '',
         email: '',
         password: '',
@@ -89,7 +87,6 @@ export default function RegisterPage() {
         setIsLoading(true)
 
         try {
-            // 1. Create auth user first
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
@@ -103,8 +100,6 @@ export default function RegisterPage() {
             if (authError) throw authError
 
             if (authData.user) {
-                // 2. Use RPC function to create empresa and user profile atomically
-                // This bypasses RLS safely
                 const { data: result, error: rpcError } = await supabase.rpc(
                     'register_empresa_and_admin',
                     {
@@ -143,44 +138,37 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[hsl(220,15%,4%)] p-4 relative overflow-hidden">
-            {/* Animated background - Enterprise theme */}
-            <div className="absolute inset-0">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-            </div>
-
-            {/* Grid pattern */}
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+            {/* Subtle background pattern */}
             <div
-                className="absolute inset-0 opacity-5"
+                className="absolute inset-0 opacity-50"
                 style={{
-                    backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
-                           linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
-                    backgroundSize: '50px 50px'
+                    backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.03) 1px, transparent 0)`,
+                    backgroundSize: '32px 32px'
                 }}
             />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.4 }}
                 className="w-full max-w-lg relative z-10"
             >
                 {/* Logo */}
                 <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-                    className="flex items-center justify-center gap-3 mb-8"
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="flex flex-col items-center justify-center gap-3 mb-6"
                 >
-                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-lg shadow-cyan-500/25">
-                        <Wrench className="w-7 h-7 text-zinc-900" />
+                    <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg">
+                        <Wrench className="w-6 h-6 text-white" />
                     </div>
-                    <span className="text-2xl font-bold text-white">RepairApp</span>
+                    <h1 className="text-xl font-bold text-slate-900">RepairApp</h1>
                 </motion.div>
 
                 {/* Progress Steps */}
-                <div className="flex items-center justify-center gap-2 mb-8">
+                <div className="flex items-center justify-center gap-1 mb-6">
                     {steps.map((step, index) => {
                         const Icon = step.icon
                         const isActive = currentStep === step.id
@@ -188,39 +176,48 @@ export default function RegisterPage() {
 
                         return (
                             <div key={step.id} className="flex items-center">
-                                <motion.div
-                                    initial={false}
-                                    animate={{
-                                        scale: isActive ? 1.1 : 1,
-                                        backgroundColor: isCompleted ? 'rgb(34, 197, 94)' : isActive ? 'rgb(6, 182, 212)' : 'rgb(39, 39, 42)'
-                                    }}
-                                    className="w-10 h-10 rounded-full flex items-center justify-center"
-                                >
-                                    <Icon className="w-5 h-5 text-white" />
-                                </motion.div>
+                                <div className="flex flex-col items-center">
+                                    <div
+                                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isCompleted
+                                                ? 'bg-emerald-500 text-white'
+                                                : isActive
+                                                    ? 'bg-slate-900 text-white'
+                                                    : 'bg-slate-200 text-slate-400'
+                                            }`}
+                                    >
+                                        {isCompleted ? (
+                                            <CheckCircle className="w-5 h-5" />
+                                        ) : (
+                                            <Icon className="w-5 h-5" />
+                                        )}
+                                    </div>
+                                    <span className={`text-xs mt-1 ${isActive ? 'text-slate-900 font-medium' : 'text-slate-400'}`}>
+                                        {step.title}
+                                    </span>
+                                </div>
                                 {index < steps.length - 1 && (
-                                    <div className={`w-12 h-0.5 mx-1 ${isCompleted ? 'bg-green-500' : 'bg-zinc-700'}`} />
+                                    <div className={`w-12 h-0.5 mx-2 mb-5 ${isCompleted ? 'bg-emerald-500' : 'bg-slate-200'}`} />
                                 )}
                             </div>
                         )
                     })}
                 </div>
 
-                <Card className="border border-zinc-800 bg-zinc-900/80 backdrop-blur-xl shadow-2xl shadow-black/50">
-                    <CardHeader className="text-center pb-4">
-                        <CardTitle className="text-xl font-bold text-white">
+                <Card className="border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
+                    <CardHeader className="text-center pb-2">
+                        <CardTitle className="text-lg font-semibold text-slate-900">
                             {currentStep === 1 && 'Datos de tu empresa'}
                             {currentStep === 2 && 'Crea tu cuenta'}
                             {currentStep === 3 && 'Confirma tus datos'}
                         </CardTitle>
-                        <CardDescription className="text-zinc-500">
+                        <CardDescription className="text-slate-500">
                             {currentStep === 1 && 'Ingresa la información de tu servicio técnico'}
                             {currentStep === 2 && 'Serás el administrador principal'}
                             {currentStep === 3 && 'Revisa que todo esté correcto'}
                         </CardDescription>
                     </CardHeader>
 
-                    <CardContent>
+                    <CardContent className="pt-4">
                         <AnimatePresence mode="wait">
                             {/* Step 1: Empresa */}
                             {currentStep === 1 && (
@@ -232,50 +229,53 @@ export default function RegisterPage() {
                                     className="space-y-4"
                                 >
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Nombre de la empresa *</Label>
+                                        <Label className="text-slate-700">Nombre de la empresa *</Label>
                                         <div className="relative">
-                                            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                             <Input
                                                 placeholder="Servicio Técnico ABC"
                                                 value={formData.empresaNombre}
                                                 onChange={(e) => updateField('empresaNombre', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
+                                                className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">RUC *</Label>
+                                        <Label className="text-slate-700">RUC *</Label>
                                         <Input
                                             placeholder="1234567890001"
                                             maxLength={13}
                                             value={formData.empresaRuc}
                                             onChange={(e) => updateField('empresaRuc', e.target.value.replace(/\D/g, ''))}
-                                            className="bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
+                                            className="h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Teléfono</Label>
+                                        <Label className="text-slate-700">Teléfono</Label>
                                         <div className="relative">
-                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                             <Input
                                                 placeholder="0999999999"
                                                 value={formData.empresaTelefono}
                                                 onChange={(e) => updateField('empresaTelefono', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
+                                                className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Dirección</Label>
-                                        <Input
-                                            placeholder="Av. Principal y Calle Secundaria"
-                                            value={formData.empresaDireccion}
-                                            onChange={(e) => updateField('empresaDireccion', e.target.value)}
-                                            className="bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
-                                        />
+                                        <Label className="text-slate-700">Dirección</Label>
+                                        <div className="relative">
+                                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                            <Input
+                                                placeholder="Av. Principal y Calle Secundaria"
+                                                value={formData.empresaDireccion}
+                                                onChange={(e) => updateField('empresaDireccion', e.target.value)}
+                                                className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400"
+                                            />
+                                        </div>
                                     </div>
                                 </motion.div>
                             )}
@@ -290,56 +290,56 @@ export default function RegisterPage() {
                                     className="space-y-4"
                                 >
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Tu nombre *</Label>
+                                        <Label className="text-slate-700">Tu nombre *</Label>
                                         <div className="relative">
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                             <Input
                                                 placeholder="Juan Pérez"
                                                 value={formData.nombre}
                                                 onChange={(e) => updateField('nombre', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
+                                                className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Correo electrónico *</Label>
+                                        <Label className="text-slate-700">Correo electrónico *</Label>
                                         <div className="relative">
-                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                             <Input
                                                 type="email"
                                                 placeholder="correo@empresa.com"
                                                 value={formData.email}
                                                 onChange={(e) => updateField('email', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
+                                                className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Contraseña *</Label>
+                                        <Label className="text-slate-700">Contraseña *</Label>
                                         <div className="relative">
-                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                             <Input
                                                 type="password"
                                                 placeholder="••••••••"
                                                 value={formData.password}
                                                 onChange={(e) => updateField('password', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
+                                                className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400"
                                             />
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
-                                        <Label className="text-zinc-300">Confirmar contraseña *</Label>
+                                        <Label className="text-slate-700">Confirmar contraseña *</Label>
                                         <div className="relative">
-                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                                             <Input
                                                 type="password"
                                                 placeholder="••••••••"
                                                 value={formData.confirmPassword}
                                                 onChange={(e) => updateField('confirmPassword', e.target.value)}
-                                                className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-zinc-500 focus:border-cyan-500"
+                                                className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400"
                                             />
                                         </div>
                                     </div>
@@ -353,46 +353,46 @@ export default function RegisterPage() {
                                     initial={{ opacity: 0, x: 20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -20 }}
-                                    className="space-y-6"
+                                    className="space-y-4"
                                 >
-                                    <div className="bg-white/5 rounded-xl p-4 space-y-3">
-                                        <div className="flex items-center gap-2 text-cyan-400 font-medium">
+                                    <div className="bg-slate-50 rounded-lg p-4 space-y-2">
+                                        <div className="flex items-center gap-2 text-slate-700 font-medium text-sm">
                                             <Building2 className="w-4 h-4" />
                                             Empresa
                                         </div>
-                                        <div className="grid grid-cols-2 gap-2 text-sm">
-                                            <div className="text-zinc-400">Nombre:</div>
-                                            <div className="text-white font-medium">{formData.empresaNombre}</div>
-                                            <div className="text-zinc-400">RUC:</div>
-                                            <div className="text-white font-medium">{formData.empresaRuc}</div>
+                                        <div className="grid grid-cols-2 gap-1 text-sm">
+                                            <div className="text-slate-500">Nombre:</div>
+                                            <div className="text-slate-900 font-medium">{formData.empresaNombre}</div>
+                                            <div className="text-slate-500">RUC:</div>
+                                            <div className="text-slate-900">{formData.empresaRuc}</div>
                                             {formData.empresaTelefono && (
                                                 <>
-                                                    <div className="text-zinc-400">Teléfono:</div>
-                                                    <div className="text-white">{formData.empresaTelefono}</div>
+                                                    <div className="text-slate-500">Teléfono:</div>
+                                                    <div className="text-slate-900">{formData.empresaTelefono}</div>
                                                 </>
                                             )}
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/5 rounded-xl p-4 space-y-3">
-                                        <div className="flex items-center gap-2 text-purple-400 font-medium">
+                                    <div className="bg-slate-50 rounded-lg p-4 space-y-2">
+                                        <div className="flex items-center gap-2 text-slate-700 font-medium text-sm">
                                             <User className="w-4 h-4" />
                                             Administrador
                                         </div>
-                                        <div className="grid grid-cols-2 gap-2 text-sm">
-                                            <div className="text-zinc-400">Nombre:</div>
-                                            <div className="text-white font-medium">{formData.nombre}</div>
-                                            <div className="text-zinc-400">Email:</div>
-                                            <div className="text-white">{formData.email}</div>
+                                        <div className="grid grid-cols-2 gap-1 text-sm">
+                                            <div className="text-slate-500">Nombre:</div>
+                                            <div className="text-slate-900 font-medium">{formData.nombre}</div>
+                                            <div className="text-slate-500">Email:</div>
+                                            <div className="text-slate-900">{formData.email}</div>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-start gap-3 p-4 bg-green-500/10 rounded-xl border border-green-500/20">
-                                        <Sparkles className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                                    <div className="flex items-start gap-3 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                                        <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
                                         <div className="text-sm">
-                                            <p className="text-green-400 font-medium">Prueba gratuita de 14 días</p>
-                                            <p className="text-zinc-400 mt-1">
-                                                Tendrás acceso a todas las funciones sin costo durante el período de prueba.
+                                            <p className="text-emerald-700 font-medium">Prueba gratuita de 14 días</p>
+                                            <p className="text-emerald-600 mt-0.5">
+                                                Acceso completo a todas las funciones sin costo.
                                             </p>
                                         </div>
                                     </div>
@@ -407,8 +407,9 @@ export default function RegisterPage() {
                                 <Button
                                     variant="outline"
                                     onClick={handleBack}
-                                    className="flex-1 border-white/10 text-white hover:bg-white/5"
+                                    className="flex-1 h-11 border-slate-200 text-slate-700 hover:bg-slate-50"
                                 >
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
                                     Atrás
                                 </Button>
                             )}
@@ -416,7 +417,7 @@ export default function RegisterPage() {
                             {currentStep < 3 ? (
                                 <Button
                                     onClick={handleNext}
-                                    className="flex-1 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500"
+                                    className="flex-1 h-11 bg-slate-900 hover:bg-slate-800 text-white"
                                 >
                                     Continuar
                                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -425,7 +426,7 @@ export default function RegisterPage() {
                                 <Button
                                     onClick={handleRegister}
                                     disabled={isLoading}
-                                    className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                                    className="flex-1 h-11 bg-emerald-600 hover:bg-emerald-700 text-white"
                                 >
                                     {isLoading ? (
                                         <>
@@ -442,9 +443,9 @@ export default function RegisterPage() {
                             )}
                         </div>
 
-                        <p className="text-sm text-center text-zinc-400">
+                        <p className="text-sm text-center text-slate-500">
                             ¿Ya tienes cuenta?{' '}
-                            <Link href="/login" className="text-cyan-400 hover:underline font-medium">
+                            <Link href="/login" className="text-slate-900 hover:underline font-medium">
                                 Inicia sesión
                             </Link>
                         </p>
@@ -452,11 +453,10 @@ export default function RegisterPage() {
                 </Card>
 
                 {/* Footer */}
-                <p className="text-center text-sm text-zinc-500 mt-6">
+                <p className="text-center text-xs text-slate-400 mt-6">
                     Al registrarte aceptas nuestros términos y condiciones
                 </p>
             </motion.div>
         </div>
     )
 }
-

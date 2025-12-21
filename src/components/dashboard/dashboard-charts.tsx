@@ -13,7 +13,7 @@ import {
 } from 'recharts'
 import { motion } from 'framer-motion'
 
-// Sample chart data - moved from page.tsx
+// Sample chart data
 const revenueData = [
     { name: 'Lun', value: 1200 },
     { name: 'Mar', value: 1800 },
@@ -39,7 +39,7 @@ const itemVariants = {
     show: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.4, ease: "easeOut" }
+        transition: { duration: 0.4, ease: "easeOut" as const }
     },
 }
 
@@ -54,35 +54,35 @@ export default function DashboardCharts({ stats }: DashboardChartsProps) {
     return (
         <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Revenue Chart */}
-            <div className="chart-container">
-                <div className="chart-header">
+            <div className="bg-white border border-slate-200 rounded-xl p-5">
+                <div className="flex items-center justify-between mb-4">
                     <div>
-                        <h3 className="chart-title">Ingresos de la Semana</h3>
-                        <p className="text-xs text-zinc-500 mt-0.5">Últimos 7 días</p>
+                        <h3 className="font-semibold text-slate-900">Ingresos de la Semana</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">Últimos 7 días</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-lg font-bold text-white">${((stats?.ventas_mes || 0)).toFixed(0)}</p>
-                        <p className="text-xs text-emerald-400">+23% vs semana pasada</p>
+                        <p className="text-lg font-bold text-slate-900">${((stats?.ventas_mes || 0)).toFixed(0)}</p>
+                        <p className="text-xs text-emerald-600">+23% vs semana pasada</p>
                     </div>
                 </div>
                 <ResponsiveContainer width="100%" height={200}>
                     <AreaChart data={revenueData}>
                         <defs>
                             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="hsl(185, 85%, 50%)" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="hsl(185, 85%, 50%)" stopOpacity={0} />
+                                <stop offset="5%" stopColor="#0f172a" stopOpacity={0.1} />
+                                <stop offset="95%" stopColor="#0f172a" stopOpacity={0} />
                             </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 12%)" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                         <XAxis
                             dataKey="name"
-                            stroke="hsl(220, 10%, 40%)"
+                            stroke="#94a3b8"
                             fontSize={11}
                             tickLine={false}
                             axisLine={false}
                         />
                         <YAxis
-                            stroke="hsl(220, 10%, 40%)"
+                            stroke="#94a3b8"
                             fontSize={11}
                             tickLine={false}
                             axisLine={false}
@@ -90,17 +90,18 @@ export default function DashboardCharts({ stats }: DashboardChartsProps) {
                         />
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: 'hsl(220, 15%, 10%)',
-                                border: '1px solid hsl(220, 15%, 16%)',
+                                backgroundColor: '#ffffff',
+                                border: '1px solid #e2e8f0',
                                 borderRadius: '8px',
                                 fontSize: '12px',
+                                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                             }}
-                            labelStyle={{ color: 'hsl(0, 0%, 98%)' }}
+                            labelStyle={{ color: '#0f172a' }}
                         />
                         <Area
                             type="monotone"
                             dataKey="value"
-                            stroke="hsl(185, 85%, 50%)"
+                            stroke="#0f172a"
                             strokeWidth={2}
                             fillOpacity={1}
                             fill="url(#colorRevenue)"
@@ -110,45 +111,46 @@ export default function DashboardCharts({ stats }: DashboardChartsProps) {
             </div>
 
             {/* Orders Chart */}
-            <div className="chart-container">
-                <div className="chart-header">
+            <div className="bg-white border border-slate-200 rounded-xl p-5">
+                <div className="flex items-center justify-between mb-4">
                     <div>
-                        <h3 className="chart-title">Órdenes por Día</h3>
-                        <p className="text-xs text-zinc-500 mt-0.5">Últimos 7 días</p>
+                        <h3 className="font-semibold text-slate-900">Órdenes por Día</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">Últimos 7 días</p>
                     </div>
                     <div className="text-right">
-                        <p className="text-lg font-bold text-white">{stats?.ordenes_hoy || 0}</p>
-                        <p className="text-xs text-zinc-500">órdenes hoy</p>
+                        <p className="text-lg font-bold text-slate-900">{stats?.ordenes_hoy || 0}</p>
+                        <p className="text-xs text-slate-500">órdenes hoy</p>
                     </div>
                 </div>
                 <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={ordersData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 12%)" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                         <XAxis
                             dataKey="name"
-                            stroke="hsl(220, 10%, 40%)"
+                            stroke="#94a3b8"
                             fontSize={11}
                             tickLine={false}
                             axisLine={false}
                         />
                         <YAxis
-                            stroke="hsl(220, 10%, 40%)"
+                            stroke="#94a3b8"
                             fontSize={11}
                             tickLine={false}
                             axisLine={false}
                         />
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: 'hsl(220, 15%, 10%)',
-                                border: '1px solid hsl(220, 15%, 16%)',
+                                backgroundColor: '#ffffff',
+                                border: '1px solid #e2e8f0',
                                 borderRadius: '8px',
                                 fontSize: '12px',
+                                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                             }}
-                            labelStyle={{ color: 'hsl(0, 0%, 98%)' }}
+                            labelStyle={{ color: '#0f172a' }}
                         />
                         <Bar
                             dataKey="ordenes"
-                            fill="hsl(262, 83%, 58%)"
+                            fill="#0f172a"
                             radius={[4, 4, 0, 0]}
                         />
                     </BarChart>

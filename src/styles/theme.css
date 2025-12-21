@@ -1,85 +1,85 @@
 /* =============================================
-   REPAIRAPP - ENTERPRISE DARK THEME
-   Ultra-dark professional design inspired by
-   modern SaaS dashboards
+   REPAIRAPP - LINEAR PROFESSIONAL THEME
+   Clean, minimal design inspired by Linear.app
+   Professional light theme with subtle accents
    ============================================= */
 
 :root {
     /* ========== BRAND IDENTITY ========== */
-    --brand-primary: 220 15% 6%;
-    /* Almost black base */
-    --brand-accent: 185 85% 50%;
-    /* Cyan accent - modern enterprise */
-    --brand-glow: 185 85% 50%;
-    /* Cyan glow */
-    --brand-secondary: 262 83% 58%;
-    /* Purple secondary for charts */
+    --brand-primary: 215 28% 17%;
+    /* Slate 900 - primary */
+    --brand-accent: 215 28% 17%;
+    /* Same as primary for consistency */
+    --brand-glow: 215 28% 17%;
+    /* No glow effect */
+    --brand-secondary: 160 84% 39%;
+    /* Emerald for positive actions */
 
     /* ========== SURFACE COLORS ========== */
-    /* Ultra-dark hierarchy */
-    --surface-base: 220 15% 4%;
-    /* Main background - near black */
-    --surface-elevated: 220 15% 7%;
-    /* Cards, panels */
-    --surface-overlay: 220 15% 10%;
-    /* Modals, dropdowns */
-    --surface-highlight: 220 15% 13%;
-    /* Hover, active states */
-    --surface-glass: 220 15% 8% / 0.8;
-    /* Glassmorphism */
+    /* Light professional hierarchy */
+    --surface-base: 210 40% 98%;
+    /* Slate 50 - Main background */
+    --surface-elevated: 0 0% 100%;
+    /* White - Cards, panels */
+    --surface-overlay: 0 0% 100%;
+    /* White - Modals, dropdowns */
+    --surface-highlight: 210 40% 96%;
+    /* Slate 100 - Hover states */
+    --surface-glass: 0 0% 100% / 0.95;
+    /* Light glassmorphism */
 
     /* ========== TEXT COLORS ========== */
-    --text-primary: 0 0% 98%;
-    /* Pure white text */
-    --text-secondary: 220 10% 60%;
-    /* Gray secondary */
-    --text-muted: 220 10% 40%;
-    /* Muted/disabled */
-    --text-accent: 185 85% 55%;
-    /* Cyan links */
+    --text-primary: 215 28% 17%;
+    /* Slate 900 - Main text */
+    --text-secondary: 215 16% 47%;
+    /* Slate 500 - Secondary text */
+    --text-muted: 215 20% 65%;
+    /* Slate 400 - Muted/disabled */
+    --text-accent: 215 28% 17%;
+    /* Slate 900 - Links */
 
     /* ========== BORDER & DIVIDERS ========== */
-    --border-subtle: 220 15% 12%;
-    /* Very subtle borders */
-    --border-default: 220 15% 16%;
-    /* Normal borders */
-    --border-interactive: 185 85% 50%;
-    /* Focus/active - cyan */
+    --border-subtle: 214 32% 91%;
+    /* Slate 200 - Very subtle */
+    --border-default: 214 32% 91%;
+    /* Slate 200 - Normal borders */
+    --border-interactive: 215 28% 17%;
+    /* Slate 900 - Focus */
 
     /* ========== STATUS COLORS ========== */
-    /* Success - Neon green */
-    --status-success: 142 71% 45%;
-    --status-success-bg: 142 71% 10%;
+    /* Success - Emerald */
+    --status-success: 160 84% 39%;
+    --status-success-bg: 152 81% 96%;
 
-    /* Warning - Neon orange */
-    --status-warning: 32 95% 50%;
-    --status-warning-bg: 32 95% 10%;
+    /* Warning - Amber */
+    --status-warning: 38 92% 50%;
+    --status-warning-bg: 48 96% 95%;
 
-    /* Error - Neon red/pink */
-    --status-error: 350 89% 60%;
-    --status-error-bg: 350 89% 10%;
+    /* Error - Red */
+    --status-error: 0 84% 60%;
+    --status-error-bg: 0 86% 97%;
 
-    /* Info - Cyan */
-    --status-info: 185 85% 50%;
-    --status-info-bg: 185 85% 10%;
+    /* Info - Blue */
+    --status-info: 217 91% 60%;
+    --status-info-bg: 214 100% 97%;
 
-    /* Pending - Purple */
-    --status-pending: 262 83% 58%;
-    --status-pending-bg: 262 83% 10%;
+    /* Pending - Slate */
+    --status-pending: 215 16% 47%;
+    --status-pending-bg: 210 40% 96%;
 
     /* ========== INTERACTIVE STATES ========== */
-    --interactive-hover: 185 85% 50% / 0.08;
-    --interactive-active: 185 85% 50% / 0.15;
-    --interactive-focus: 185 85% 50%;
+    --interactive-hover: 215 28% 17% / 0.04;
+    --interactive-active: 215 28% 17% / 0.08;
+    --interactive-focus: 215 28% 17%;
 
     /* ========== EFFECTS ========== */
-    --glow-primary: 0 0 30px hsl(185 85% 50% / 0.25);
-    --glow-success: 0 0 20px hsl(142 71% 45% / 0.25);
-    --glow-purple: 0 0 20px hsl(262 83% 58% / 0.25);
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6), 0 2px 4px -2px rgb(0 0 0 / 0.5);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.7), 0 4px 6px -4px rgb(0 0 0 / 0.6);
-    --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.8);
+    --glow-primary: none;
+    --glow-success: none;
+    --glow-purple: none;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.05);
 
     /* ========== SPACING SCALE ========== */
     --space-1: 0.25rem;
@@ -96,9 +96,9 @@
     /* ========== BORDER RADIUS ========== */
     --radius-sm: 0.375rem;
     --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
-    --radius-xl: 1rem;
-    --radius-2xl: 1.25rem;
+    --radius-lg: 0.625rem;
+    --radius-xl: 0.75rem;
+    --radius-2xl: 1rem;
     --radius-full: 9999px;
 
     /* ========== TYPOGRAPHY ========== */
@@ -126,7 +126,7 @@
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
     /* ========== Z-INDEX SCALE ========== */
     --z-dropdown: 100;
@@ -136,8 +136,8 @@
     --z-toast: 500;
 
     /* ========== SIDEBAR ========== */
-    --sidebar-width: 220px;
-    --sidebar-collapsed-width: 60px;
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 64px;
     --header-height: 56px;
 }
 
@@ -149,14 +149,14 @@
     --card-foreground: var(--text-primary);
     --popover: var(--surface-elevated);
     --popover-foreground: var(--text-primary);
-    --primary: var(--brand-accent);
-    --primary-foreground: 220 15% 4%;
-    --secondary: var(--surface-overlay);
+    --primary: var(--brand-primary);
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--surface-highlight);
     --secondary-foreground: var(--text-secondary);
     --muted: var(--surface-highlight);
     --muted-foreground: var(--text-muted);
-    --accent: var(--brand-accent);
-    --accent-foreground: 220 15% 4%;
+    --accent: var(--surface-highlight);
+    --accent-foreground: var(--text-primary);
     --destructive: var(--status-error);
     --destructive-foreground: 0 0% 100%;
     --border: var(--border-subtle);
@@ -164,15 +164,30 @@
     --ring: var(--border-interactive);
     --radius: var(--radius-lg);
 
-    /* Chart colors - Neon palette */
-    --chart-1: 185 85% 50%;
-    /* Cyan */
-    --chart-2: 142 71% 45%;
-    /* Green */
-    --chart-3: 262 83% 58%;
-    /* Purple */
-    --chart-4: 32 95% 50%;
-    /* Orange */
-    --chart-5: 350 89% 60%;
-    /* Pink */
+    /* Chart colors - Professional palette */
+    --chart-1: 215 28% 17%;
+    /* Slate */
+    --chart-2: 160 84% 39%;
+    /* Emerald */
+    --chart-3: 217 91% 60%;
+    /* Blue */
+    --chart-4: 38 92% 50%;
+    /* Amber */
+    --chart-5: 0 84% 60%;
+    /* Red */
+}
+
+/* ========== DARK MODE (Optional) ========== */
+.dark {
+    --surface-base: 215 28% 10%;
+    --surface-elevated: 215 28% 13%;
+    --surface-overlay: 215 28% 15%;
+    --surface-highlight: 215 28% 18%;
+
+    --text-primary: 210 40% 98%;
+    --text-secondary: 215 20% 65%;
+    --text-muted: 215 16% 47%;
+
+    --border-subtle: 215 28% 20%;
+    --border-default: 215 28% 25%;
 }

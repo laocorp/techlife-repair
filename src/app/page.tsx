@@ -19,13 +19,13 @@ const LandingContent = dynamic(() => import('@/components/landing/landing-page')
 
 function DashboardLoading() {
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
             <div className="flex flex-col items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/25">
-                    <Wrench className="w-8 h-8 text-white animate-pulse" />
+                <div className="w-14 h-14 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg">
+                    <Wrench className="w-7 h-7 text-white animate-pulse" />
                 </div>
-                <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
-                <p className="text-slate-400">Cargando...</p>
+                <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                <p className="text-slate-500">Cargando...</p>
             </div>
         </div>
     )
