@@ -1,20 +1,62 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/stores'
+import { useTenant } from '@/hooks'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
+import { motion, AnimatePresence } from 'framer-motion'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+    ArrowLeft,
+    Calendar,
+    CheckCircle,
+    Clock,
+    DollarSign,
+    FileText,
+    MessageSquare,
+    Printer,
+    Save,
+    Share2,
+    User,
+    Wrench,
+    AlertTriangle,
+    Send,
+    Plus,
+    Trash2,
+    Edit,
+    Phone,
+    Mail,
+    MapPin,
+    QrCode,
+    Search,
+    Download,
+    Package,
+    ExternalLink,
+    Loader2
+} from 'lucide-react'
+import { toast } from 'sonner'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { motion } from 'framer-motion'
-import { useAuthStore } from '@/stores'
-import { PermissionGate } from '@/hooks/use-permissions'
-import { createClient } from '@/lib/supabase/client'
-import { generateOrderQR } from '@/lib/qr-generator'
-import { Button } from '@/components/ui/button'
+import Image from 'next/image'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import { Label } from '@/components/ui/label'
 import {
     Select,
     SelectContent,
@@ -22,39 +64,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { toast } from 'sonner'
-import {
-    ArrowLeft,
-    Wrench,
-    User,
-    Package,
-    FileText,
-    Clock,
-    CheckCircle,
-    AlertTriangle,
-    Search,
-    Edit,
-    Save,
-    Download,
-    QrCode,
-    ExternalLink,
-    Loader2,
-    Phone,
-    Mail,
-    DollarSign,
-} from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { PDFDownloadButton } from '@/components/pdf/pdf-download-wrapper'
+import { PermissionGate } from '@/hooks/use-permissions'
+import { generateOrderQR } from '@/lib/qr-generator'
+
+// Import PDFDownloadButton dynamically (renamed from Wrapper to match export and usage)
+const PDFDownloadButton = dynamic(
+    () => import('@/components/pdf/pdf-download-wrapper').then(mod => mod.PDFDownloadButton),
+    { ssr: false }
+)
 
 interface OrdenServicio {
     id: string
@@ -250,11 +268,13 @@ export default function OrdenDetallePage() {
                     <PDFDownloadButton
                         orden={{
                             ...orden,
-                            problema: orden.problema_reportado
+                            problema: orden.problema_reportado,
+                            cliente: orden.cliente || null,
                         }}
                         qrCodeUrl={qrData?.qrDataUrl || ''}
                         trackingUrl={typeof window !== 'undefined' ? `${window.location.origin}/tracking/${orden.id}` : ''}
                         fileName={`Orden-${orden.numero_orden}.pdf`}
+                        className="border-white/10 text-white hover:bg-white/5"
                     >
                         Descargar PDF
                     </PDFDownloadButton>
@@ -264,8 +284,6 @@ export default function OrdenDetallePage() {
                         onClick={handleGenerateQR}
                         className="gap-2 border-white/10 text-white hover:bg-white/5"
                     >
-                        <QrCode className="h-4 w-4" />
-                        Ver QR
                     </Button>
 
                     <PermissionGate permission="orders.update">
@@ -536,10 +554,19 @@ export default function OrdenDetallePage() {
                     <div className="flex flex-col items-center py-6">
                         {qrData && (
                             <>
-                                <img src={qrData.qrDataUrl} alt="QR Code" className="w-48 h-48" />
+                                <div className="relative w-48 h-48">
+                                    <Image
+                                        src={qrData.qrDataUrl}
+                                        alt="QR Code"
+                                        fill
+                                        className="object-contain"
+                                        unoptimized // QR data URLs might not be cacheable/optimizable by Next.js Image Optimization API properly if they are base64, but let's try standard approach or use unoptimized if it's base64 data URI usually.
+                                    />
+                                </div>
                                 <p className="text-slate-400 text-sm mt-4 text-center">
                                     El cliente puede escanear este código para ver el estado de su orden
                                 </p>
+
                                 <p className="text-xs text-blue-400 mt-2 break-all text-center">
                                     {qrData.trackingUrl}
                                 </p>

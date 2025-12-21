@@ -28,17 +28,25 @@ import {
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
-import {
-    AreaChart,
-    Area,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    BarChart,
-    Bar,
-} from 'recharts'
+import dynamic from 'next/dynamic'
+
+// Dynamically import charts to reduce initial bundle size
+const DashboardCharts = dynamic(
+    () => import('@/components/dashboard/dashboard-charts'),
+    {
+        ssr: false,
+        loading: () => (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="chart-container h-[300px] flex items-center justify-center">
+                    <div className="skeleton h-full w-full rounded-xl bg-zinc-800/50" />
+                </div>
+                <div className="chart-container h-[300px] flex items-center justify-center">
+                    <div className="skeleton h-full w-full rounded-xl bg-zinc-800/50" />
+                </div>
+            </div>
+        )
+    }
+)
 
 // Animation variants
 const containerVariants = {
@@ -54,7 +62,7 @@ const itemVariants = {
     show: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }
+        transition: { duration: 0.4, ease: "easeOut" as const }
     },
 }
 
@@ -78,27 +86,6 @@ const estadoColors: Record<string, { bg: string; text: string; label: string; do
     terminado: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: 'Terminado', dot: 'bg-emerald-400' },
     entregado: { bg: 'bg-green-500/10', text: 'text-green-400', label: 'Entregado', dot: 'bg-green-400' },
 }
-
-// Sample chart data - will be replaced with real data
-const revenueData = [
-    { name: 'Lun', value: 1200 },
-    { name: 'Mar', value: 1800 },
-    { name: 'Mié', value: 1400 },
-    { name: 'Jue', value: 2200 },
-    { name: 'Vie', value: 1900 },
-    { name: 'Sáb', value: 2800 },
-    { name: 'Dom', value: 2100 },
-]
-
-const ordersData = [
-    { name: 'Lun', ordenes: 8 },
-    { name: 'Mar', ordenes: 12 },
-    { name: 'Mié', ordenes: 9 },
-    { name: 'Jue', ordenes: 15 },
-    { name: 'Vie', ordenes: 11 },
-    { name: 'Sáb', ordenes: 18 },
-    { name: 'Dom', ordenes: 14 },
-]
 
 export default function DashboardPage() {
     const { user } = useAuthStore()
@@ -331,110 +318,8 @@ export default function DashboardPage() {
                 })}
             </motion.div>
 
-            {/* Charts Row */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Revenue Chart */}
-                <div className="chart-container">
-                    <div className="chart-header">
-                        <div>
-                            <h3 className="chart-title">Ingresos de la Semana</h3>
-                            <p className="text-xs text-zinc-500 mt-0.5">Últimos 7 días</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-lg font-bold text-white">${((stats?.ventas_mes || 0)).toFixed(0)}</p>
-                            <p className="text-xs text-emerald-400">+23% vs semana pasada</p>
-                        </div>
-                    </div>
-                    <ResponsiveContainer width="100%" height={200}>
-                        <AreaChart data={revenueData}>
-                            <defs>
-                                <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="hsl(185, 85%, 50%)" stopOpacity={0.3} />
-                                    <stop offset="95%" stopColor="hsl(185, 85%, 50%)" stopOpacity={0} />
-                                </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 12%)" vertical={false} />
-                            <XAxis
-                                dataKey="name"
-                                stroke="hsl(220, 10%, 40%)"
-                                fontSize={11}
-                                tickLine={false}
-                                axisLine={false}
-                            />
-                            <YAxis
-                                stroke="hsl(220, 10%, 40%)"
-                                fontSize={11}
-                                tickLine={false}
-                                axisLine={false}
-                                tickFormatter={(value) => `$${value}`}
-                            />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: 'hsl(220, 15%, 10%)',
-                                    border: '1px solid hsl(220, 15%, 16%)',
-                                    borderRadius: '8px',
-                                    fontSize: '12px',
-                                }}
-                                labelStyle={{ color: 'hsl(0, 0%, 98%)' }}
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="value"
-                                stroke="hsl(185, 85%, 50%)"
-                                strokeWidth={2}
-                                fillOpacity={1}
-                                fill="url(#colorRevenue)"
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                </div>
-
-                {/* Orders Chart */}
-                <div className="chart-container">
-                    <div className="chart-header">
-                        <div>
-                            <h3 className="chart-title">Órdenes por Día</h3>
-                            <p className="text-xs text-zinc-500 mt-0.5">Últimos 7 días</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-lg font-bold text-white">{stats?.ordenes_hoy || 0}</p>
-                            <p className="text-xs text-zinc-500">órdenes hoy</p>
-                        </div>
-                    </div>
-                    <ResponsiveContainer width="100%" height={200}>
-                        <BarChart data={ordersData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 15%, 12%)" vertical={false} />
-                            <XAxis
-                                dataKey="name"
-                                stroke="hsl(220, 10%, 40%)"
-                                fontSize={11}
-                                tickLine={false}
-                                axisLine={false}
-                            />
-                            <YAxis
-                                stroke="hsl(220, 10%, 40%)"
-                                fontSize={11}
-                                tickLine={false}
-                                axisLine={false}
-                            />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: 'hsl(220, 15%, 10%)',
-                                    border: '1px solid hsl(220, 15%, 16%)',
-                                    borderRadius: '8px',
-                                    fontSize: '12px',
-                                }}
-                                labelStyle={{ color: 'hsl(0, 0%, 98%)' }}
-                            />
-                            <Bar
-                                dataKey="ordenes"
-                                fill="hsl(262, 83%, 58%)"
-                                radius={[4, 4, 0, 0]}
-                            />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
-            </motion.div>
+            {/* Charts Row - Now Dynamically Loaded */}
+            <DashboardCharts stats={stats} />
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

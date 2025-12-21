@@ -28,6 +28,7 @@ import {
     Moon,
     Sun,
     Sparkles,
+    Menu,
 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -49,9 +50,10 @@ const routeTitles: Record<string, { title: string; description?: string }> = {
 
 interface HeaderProps {
     isSidebarCollapsed: boolean
+    onMenuClick?: () => void
 }
 
-export function Header({ isSidebarCollapsed }: HeaderProps) {
+export function Header({ isSidebarCollapsed, onMenuClick }: HeaderProps) {
     const pathname = usePathname()
     const { user, logout } = useAuthStore()
     const { empresa } = useTenant()
@@ -78,9 +80,26 @@ export function Header({ isSidebarCollapsed }: HeaderProps) {
                 width: `calc(100% - ${isSidebarCollapsed ? 64 : 240}px)`
             }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="header-linear fixed top-0 right-0 z-40"
+            className="header-linear fixed top-0 right-0 z-40 md:ml-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))]"
+            style={{
+                // Override framer motion styles on mobile via standard CSS class overrides if needed,
+                // but since we render via JS logic in layout, we might just conditionalize the animate prop
+                marginLeft: undefined, // Let parent/layout handle generic positioning via classes for mobile?
+                // Actually, framer motion inline styles might conflict with media queries.
+                // We will handle the "mobile reset" in the layout component logic.
+            }}
         >
             <div className="flex items-center gap-4">
+                {/* Mobile Menu Button */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="md:hidden -ml-2 text-[hsl(var(--text-secondary))]"
+                    onClick={onMenuClick}
+                >
+                    <Menu className="h-5 w-5" />
+                </Button>
+
                 {/* Page Title - Linear style */}
                 <div className="flex items-center gap-3">
                     <div>
@@ -88,7 +107,7 @@ export function Header({ isSidebarCollapsed }: HeaderProps) {
                             {pageInfo.title}
                         </h1>
                         {pageInfo.description && (
-                            <p className="text-xs text-[hsl(var(--text-muted))]">
+                            <p className="text-xs text-[hsl(var(--text-muted))] hidden sm:block">
                                 {pageInfo.description}
                             </p>
                         )}

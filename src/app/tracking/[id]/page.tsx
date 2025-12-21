@@ -1,5 +1,8 @@
 // Public Order Tracking Page - No authentication required
 import { Suspense } from 'react'
+
+// Revalidar la página cada 60 segundos (ISR)
+export const revalidate = 60
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -152,8 +155,8 @@ export default async function TrackingPage({ params }: PageProps) {
                                         <div key={step} className="flex flex-col items-center">
                                             <div
                                                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isCompleted || isCurrent
-                                                        ? stepConfig.bgColor
-                                                        : 'bg-slate-800 border-2 border-white/20'
+                                                    ? stepConfig.bgColor
+                                                    : 'bg-slate-800 border-2 border-white/20'
                                                     }`}
                                             >
                                                 <StepIcon className={`h-4 w-4 ${isCompleted || isCurrent ? 'text-white' : 'text-slate-500'}`} />

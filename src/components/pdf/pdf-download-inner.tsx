@@ -11,10 +11,11 @@ interface PDFDownloadInnerProps {
     qrCodeUrl: string
     trackingUrl: string
     fileName: string
+    className?: string
     children: React.ReactNode
 }
 
-export function PDFDownloadInner({ orden, qrCodeUrl, trackingUrl, fileName, children }: PDFDownloadInnerProps) {
+export function PDFDownloadInner({ orden, qrCodeUrl, trackingUrl, fileName, className, children }: PDFDownloadInnerProps) {
     return (
         <PDFDownloadLink
             document={
@@ -28,7 +29,7 @@ export function PDFDownloadInner({ orden, qrCodeUrl, trackingUrl, fileName, chil
         >
             {/* @ts-ignore - render prop type mismatch in react-pdf types */}
             {({ blob, url, loading, error }: any) => (
-                <Button disabled={loading} variant="outline" className="gap-2">
+                <Button disabled={loading} variant="outline" className={`gap-2 ${className || ''}`}>
                     <Download className="h-4 w-4" />
                     {loading ? 'Generando PDF...' : children}
                 </Button>

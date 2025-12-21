@@ -2,6 +2,14 @@
 FROM node:20-slim AS builder
 WORKDIR /app
 
+# Build-time arguments for Next.js public env vars
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+# Make them available as env vars during build
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
     openssl \
@@ -32,8 +40,8 @@ RUN npm run build
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# Install OpenSSL for runtime
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+# Install OpenSSL and curl for runtime and health checks
+RUN apt-get update && apt-get install -y openssl curl && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 
@@ -44,6 +52,10 @@ COPY --from=builder /app/public ./public
 
 # Expose the default Next.js port
 EXPOSE 3000
+
+# Health check for container orchestration (Dokploy, Docker Swarm, etc.)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/ || exit 1
 
 # Start the server
 CMD ["node", "server.js"]

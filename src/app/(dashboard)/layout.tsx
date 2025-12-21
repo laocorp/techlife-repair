@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import { useAuthStore } from '@/stores'
-import { TenantProvider } from '@/hooks'
+import { TenantProvider, useMediaQuery } from '@/hooks'
 import { createClient } from '@/lib/supabase/client'
 import { Loader2, Wrench } from 'lucide-react'
 
@@ -17,6 +17,9 @@ export default function DashboardLayout({
 }) {
     const [isCollapsed, setIsCollapsed] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
+    const [isMobileOpen, setIsMobileOpen] = useState(false)
+    const isMobile = useMediaQuery('(max-width: 768px)')
+
     const { user, setUser, setEmpresa, setLoading } = useAuthStore()
     const router = useRouter()
     const supabase = createClient()
@@ -104,13 +107,23 @@ export default function DashboardLayout({
     return (
         <TenantProvider>
             <div className="min-h-screen bg-[hsl(var(--surface-base))]">
-                <Sidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
-                <Header isSidebarCollapsed={isCollapsed} />
+                <Sidebar
+                    isCollapsed={isMobile ? false : isCollapsed}
+                    onToggle={() => setIsCollapsed(!isCollapsed)}
+                    isMobile={isMobile}
+                    isOpenMobile={isMobileOpen}
+                    onCloseMobile={() => setIsMobileOpen(false)}
+                />
+
+                <Header
+                    isSidebarCollapsed={isMobile ? true : isCollapsed}
+                    onMenuClick={() => setIsMobileOpen(true)}
+                />
 
                 <motion.main
                     initial={false}
                     animate={{
-                        marginLeft: isCollapsed ? 64 : 240,
+                        marginLeft: isMobile ? 0 : (isCollapsed ? 64 : 240),
                         paddingTop: 56 // header-height
                     }}
                     transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}

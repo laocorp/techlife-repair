@@ -45,6 +45,7 @@ interface PDFDownloadButtonProps {
     qrCodeUrl: string
     trackingUrl: string
     fileName: string
+    className?: string
     children: React.ReactNode
 }
 
@@ -57,13 +58,14 @@ const PDFDownloadComponent = dynamic(
     }
 )
 
-export function PDFDownloadButton({ orden, qrCodeUrl, trackingUrl, fileName, children }: PDFDownloadButtonProps) {
+export function PDFDownloadButton({ orden, qrCodeUrl, trackingUrl, fileName, className, children }: PDFDownloadButtonProps) {
     return (
         <PDFDownloadComponent
             orden={orden}
             qrCodeUrl={qrCodeUrl}
             trackingUrl={trackingUrl}
             fileName={fileName}
+            className={className}
         >
             {children}
         </PDFDownloadComponent>
