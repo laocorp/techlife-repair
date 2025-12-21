@@ -8,7 +8,7 @@ FROM node:20-slim AS builder
 WORKDIR /app
 
 # Build-time arguments
-ARG DATABASE_URL=postgresql://repairapp:Life*9458@techliferepairv2-db-jxatb3:5432/repair-db
+ARG DATABASE_URL=postgresql://repairapp:Life*9458@techliferepair-db-chwhjj:5432/techlife-db
 ARG NEXTAUTH_SECRET=KJH/uk8vP2gwAX+blvjGaPPcG9mYmjpiqvMgwsgJlrPg=
 ARG NEXTAUTH_URL=https://repair.laocorp.lat
 ARG NEXT_PUBLIC_APP_URL=https://repair.laocorp.lat
