@@ -8,10 +8,10 @@ FROM node:20-slim AS builder
 WORKDIR /app
 
 # Build-time arguments
-ARG DATABASE_URL
-ARG NEXTAUTH_SECRET
-ARG NEXTAUTH_URL
-ARG NEXT_PUBLIC_APP_URL
+ARG DATABASE_URL=postgresql://repairapp:Life*9458@techliferepairv2-db-jxatb3:5432/repair-db
+ARG NEXTAUTH_SECRET=KJH/uk8vP2gwAX+blvjGaPPcG9mYmjpiqvMgwsgJlrPg=
+ARG NEXTAUTH_URL=https://repair.laocorp.lat
+ARG NEXT_PUBLIC_APP_URL=https://repair.laocorp.lat
 
 # Make them available as env vars during build
 ENV DATABASE_URL=$DATABASE_URL
@@ -19,6 +19,11 @@ ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
 ENV NEXTAUTH_URL=$NEXTAUTH_URL
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# Placeholder Supabase vars for build (app still has Supabase code during migration)
+# These are needed for static page generation but won't be used at runtime
+ENV NEXT_PUBLIC_SUPABASE_URL=https://lztnncxlomdhjelqziuh.supabase.co
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6dG5uY3hsb21kaGplbHF6aXVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYyMDI3MTksImV4cCI6MjA4MTc3ODcxOX0.mUF6MEtONWmrFYZvLA9qqM0ztJ3d5xhpViJd2i0lkNE
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
