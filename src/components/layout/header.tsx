@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
-import { useTenant } from '@/hooks'
+import { useTenant, useNotificaciones } from '@/hooks'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -29,6 +29,9 @@ import {
     Sun,
     Sparkles,
     Menu,
+    CheckCheck,
+    Package,
+    AlertCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -59,6 +62,39 @@ export function Header({ isSidebarCollapsed, onMenuClick }: HeaderProps) {
     const { empresa } = useTenant()
     const router = useRouter()
     const supabase = createClient()
+    const { notificaciones, unreadCount, isLoading: loadingNotifs, marcarLeida, marcarTodasLeidas } = useNotificaciones()
+
+    // Format time ago
+    const formatTimeAgo = (dateString: string) => {
+        const date = new Date(dateString)
+        const now = new Date()
+        const diffMs = now.getTime() - date.getTime()
+        const diffMins = Math.floor(diffMs / 60000)
+        const diffHours = Math.floor(diffMs / 3600000)
+        const diffDays = Math.floor(diffMs / 86400000)
+
+        if (diffMins < 1) return 'Ahora'
+        if (diffMins < 60) return `Hace ${diffMins} min`
+        if (diffHours < 24) return `Hace ${diffHours}h`
+        if (diffDays === 1) return 'Ayer'
+        return `Hace ${diffDays} días`
+    }
+
+    // Get icon and color for notification type
+    const getNotifIcon = (tipo: string) => {
+        switch (tipo) {
+            case 'orden':
+                return { icon: Package, color: 'blue' }
+            case 'pago':
+                return { icon: CreditCard, color: 'green' }
+            case 'sistema':
+                return { icon: AlertCircle, color: 'amber' }
+            case 'completada':
+                return { icon: CheckCheck, color: 'purple' }
+            default:
+                return { icon: Bell, color: 'slate' }
+        }
+    }
 
     // Get current page info
     const currentRoute = Object.keys(routeTitles).find(route =>
@@ -148,15 +184,89 @@ export function Header({ isSidebarCollapsed, onMenuClick }: HeaderProps) {
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                {/* Notifications */}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--interactive-hover))] relative"
-                >
-                    <Bell className="h-4 w-4" />
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-[hsl(var(--status-error))] rounded-full" />
-                </Button>
+                {/* Notifications Dropdown */}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--interactive-hover))] relative"
+                        >
+                            <Bell className="h-4 w-4" />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-1 right-1 w-2 h-2 bg-[hsl(var(--status-error))] rounded-full" />
+                            )}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                        align="end"
+                        className="w-80 bg-[hsl(var(--surface-elevated))] border-[hsl(var(--border-subtle))] p-0"
+                    >
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(var(--border-subtle))]">
+                            <span className="text-sm font-semibold text-[hsl(var(--text-primary))]">Notificaciones</span>
+                            {unreadCount > 0 && (
+                                <Badge className="bg-[hsl(var(--status-error))] text-white text-[10px] px-1.5">{unreadCount}</Badge>
+                            )}
+                        </div>
+                        <div className="max-h-[300px] overflow-y-auto">
+                            {loadingNotifs ? (
+                                <div className="px-4 py-8 text-center text-[hsl(var(--text-muted))] text-sm">
+                                    Cargando...
+                                </div>
+                            ) : notificaciones.length === 0 ? (
+                                <div className="px-4 py-8 text-center text-[hsl(var(--text-muted))] text-sm">
+                                    No hay notificaciones
+                                </div>
+                            ) : (
+                                notificaciones.slice(0, 10).map((notif) => {
+                                    const { icon: Icon, color } = getNotifIcon(notif.tipo)
+                                    return (
+                                        <div
+                                            key={notif.id}
+                                            className={`px-4 py-3 hover:bg-[hsl(var(--interactive-hover))] border-b border-[hsl(var(--border-subtle))] cursor-pointer ${!notif.leida ? 'bg-[hsl(var(--surface-highlight))]' : ''}`}
+                                            onClick={() => {
+                                                if (!notif.leida) marcarLeida(notif.id)
+                                                if (notif.link) router.push(notif.link)
+                                            }}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className={`w-8 h-8 rounded-full bg-${color}-500/10 flex items-center justify-center flex-shrink-0`}>
+                                                    <Icon className={`w-4 h-4 text-${color}-500`} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-[hsl(var(--text-primary))] truncate">{notif.titulo}</p>
+                                                    <p className="text-xs text-[hsl(var(--text-muted))] mt-0.5 truncate">{notif.mensaje}</p>
+                                                    <p className="text-[10px] text-[hsl(var(--text-muted))] mt-1">{formatTimeAgo(notif.created_at)}</p>
+                                                </div>
+                                                {!notif.leida && (
+                                                    <div className="w-2 h-2 bg-[hsl(var(--brand-accent))] rounded-full flex-shrink-0 mt-1" />
+                                                )}
+                                            </div>
+                                        </div>
+                                    )
+                                })
+                            )}
+                        </div>
+                        <div className="px-4 py-2 border-t border-[hsl(var(--border-subtle))] flex gap-2">
+                            {unreadCount > 0 && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="flex-1 h-8 text-xs text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))]"
+                                    onClick={() => marcarTodasLeidas()}
+                                >
+                                    Marcar todas como leídas
+                                </Button>
+                            )}
+                            <Button
+                                variant="ghost"
+                                className="flex-1 h-8 text-xs text-[hsl(var(--brand-accent))] hover:text-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--interactive-hover))]"
+                            >
+                                Ver todas
+                            </Button>
+                        </div>
+                    </DropdownMenuContent>
+                </DropdownMenu>
 
                 {/* Separator */}
                 <div className="h-6 w-px bg-[hsl(var(--border-subtle))]" />

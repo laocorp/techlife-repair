@@ -51,39 +51,56 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-            {/* Subtle background pattern */}
+        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[#fafafa]">
+            {/* Premium subtle gradient background */}
+            <div className="fixed inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-100" />
+
+            {/* Elegant ambient lighting */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-[300px] -right-[300px] w-[800px] h-[800px] bg-gradient-to-br from-slate-200/50 to-transparent rounded-full blur-3xl" />
+                <div className="absolute -bottom-[300px] -left-[300px] w-[800px] h-[800px] bg-gradient-to-tr from-slate-200/40 to-transparent rounded-full blur-3xl" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-slate-100/60 to-transparent rounded-full blur-2xl" />
+            </div>
+
+            {/* Subtle noise texture */}
             <div
-                className="absolute inset-0 opacity-50"
+                className="fixed inset-0 opacity-[0.015]"
                 style={{
-                    backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.03) 1px, transparent 0)`,
-                    backgroundSize: '32px 32px'
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
                 }}
             />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="w-full max-w-md relative z-10"
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="w-full max-w-[420px] relative z-10"
             >
                 {/* Logo */}
                 <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
+                    initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="flex flex-col items-center justify-center gap-3 mb-8"
+                    transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                    className="flex flex-col items-center justify-center gap-4 mb-10"
                 >
-                    <div className="w-14 h-14 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg">
-                        <Wrench className="w-7 h-7 text-white" />
+                    <motion.div
+                        className="w-[72px] h-[72px] bg-slate-900 rounded-[20px] flex items-center justify-center shadow-[0_20px_50px_-12px_rgba(0,0,0,0.35)]"
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                    >
+                        <Wrench className="w-9 h-9 text-white" strokeWidth={1.5} />
+                    </motion.div>
+                    <div className="text-center">
+                        <h1 className="text-[28px] font-semibold text-slate-900 tracking-tight">RepairApp</h1>
+                        <p className="text-sm text-slate-500 mt-1">Sistema de Gestión Profesional</p>
                     </div>
-                    <h1 className="text-2xl font-bold text-slate-900">RepairApp</h1>
                 </motion.div>
 
-                <Card className="border border-slate-200 bg-white shadow-xl shadow-slate-200/50">
-                    <CardHeader className="text-center space-y-1 pb-4">
-                        <CardTitle className="text-xl font-semibold text-slate-900">
-                            Iniciar Sesión
+                {/* Premium Card */}
+                <Card className="border-0 bg-white/80 backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.12)] rounded-2xl overflow-hidden">
+                    <CardHeader className="text-center space-y-1 pb-2 pt-8">
+                        <CardTitle className="text-xl font-semibold text-slate-900 tracking-tight">
+                            Bienvenido de nuevo
                         </CardTitle>
                         <CardDescription className="text-slate-500">
                             Ingresa tus credenciales para continuar
@@ -91,20 +108,20 @@ export default function LoginPage() {
                     </CardHeader>
 
                     <form onSubmit={handleLogin}>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-5 px-8">
                             <div className="space-y-2">
                                 <Label htmlFor="email" className="text-sm font-medium text-slate-700">
                                     Correo electrónico
                                 </Label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                <div className="relative group">
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400 group-focus-within:text-slate-600 transition-colors duration-200" strokeWidth={1.5} />
                                     <Input
                                         id="email"
                                         type="email"
                                         placeholder="correo@empresa.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-slate-400/20"
+                                        className="pl-12 h-[52px] bg-slate-50/80 border-slate-200/80 text-slate-900 placeholder:text-slate-400 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:bg-white transition-all duration-200 text-[15px]"
                                         required
                                     />
                                 </div>
@@ -117,41 +134,41 @@ export default function LoginPage() {
                                     </Label>
                                     <Link
                                         href="/forgot-password"
-                                        className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+                                        className="text-sm text-slate-500 hover:text-slate-900 transition-colors duration-200"
                                     >
                                         ¿Olvidaste tu contraseña?
                                     </Link>
                                 </div>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                                <div className="relative group">
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400 group-focus-within:text-slate-600 transition-colors duration-200" strokeWidth={1.5} />
                                     <Input
                                         id="password"
                                         type="password"
                                         placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="pl-10 h-11 bg-slate-50 border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:ring-slate-400/20"
+                                        className="pl-12 h-[52px] bg-slate-50/80 border-slate-200/80 text-slate-900 placeholder:text-slate-400 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:bg-white transition-all duration-200 text-[15px]"
                                         required
                                     />
                                 </div>
                             </div>
                         </CardContent>
 
-                        <CardFooter className="flex flex-col gap-4 pt-2">
+                        <CardFooter className="flex flex-col gap-5 pt-4 pb-8 px-8">
                             <Button
                                 type="submit"
-                                className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm"
+                                className="w-full h-[52px] bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-[0_4px_14px_0_rgba(0,0,0,0.2)] hover:shadow-[0_6px_20px_0_rgba(0,0,0,0.25)] rounded-xl transition-all duration-200 active:scale-[0.98] text-[15px]"
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
                                     <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                                         Iniciando sesión...
                                     </>
                                 ) : (
                                     <>
                                         Iniciar sesión
-                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                        <ArrowRight className="ml-2 h-5 w-5" strokeWidth={1.5} />
                                     </>
                                 )}
                             </Button>
@@ -160,7 +177,7 @@ export default function LoginPage() {
                                 ¿No tienes cuenta?{' '}
                                 <Link
                                     href="/register"
-                                    className="text-slate-900 hover:underline font-medium"
+                                    className="text-slate-900 hover:underline font-medium transition-colors"
                                 >
                                     Regístrate gratis
                                 </Link>
@@ -169,9 +186,9 @@ export default function LoginPage() {
                     </form>
                 </Card>
 
-                {/* Footer text */}
-                <p className="mt-8 text-center text-xs text-slate-400">
-                    Sistema de Gestión para Servicio Técnico · Ecuador
+                {/* Footer */}
+                <p className="mt-10 text-center text-xs text-slate-400 tracking-wide">
+                    RepairApp © {new Date().getFullYear()} · Ecuador
                 </p>
             </motion.div>
         </div>

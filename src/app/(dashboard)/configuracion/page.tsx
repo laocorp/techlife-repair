@@ -32,6 +32,7 @@ import {
     EyeOff,
     ShieldCheck,
     Trash2,
+    Image,
 } from 'lucide-react'
 import { validateP12Certificate, type P12Info } from '@/lib/sri/xml-signer'
 
@@ -106,6 +107,7 @@ export default function ConfiguracionPage() {
         email_pagos: true,
         whatsapp_ordenes: false,
     })
+    const [isSavingNotificaciones, setIsSavingNotificaciones] = useState(false)
 
     // Facturación form state
     const [facturacionData, setFacturacionData] = useState<FacturacionFormData>({
@@ -142,6 +144,12 @@ export default function ConfiguracionPage() {
     } | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    // Logo upload state
+    const [logoFile, setLogoFile] = useState<File | null>(null)
+    const [logoPreview, setLogoPreview] = useState<string | null>(null)
+    const [isUploadingLogo, setIsUploadingLogo] = useState(false)
+    const logoInputRef = useRef<HTMLInputElement>(null)
+
     useEffect(() => {
         loadEmpresa()
     }, [user?.empresa_id])
@@ -149,6 +157,15 @@ export default function ConfiguracionPage() {
     useEffect(() => {
         if (empresa?.id) {
             loadSriConfig()
+            // Load notification preferences from localStorage
+            const saved = localStorage.getItem(`notif_prefs_${empresa.id}`)
+            if (saved) {
+                try {
+                    setNotificaciones(JSON.parse(saved))
+                } catch (e) {
+                    console.error('Error loading notification preferences')
+                }
+            }
         }
     }, [empresa?.id])
 
@@ -412,6 +429,84 @@ export default function ConfiguracionPage() {
         }
     }
 
+    // Logo upload handlers
+    const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                toast.error('Por favor selecciona una imagen')
+                return
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                toast.error('La imagen debe ser menor a 2MB')
+                return
+            }
+            setLogoFile(file)
+            setLogoPreview(URL.createObjectURL(file))
+        }
+    }
+
+    const handleUploadLogo = async () => {
+        if (!logoFile || !empresa?.id) return
+
+        setIsUploadingLogo(true)
+        try {
+            const fileExt = logoFile.name.split('.').pop()
+            const fileName = `${empresa.id}/logo.${fileExt}`
+
+            // Upload to Supabase Storage
+            const { error: uploadError } = await supabase.storage
+                .from('logos')
+                .upload(fileName, logoFile, { upsert: true })
+
+            if (uploadError) throw uploadError
+
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('logos')
+                .getPublicUrl(fileName)
+
+            // Update empresa with logo URL
+            const { error: updateError } = await supabase
+                .from('empresas')
+                .update({ logo_url: publicUrl })
+                .eq('id', empresa.id)
+
+            if (updateError) throw updateError
+
+            setEmpresa(prev => prev ? { ...prev, logo_url: publicUrl } : null)
+            setLogoFile(null)
+            toast.success('Logo actualizado correctamente')
+        } catch (error) {
+            console.error('Error uploading logo:', error)
+            toast.error('Error al subir el logo')
+        } finally {
+            setIsUploadingLogo(false)
+        }
+    }
+
+    const handleRemoveLogo = async () => {
+        if (!empresa?.id) return
+
+        try {
+            // Update empresa to remove logo URL
+            const { error } = await supabase
+                .from('empresas')
+                .update({ logo_url: null })
+                .eq('id', empresa.id)
+
+            if (error) throw error
+
+            setEmpresa(prev => prev ? { ...prev, logo_url: null } : null)
+            setLogoPreview(null)
+            setLogoFile(null)
+            toast.success('Logo eliminado')
+        } catch (error) {
+            console.error('Error removing logo:', error)
+            toast.error('Error al eliminar el logo')
+        }
+    }
+
     const validateSriCode = (code: string): boolean => {
         return /^\d{3}$/.test(code)
     }
@@ -539,6 +634,78 @@ export default function ConfiguracionPage() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
+                                {/* Logo Section */}
+                                <div className="space-y-4">
+                                    <Label>Logo de la Empresa</Label>
+                                    <div className="flex items-start gap-6">
+                                        {/* Logo Preview */}
+                                        <div className="relative">
+                                            <div className="w-24 h-24 rounded-xl border-2 border-dashed border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-highlight))] flex items-center justify-center overflow-hidden">
+                                                {logoPreview || empresa?.logo_url ? (
+                                                    <img
+                                                        src={logoPreview || empresa?.logo_url || ''}
+                                                        alt="Logo"
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <Image className="w-8 h-8 text-[hsl(var(--text-muted))]" />
+                                                )}
+                                            </div>
+                                            {(logoPreview || empresa?.logo_url) && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="absolute -top-2 -right-2 h-6 w-6 bg-[hsl(var(--status-error))] text-white hover:bg-[hsl(var(--status-error))]/90 rounded-full"
+                                                    onClick={handleRemoveLogo}
+                                                >
+                                                    <Trash2 className="h-3 w-3" />
+                                                </Button>
+                                            )}
+                                        </div>
+                                        {/* Upload Controls */}
+                                        <div className="flex-1 space-y-3">
+                                            <input
+                                                ref={logoInputRef}
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleLogoSelect}
+                                                className="hidden"
+                                            />
+                                            <p className="text-sm text-[hsl(var(--text-muted))]">
+                                                Sube el logo de tu empresa. Formatos: PNG, JPG, WebP. Máximo 2MB.
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="gap-2"
+                                                    onClick={() => logoInputRef.current?.click()}
+                                                >
+                                                    <Upload className="h-4 w-4" />
+                                                    Seleccionar
+                                                </Button>
+                                                {logoFile && (
+                                                    <Button
+                                                        size="sm"
+                                                        className="gap-2 bg-[hsl(var(--brand-accent))]"
+                                                        onClick={handleUploadLogo}
+                                                        disabled={isUploadingLogo}
+                                                    >
+                                                        {isUploadingLogo ? (
+                                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                                        ) : (
+                                                            <Save className="h-4 w-4" />
+                                                        )}
+                                                        Guardar Logo
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="h-px bg-[hsl(var(--border-subtle))]" />
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label>Nombre de la Empresa</Label>
@@ -639,6 +806,25 @@ export default function ConfiguracionPage() {
                                             onCheckedChange={(v) => setNotificaciones(n => ({ ...n, whatsapp_ordenes: v }))}
                                         />
                                     </div>
+                                </div>
+
+                                <div className="flex justify-end pt-4">
+                                    <Button
+                                        onClick={() => {
+                                            if (!empresa?.id) return
+                                            setIsSavingNotificaciones(true)
+                                            localStorage.setItem(`notif_prefs_${empresa.id}`, JSON.stringify(notificaciones))
+                                            setTimeout(() => {
+                                                setIsSavingNotificaciones(false)
+                                                toast.success('Preferencias de notificaciones guardadas')
+                                            }, 500)
+                                        }}
+                                        disabled={isSavingNotificaciones}
+                                        className="gap-2 bg-[hsl(var(--brand-accent))]"
+                                    >
+                                        {isSavingNotificaciones ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                                        Guardar Preferencias
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>

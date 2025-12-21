@@ -1,14 +1,24 @@
+# ============================================
+# Dockerfile for RepairApp (Next.js 16 + Prisma)
+# PostgreSQL Direct - Optimized for Dokploy
+# ============================================
+
 # ---- Build stage ----
 FROM node:20-slim AS builder
 WORKDIR /app
 
-# Build-time arguments for Next.js public env vars
-ARG NEXT_PUBLIC_SUPABASE_URL
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+# Build-time arguments
+ARG DATABASE_URL
+ARG NEXTAUTH_SECRET
+ARG NEXTAUTH_URL
+ARG NEXT_PUBLIC_APP_URL
 
 # Make them available as env vars during build
-ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV DATABASE_URL=$DATABASE_URL
+ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+ENV NEXTAUTH_URL=$NEXTAUTH_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
@@ -20,15 +30,19 @@ RUN apt-get update && apt-get install -y \
 
 # Copy package files
 COPY package*.json ./
+COPY prisma ./prisma/
 
-# Remove package-lock.json to ensure fresh dependency resolution (fixes linux optional deps)
+# Remove package-lock.json to ensure fresh dependency resolution
 RUN rm -f package-lock.json
 
-# Install dependencies (will regenerate package-lock.json with linux binaries)
-RUN npm install
+# Install dependencies
+RUN npm install --legacy-peer-deps
 
-# Install the specific lightningcss binary for linux x64 (just in case)
-RUN npm install lightningcss-linux-x64-gnu --save-optional
+# Install lightningcss for linux (tailwind)
+RUN npm install lightningcss-linux-x64-gnu --save-optional || true
+
+# Generate Prisma client
+RUN npx prisma generate
 
 # Copy source files
 COPY . .
@@ -40,21 +54,24 @@ RUN npm run build
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# Install OpenSSL and curl for runtime and health checks
+# Install OpenSSL and curl for runtime
 RUN apt-get update && apt-get install -y openssl curl && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy built output and necessary files
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Expose the default Next.js port
 EXPOSE 3000
 
-# Health check for container orchestration (Dokploy, Docker Swarm, etc.)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:3000/ || exit 1
 
 # Start the server
