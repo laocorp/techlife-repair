@@ -106,6 +106,7 @@ export default function OrdenDetallePage() {
     const params = useParams()
     const router = useRouter()
     const { user } = useAuthStore()
+    const { empresa } = useTenant()
     const [orden, setOrden] = useState<OrdenServicio | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [isEditing, setIsEditing] = useState(false)
@@ -250,6 +251,13 @@ export default function OrdenDetallePage() {
                             serie: orden.equipo_serie,
                             problema: orden.problema_reportado,
                             cliente: orden.cliente || null,
+                            empresa: {
+                                nombre: empresa?.nombre || 'Empresa',
+                                ruc: empresa?.ruc || '',
+                                direccion: empresa?.direccion || null,
+                                telefono: empresa?.telefono || null,
+                                email: empresa?.email || null,
+                            }
                         }}
                         qrCodeUrl={qrData?.qrDataUrl || ''}
                         trackingUrl={typeof window !== 'undefined' ? `${window.location.origin}/tracking/${orden.id}` : ''}
