@@ -1,5 +1,6 @@
 // src/app/cliente/login/page.tsx
-// Customer login with magic link (no password)
+// Customer login - simplified version without Supabase Auth
+// TODO: Implement proper magic link or password auth for clients
 
 'use client'
 
@@ -7,7 +8,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -17,18 +17,16 @@ import {
     Wrench,
     Mail,
     Loader2,
-    CheckCircle,
     ArrowLeft,
-    Sparkles,
+    Search,
 } from 'lucide-react'
 
 export default function ClienteLoginPage() {
+    const router = useRouter()
     const [email, setEmail] = useState('')
     const [isLoading, setIsLoading] = useState(false)
-    const [isEmailSent, setIsEmailSent] = useState(false)
-    const supabase = createClient()
 
-    const handleMagicLink = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!email) {
@@ -39,13 +37,10 @@ export default function ClienteLoginPage() {
         setIsLoading(true)
         try {
             // Check if email exists as a cliente
-            const { data: cliente, error: clienteError } = await supabase
-                .from('clientes')
-                .select('id, email')
-                .eq('email', email.toLowerCase())
-                .single()
+            const response = await fetch(`/api/clientes?email=${encodeURIComponent(email.toLowerCase())}`)
+            const data = await response.json()
 
-            if (clienteError || !cliente) {
+            if (!response.ok || !data.cliente) {
                 toast.error('Email no encontrado', {
                     description: 'Este email no está registrado como cliente'
                 })
@@ -53,65 +48,24 @@ export default function ClienteLoginPage() {
                 return
             }
 
-            // Send magic link
-            const { error } = await supabase.auth.signInWithOtp({
-                email: email.toLowerCase(),
-                options: {
-                    emailRedirectTo: `${window.location.origin}/cliente`,
-                }
+            // Store client info in localStorage for the portal
+            localStorage.setItem('cliente_portal', JSON.stringify({
+                id: data.cliente.id,
+                nombre: data.cliente.nombre,
+                email: data.cliente.email,
+                empresa_id: data.cliente.empresa_id
+            }))
+
+            toast.success('¡Bienvenido!', {
+                description: `Hola ${data.cliente.nombre}`
             })
 
-            if (error) throw error
-
-            setIsEmailSent(true)
-            toast.success('¡Enlace enviado!', {
-                description: 'Revisa tu email para acceder'
-            })
+            router.push('/cliente')
         } catch (error: any) {
-            toast.error('Error al enviar enlace', { description: error.message })
+            toast.error('Error al verificar email', { description: error.message })
         } finally {
             setIsLoading(false)
         }
-    }
-
-    if (isEmailSent) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--surface-base))] p-4">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="w-full max-w-md"
-                >
-                    <Card className="card-linear border-emerald-500/20">
-                        <CardContent className="p-8 text-center">
-                            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                                <CheckCircle className="h-8 w-8 text-emerald-400" />
-                            </div>
-                            <h2 className="text-xl font-semibold text-[hsl(var(--text-primary))] mb-2">
-                                ¡Revisa tu email!
-                            </h2>
-                            <p className="text-[hsl(var(--text-muted))] mb-6">
-                                Enviamos un enlace mágico a <strong className="text-[hsl(var(--text-primary))]">{email}</strong>.
-                                Haz clic en el enlace para acceder a tu portal.
-                            </p>
-                            <div className="bg-[hsl(var(--surface-highlight))] rounded-lg p-4 mb-6">
-                                <p className="text-sm text-[hsl(var(--text-muted))]">
-                                    <strong>Tip:</strong> El enlace expira en 1 hora.
-                                    Revisa también tu carpeta de spam.
-                                </p>
-                            </div>
-                            <Button
-                                variant="outline"
-                                onClick={() => setIsEmailSent(false)}
-                                className="w-full border-[hsl(var(--border-subtle))]"
-                            >
-                                Enviar otro enlace
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-            </div>
-        )
     }
 
     return (
@@ -140,7 +94,7 @@ export default function ClienteLoginPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-4">
-                        <form onSubmit={handleMagicLink} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
                                 <Label className="text-[hsl(var(--text-secondary))]">
                                     Email registrado
@@ -166,12 +120,12 @@ export default function ClienteLoginPage() {
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="h-4 w-4 animate-spin" />
-                                        Enviando...
+                                        Verificando...
                                     </>
                                 ) : (
                                     <>
-                                        <Sparkles className="h-4 w-4" />
-                                        Enviar Enlace Mágico
+                                        <Search className="h-4 w-4" />
+                                        Acceder al Portal
                                     </>
                                 )}
                             </Button>
@@ -179,9 +133,8 @@ export default function ClienteLoginPage() {
 
                         <div className="mt-6 p-4 bg-[hsl(var(--surface-highlight))] rounded-lg">
                             <p className="text-sm text-[hsl(var(--text-muted))]">
-                                <Sparkles className="inline h-4 w-4 mr-1 text-blue-400" />
-                                <strong>Sin contraseña:</strong> Te enviamos un enlace seguro
-                                a tu email para acceder directamente.
+                                Ingresa el email con el que registraste tu equipo
+                                para ver el estado de tus reparaciones.
                             </p>
                         </div>
 

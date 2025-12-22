@@ -6,8 +6,19 @@ export async function GET(request: NextRequest) {
     try {
         const searchParams = request.nextUrl.searchParams
         const empresaId = searchParams.get('empresa_id')
+        const clienteId = searchParams.get('cliente_id')
         const estado = searchParams.get('estado')
         const limit = parseInt(searchParams.get('limit') || '50')
+
+        // Allow filtering by cliente_id for cliente portal
+        if (clienteId) {
+            const ordenes = await prisma.ordenServicio.findMany({
+                where: { cliente_id: clienteId },
+                orderBy: { created_at: 'desc' },
+                take: limit
+            })
+            return NextResponse.json(ordenes)
+        }
 
         if (!empresaId) {
             return NextResponse.json(

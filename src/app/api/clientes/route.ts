@@ -7,6 +7,27 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams
         const empresaId = searchParams.get('empresa_id')
         const search = searchParams.get('search')
+        const email = searchParams.get('email')
+
+        // Email lookup for cliente portal login (no empresa_id required)
+        if (email) {
+            const cliente = await prisma.cliente.findFirst({
+                where: { email: email.toLowerCase() },
+                select: {
+                    id: true,
+                    nombre: true,
+                    email: true,
+                    telefono: true,
+                    empresa_id: true
+                }
+            })
+
+            if (!cliente) {
+                return NextResponse.json({ cliente: null })
+            }
+
+            return NextResponse.json({ cliente })
+        }
 
         if (!empresaId) {
             return NextResponse.json(

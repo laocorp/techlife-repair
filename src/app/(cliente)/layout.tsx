@@ -1,21 +1,17 @@
 // src/app/(cliente)/layout.tsx
-// Layout for customer portal - separate from main dashboard
+// Layout for customer portal - using localStorage session
 
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
 import {
     Wrench,
     History,
     DollarSign,
     LogOut,
-    User,
-    Home,
-    FileText,
     Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -26,7 +22,8 @@ interface ClienteData {
     nombre: string
     email: string | null
     telefono: string | null
-    empresa: {
+    empresa_id: string
+    empresa?: {
         nombre: string
     }
 }
@@ -39,46 +36,49 @@ export default function ClienteLayout({
     const [cliente, setCliente] = useState<ClienteData | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const router = useRouter()
-    const supabase = createClient()
+    const pathname = usePathname()
+
+    const loadCliente = useCallback(async () => {
+        try {
+            // Check localStorage for cliente session
+            const stored = localStorage.getItem('cliente_portal')
+
+            if (!stored) {
+                router.push('/cliente/login')
+                return
+            }
+
+            const clienteData = JSON.parse(stored)
+
+            // Optionally fetch empresa name
+            if (clienteData.empresa_id) {
+                try {
+                    const response = await fetch(`/api/empresas/${clienteData.empresa_id}`)
+                    if (response.ok) {
+                        const empresa = await response.json()
+                        clienteData.empresa = { nombre: empresa.nombre }
+                    }
+                } catch (e) {
+                    // Ignore error, empresa name is optional
+                }
+            }
+
+            setCliente(clienteData)
+        } catch (error) {
+            console.error('Auth error:', error)
+            localStorage.removeItem('cliente_portal')
+            router.push('/cliente/login')
+        } finally {
+            setIsLoading(false)
+        }
+    }, [router])
 
     useEffect(() => {
-        const loadCliente = async () => {
-            try {
-                // Check if user is authenticated
-                const { data: { user } } = await supabase.auth.getUser()
-
-                if (!user) {
-                    router.push('/cliente/login')
-                    return
-                }
-
-                // Get cliente data linked to this user
-                const { data: clienteData, error } = await supabase
-                    .from('clientes')
-                    .select('id, nombre, email, telefono, empresa:empresas(nombre)')
-                    .eq('user_id', user.id)
-                    .single()
-
-                if (error || !clienteData) {
-                    console.error('Cliente not found')
-                    router.push('/cliente/login')
-                    return
-                }
-
-                setCliente(clienteData as unknown as ClienteData)
-            } catch (error) {
-                console.error('Auth error:', error)
-                router.push('/cliente/login')
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
         loadCliente()
-    }, [supabase, router])
+    }, [loadCliente])
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut()
+    const handleLogout = () => {
+        localStorage.removeItem('cliente_portal')
         router.push('/cliente/login')
     }
 
@@ -123,17 +123,18 @@ export default function ClienteLayout({
                             </span>
                         </Link>
                         <span className="text-xs text-[hsl(var(--text-muted))] hidden sm:block">
-                            {(cliente?.empresa as any)?.nombre}
+                            {cliente?.empresa?.nombre}
                         </span>
                     </div>
 
                     <nav className="hidden md:flex items-center gap-1">
                         {menuItems.map((item) => {
                             const Icon = item.icon
+                            const isActive = pathname === item.href
                             return (
                                 <Link key={item.href} href={item.href}>
                                     <Button
-                                        variant="ghost"
+                                        variant={isActive ? "secondary" : "ghost"}
                                         size="sm"
                                         className="gap-2 text-[hsl(var(--text-secondary))] hover:text-[hsl(var(--text-primary))]"
                                     >
@@ -152,7 +153,7 @@ export default function ClienteLayout({
                         </div>
                         <Avatar className="h-8 w-8">
                             <AvatarFallback className="bg-gradient-to-br from-blue-500 to-violet-600 text-white text-xs">
-                                {cliente?.nombre.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                {cliente?.nombre?.split(' ').map(n => n[0]).join('').slice(0, 2) || 'C'}
                             </AvatarFallback>
                         </Avatar>
                         <Button
@@ -172,12 +173,13 @@ export default function ClienteLayout({
                 <div className="h-full flex items-center justify-around px-4">
                     {menuItems.map((item) => {
                         const Icon = item.icon
+                        const isActive = pathname === item.href
                         return (
                             <Link key={item.href} href={item.href}>
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="flex-col gap-1 h-auto py-2 text-[hsl(var(--text-secondary))]"
+                                    className={`flex-col gap-1 h-auto py-2 ${isActive ? 'text-[hsl(var(--brand-accent))]' : 'text-[hsl(var(--text-secondary))]'}`}
                                 >
                                     <Icon className="h-5 w-5" />
                                     <span className="text-[10px]">{item.name}</span>

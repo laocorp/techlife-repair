@@ -1,12 +1,11 @@
-// src/app/(cliente)/page.tsx
+// src/app/(cliente)/equipos/page.tsx
 // Customer Dashboard - Shows current equipment in repair
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -17,9 +16,7 @@ import {
     CheckCircle,
     AlertTriangle,
     Package,
-    ArrowRight,
     RefreshCw,
-    Eye,
     Calendar,
 } from 'lucide-react'
 import { format } from 'date-fns'
@@ -27,10 +24,10 @@ import { es } from 'date-fns/locale'
 
 interface OrdenActiva {
     id: string
-    numero_orden: string
-    equipo: string
-    marca: string | null
-    modelo: string | null
+    numero: string
+    equipo_tipo: string
+    equipo_marca: string | null
+    equipo_modelo: string | null
     estado: string
     prioridad: string
     costo_estimado: number | null
@@ -63,43 +60,33 @@ const itemVariants = {
 export default function ClienteDashboard() {
     const [ordenes, setOrdenes] = useState<OrdenActiva[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const supabase = createClient()
 
-    useEffect(() => {
-        loadOrdenes()
-    }, [])
-
-    const loadOrdenes = async () => {
+    const loadOrdenes = useCallback(async () => {
         setIsLoading(true)
         try {
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) return
+            // Get cliente from localStorage
+            const stored = localStorage.getItem('cliente_portal')
+            if (!stored) return
 
-            // Get cliente linked to user
-            const { data: cliente } = await supabase
-                .from('clientes')
-                .select('id')
-                .eq('user_id', user.id)
-                .single()
-
-            if (!cliente) return
+            const cliente = JSON.parse(stored)
 
             // Get active orders for this client
-            const { data, error } = await supabase
-                .from('ordenes_servicio')
-                .select('id, numero_orden, equipo, marca, modelo, estado, prioridad, costo_estimado, created_at')
-                .eq('cliente_id', cliente.id)
-                .neq('estado', 'entregado')
-                .order('created_at', { ascending: false })
+            const response = await fetch(`/api/ordenes?cliente_id=${cliente.id}`)
+            if (!response.ok) throw new Error('Error loading orders')
 
-            if (error) throw error
-            setOrdenes(data || [])
+            const data = await response.json()
+            // Filter out delivered orders
+            setOrdenes(data.filter((o: any) => o.estado !== 'entregado'))
         } catch (error) {
             console.error('Error loading orders:', error)
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [])
+
+    useEffect(() => {
+        loadOrdenes()
+    }, [loadOrdenes])
 
     const ordenesActivas = ordenes.filter(o => o.estado !== 'entregado')
     const ordenesListas = ordenes.filter(o => o.estado === 'terminado')
@@ -249,10 +236,10 @@ export default function ClienteDashboard() {
                                                         </div>
                                                         <div>
                                                             <p className="font-medium text-[hsl(var(--text-primary))]">
-                                                                {orden.equipo}
+                                                                {orden.equipo_tipo}
                                                             </p>
                                                             <p className="text-xs text-[hsl(var(--text-muted))]">
-                                                                {orden.marca} {orden.modelo} · {orden.numero_orden}
+                                                                {orden.equipo_marca} {orden.equipo_modelo} · {orden.numero}
                                                             </p>
                                                         </div>
                                                     </div>

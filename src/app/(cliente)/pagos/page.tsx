@@ -1,16 +1,14 @@
 // src/app/(cliente)/pagos/page.tsx
-// Customer payments/balance page
+// Customer payments/balance page - using fetch API
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
-    DollarSign,
     CheckCircle,
     Clock,
     AlertTriangle,
@@ -22,8 +20,8 @@ import { es } from 'date-fns/locale'
 
 interface Pago {
     id: string
-    numero_orden: string
-    equipo: string
+    numero: string
+    equipo_tipo: string
     costo_final: number | null
     pagado: boolean
     created_at: string
@@ -33,41 +31,30 @@ interface Pago {
 export default function PagosPage() {
     const [ordenes, setOrdenes] = useState<Pago[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const supabase = createClient()
+
+    const loadPagos = useCallback(async () => {
+        try {
+            const stored = localStorage.getItem('cliente_portal')
+            if (!stored) return
+
+            const cliente = JSON.parse(stored)
+
+            const response = await fetch(`/api/ordenes?cliente_id=${cliente.id}`)
+            if (!response.ok) throw new Error('Error loading payments')
+
+            const data = await response.json()
+            // Filter orders with cost
+            setOrdenes(data.filter((o: any) => o.costo_final !== null))
+        } catch (error) {
+            console.error('Error loading payments:', error)
+        } finally {
+            setIsLoading(false)
+        }
+    }, [])
 
     useEffect(() => {
-        const loadPagos = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser()
-                if (!user) return
-
-                const { data: cliente } = await supabase
-                    .from('clientes')
-                    .select('id')
-                    .eq('user_id', user.id)
-                    .single()
-
-                if (!cliente) return
-
-                // Get orders with payment info
-                const { data, error } = await supabase
-                    .from('ordenes_servicio')
-                    .select('id, numero_orden, equipo, costo_final, pagado, created_at, estado')
-                    .eq('cliente_id', cliente.id)
-                    .not('costo_final', 'is', null)
-                    .order('created_at', { ascending: false })
-
-                if (error) throw error
-                setOrdenes(data || [])
-            } catch (error) {
-                console.error('Error loading payments:', error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
         loadPagos()
-    }, [supabase])
+    }, [loadPagos])
 
     const pendientes = ordenes.filter(o => !o.pagado && o.costo_final)
     const pagados = ordenes.filter(o => o.pagado)
@@ -179,10 +166,10 @@ export default function PagosPage() {
                                         </div>
                                         <div>
                                             <p className="font-medium text-[hsl(var(--text-primary))]">
-                                                {orden.equipo}
+                                                {orden.equipo_tipo}
                                             </p>
                                             <p className="text-xs text-[hsl(var(--text-muted))]">
-                                                {orden.numero_orden} · {format(new Date(orden.created_at), "d MMM", { locale: es })}
+                                                {orden.numero} · {format(new Date(orden.created_at), "d MMM", { locale: es })}
                                             </p>
                                         </div>
                                     </div>

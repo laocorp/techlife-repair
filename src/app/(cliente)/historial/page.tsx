@@ -1,20 +1,16 @@
 // src/app/(cliente)/historial/page.tsx
-// Customer repair history
+// Customer repair history - using fetch API
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
     History,
-    Wrench,
     CheckCircle,
-    Calendar,
     Package,
     ChevronRight,
 } from 'lucide-react'
@@ -23,10 +19,10 @@ import { es } from 'date-fns/locale'
 
 interface OrdenHistorial {
     id: string
-    numero_orden: string
-    equipo: string
-    marca: string | null
-    modelo: string | null
+    numero: string
+    equipo_tipo: string
+    equipo_marca: string | null
+    equipo_modelo: string | null
     estado: string
     costo_final: number | null
     created_at: string
@@ -36,41 +32,30 @@ interface OrdenHistorial {
 export default function HistorialPage() {
     const [ordenes, setOrdenes] = useState<OrdenHistorial[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const supabase = createClient()
+
+    const loadHistorial = useCallback(async () => {
+        try {
+            const stored = localStorage.getItem('cliente_portal')
+            if (!stored) return
+
+            const cliente = JSON.parse(stored)
+
+            const response = await fetch(`/api/ordenes?cliente_id=${cliente.id}`)
+            if (!response.ok) throw new Error('Error loading history')
+
+            const data = await response.json()
+            // Filter only delivered orders
+            setOrdenes(data.filter((o: any) => o.estado === 'entregado'))
+        } catch (error) {
+            console.error('Error loading history:', error)
+        } finally {
+            setIsLoading(false)
+        }
+    }, [])
 
     useEffect(() => {
-        const loadHistorial = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser()
-                if (!user) return
-
-                const { data: cliente } = await supabase
-                    .from('clientes')
-                    .select('id')
-                    .eq('user_id', user.id)
-                    .single()
-
-                if (!cliente) return
-
-                // Get all completed orders
-                const { data, error } = await supabase
-                    .from('ordenes_servicio')
-                    .select('id, numero_orden, equipo, marca, modelo, estado, costo_final, created_at, updated_at')
-                    .eq('cliente_id', cliente.id)
-                    .eq('estado', 'entregado')
-                    .order('updated_at', { ascending: false })
-
-                if (error) throw error
-                setOrdenes(data || [])
-            } catch (error) {
-                console.error('Error loading history:', error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
         loadHistorial()
-    }, [supabase])
+    }, [loadHistorial])
 
     const totalGastado = ordenes.reduce((acc, o) => acc + (o.costo_final || 0), 0)
 
@@ -141,10 +126,10 @@ export default function HistorialPage() {
                                             </div>
                                             <div>
                                                 <p className="font-medium text-[hsl(var(--text-primary))]">
-                                                    {orden.equipo}
+                                                    {orden.equipo_tipo}
                                                 </p>
                                                 <p className="text-xs text-[hsl(var(--text-muted))]">
-                                                    {orden.marca} · {format(new Date(orden.updated_at), "d MMM yyyy", { locale: es })}
+                                                    {orden.equipo_marca} · {format(new Date(orden.updated_at), "d MMM yyyy", { locale: es })}
                                                 </p>
                                             </div>
                                         </div>

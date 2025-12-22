@@ -277,7 +277,7 @@ Receiving objects:  67% (179/267)
 Receiving objects:  68% (182/267)
 Receiving objects:  69% (185/267)
 Receiving objects:  70% (187/267)
-remote: Total 267 (delta 48), reused 208 (delta 22), pack-reused 0 (from 0)
+remote: Total 267 (delta 48), reused 207 (delta 22), pack-reused 0 (from 0)
 Receiving objects:  71% (190/267)
 Receiving objects:  72% (193/267)
 Receiving objects:  73% (195/267)
@@ -308,7 +308,7 @@ Receiving objects:  97% (259/267)
 Receiving objects:  98% (262/267)
 Receiving objects:  99% (265/267)
 Receiving objects: 100% (267/267)
-Receiving objects: 100% (267/267), 1.16 MiB | 18.20 MiB/s, done.
+Receiving objects: 100% (267/267), 1.16 MiB | 19.72 MiB/s, done.
 Resolving deltas:   0% (0/48)
 Resolving deltas:   2% (1/48)
 Resolving deltas:   4% (2/48)
@@ -319,25 +319,24 @@ Resolving deltas:  12% (6/48)
 Resolving deltas:  14% (7/48)
 Resolving deltas:  16% (8/48)
 Resolving deltas:  18% (9/48)
-Resolving deltas:  20% (10/48)
 Resolving deltas:  22% (11/48)
 Resolving deltas:  25% (12/48)
 Resolving deltas:  27% (13/48)
 Resolving deltas:  29% (14/48)
 Resolving deltas:  31% (15/48)
-Resolving deltas:  33% (16/48)
 Resolving deltas:  35% (17/48)
 Resolving deltas:  37% (18/48)
-Resolving deltas:  39% (19/48)
+Resolving deltas:  41% (20/48)
+Resolving deltas:  43% (21/48)
 Resolving deltas:  45% (22/48)
-Resolving deltas:  47% (23/48)
+Resolving deltas:  52% (25/48)
 Resolving deltas:  54% (26/48)
 Resolving deltas:  56% (27/48)
 Resolving deltas:  58% (28/48)
-Resolving deltas:  60% (29/48)
 Resolving deltas:  62% (30/48)
 Resolving deltas:  64% (31/48)
 Resolving deltas:  66% (32/48)
+Resolving deltas:  68% (33/48)
 Resolving deltas:  70% (34/48)
 Resolving deltas:  72% (35/48)
 Resolving deltas:  75% (36/48)
@@ -357,10 +356,10 @@ Resolving deltas: 100% (48/48), done.
 Building techliferepair-repairapp-5z3xud
 #0 building with "default" instance using docker driver
 #1 [internal] load build definition from Dockerfile
-#1 transferring dockerfile: 2.14kB done
+#1 transferring dockerfile: 2.14kB 0.0s done
 #1 DONE 0.0s
 #2 [internal] load metadata for docker.io/library/node:20-slim
-#2 DONE 1.0s
+#2 DONE 0.7s
 #3 [internal] load .dockerignore
 #3 transferring context: 451B done
 #3 DONE 0.0s
@@ -369,67 +368,93 @@ Building techliferepair-repairapp-5z3xud
 #5 [internal] load build context
 #5 transferring context: 2.48MB 0.1s done
 #5 DONE 0.1s
-#6 [builder  2/11] WORKDIR /app
+#6 [builder  5/11] COPY prisma ./prisma/
 #6 CACHED
-#7 [builder  4/11] COPY package*.json ./
+#7 [builder  6/11] RUN rm -f package-lock.json
 #7 CACHED
-#8 [builder  5/11] COPY prisma ./prisma/
+#8 [builder  3/11] RUN apt-get update && apt-get install -y     openssl     python3     make     g++     && rm -rf /var/lib/apt/lists/*
 #8 CACHED
-#9 [builder  8/11] RUN npm install lightningcss-linux-x64-gnu --save-optional || true
+#9 [builder  7/11] RUN npm install --legacy-peer-deps
 #9 CACHED
-#10 [builder  3/11] RUN apt-get update && apt-get install -y     openssl     python3     make     g++     && rm -rf /var/lib/apt/lists/*
+#10 [builder  8/11] RUN npm install lightningcss-linux-x64-gnu --save-optional || true
 #10 CACHED
-#11 [builder  6/11] RUN rm -f package-lock.json
+#11 [builder  2/11] WORKDIR /app
 #11 CACHED
-#12 [builder  7/11] RUN npm install --legacy-peer-deps
+#12 [builder  4/11] COPY package*.json ./
 #12 CACHED
 #13 [builder  9/11] RUN npx prisma generate
 #13 CACHED
 #14 [builder 10/11] COPY . .
 #14 DONE 0.1s
 #15 [builder 11/11] RUN npm run build
-#15 0.626
-#15 0.626 > repairappv2@0.1.0 build
-#15 0.626 > next build
-#15 0.626
-#15 1.683 ▲ Next.js 16.1.0 (Turbopack)
-#15 1.683 - Experiments (use with caution):
-#15 1.684   · serverActions
-#15 1.684
-#15 1.689 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-#15 1.759   Creating an optimized production build ...
-#15 30.44 ✓ Compiled successfully in 28.1s
-#15 30.45   Running TypeScript ...
-#15 47.46 Failed to compile.
-#15 47.46
-#15 47.46 ./src/app/api/usuarios/[id]/password/route.ts:28:21
-#15 47.46 Type error: Object literal may only specify known properties, and 'password_hash' does not exist in type '(Without<UsuarioUpdateInput, UsuarioUncheckedUpdateInput> & UsuarioUncheckedUpdateInput) | (Without<...> & UsuarioUpdateInput)'.
-#15 47.46
-#15 47.46 [0m [90m 26 |[39m         [36mawait[39m prisma[33m.[39musuario[33m.[39mupdate({
-#15 47.46  [90m 27 |[39m             where[33m:[39m { id }[33m,[39m
-#15 47.46 [31m[1m>[22m[39m[90m 28 |[39m             data[33m:[39m { password_hash[33m:[39m hashedPassword }
-#15 47.46  [90m    |[39m                     [31m[1m^[22m[39m
-#15 47.46  [90m 29 |[39m         })
-#15 47.46  [90m 30 |[39m
-#15 47.46  [90m 31 |[39m         [36mreturn[39m [33mNextResponse[39m[33m.[39mjson({ success[33m:[39m [36mtrue[39m })[0m
-#15 47.61 Next.js build worker exited with code: 1 and signal: null
+#15 0.529
+#15 0.529 > repairappv2@0.1.0 build
+#15 0.529 > next build
+#15 0.529
+#15 1.602 ▲ Next.js 16.1.0 (Turbopack)
+#15 1.603 - Experiments (use with caution):
+#15 1.603   · serverActions
+#15 1.603
+#15 1.608 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+#15 1.677   Creating an optimized production build ...
+#15 31.25 ✓ Compiled successfully in 29.0s
+#15 31.26   Running TypeScript ...
+#15 49.17   Collecting page data using 3 workers ...
+#15 50.20   Generating static pages using 3 workers (0/49) ...
+#15 50.27   Generating static pages using 3 workers (12/49)
+#15 50.33 ⚠ Unsupported metadata themeColor is configured in metadata export in /_not-found. Please move it to viewport export instead.
+#15 50.33 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+#15 50.35 ⚠ Unsupported metadata themeColor is configured in metadata export in /cliente/login. Please move it to viewport export instead.
+#15 50.35 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+#15 50.41 ⚠ Unsupported metadata themeColor is configured in metadata export in /login. Please move it to viewport export instead.
+#15 50.41 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+#15 50.46 ⚠ Unsupported metadata themeColor is configured in metadata export in /register. Please move it to viewport export instead.
+#15 50.46 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+#15 50.48 ⚠ Unsupported metadata themeColor is configured in metadata export in /cliente/login. Please move it to viewport export instead.
+#15 50.48 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+#15 50.50 ⚠ Unsupported metadata themeColor is configured in metadata export in /register. Please move it to viewport export instead.
+#15 50.50 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+#15 50.50 ⚠ Unsupported metadata themeColor is configured in metadata export in /dashboard. Please move it to viewport export instead.
+#15 50.50 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+#15 50.52 ⚠ Unsupported metadata themeColor is configured in metadata export in /equipos. Please move it to viewport export instead.
+#15 50.52 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+#15 50.54 ⚠ Unsupported metadata themeColor is configured in metadata export in /equipos. Please move it to viewport export instead.
+#15 50.54 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+#15 50.54 Error occurred prerendering page "/cliente/login". Read more: https://nextjs.org/docs/messages/prerender-error
+#15 50.55 ⚠ Unsupported metadata themeColor is configured in metadata export in /historial. Please move it to viewport export instead.
+#15 50.55 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+#15 50.55 Error: @supabase/ssr: Your project's URL and API key are required to create a Supabase client!
+#15 50.55
+#15 50.55 Check your Supabase project's API settings to find these values
+#15 50.55
+#15 50.55 https://supabase.com/dashboard/project/_/settings/api
+#15 50.55     at <unknown> (https://supabase.com/dashboard/project/_/settings/api)
+#15 50.55     at <unknown> (.next/server/chunks/ssr/_4d226d56._.js:55:63)
+#15 50.55     at cx (.next/server/chunks/ssr/_4d226d56._.js:59:4544)
+#15 50.55     at r (.next/server/chunks/ssr/_898d8a7d._.js:1:6830) {
+#15 50.55   digest: '2234734310'
+#15 50.55 }
+#15 50.55 Export encountered an error on /cliente/login/page: /cliente/login, exiting the build.
+#15 50.57 ⚠ Unsupported metadata themeColor is configured in metadata export in /historial. Please move it to viewport export instead.
+#15 50.57 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+#15 50.61 ⨯ Next.js build worker exited with code: 1 and signal: null
 #15 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
 ------
 > [builder 11/11] RUN npm run build:
-47.46 Type error: Object literal may only specify known properties, and 'password_hash' does not exist in type '(Without<UsuarioUpdateInput, UsuarioUncheckedUpdateInput> & UsuarioUncheckedUpdateInput) | (Without<...> & UsuarioUpdateInput)'.
-47.46
-47.46 [0m [90m 26 |[39m         [36mawait[39m prisma[33m.[39musuario[33m.[39mupdate({
-47.46  [90m 27 |[39m             where[33m:[39m { id }[33m,[39m
-47.46 [31m[1m>[22m[39m[90m 28 |[39m             data[33m:[39m { password_hash[33m:[39m hashedPassword }
-47.46  [90m    |[39m                     [31m[1m^[22m[39m
-47.46  [90m 29 |[39m         })
-47.46  [90m 30 |[39m
-47.46  [90m 31 |[39m         [36mreturn[39m [33mNextResponse[39m[33m.[39mjson({ success[33m:[39m [36mtrue[39m })[0m
-47.61 Next.js build worker exited with code: 1 and signal: null
+50.55     at <unknown> (https://supabase.com/dashboard/project/_/settings/api)
+50.55     at <unknown> (.next/server/chunks/ssr/_4d226d56._.js:55:63)
+50.55     at cx (.next/server/chunks/ssr/_4d226d56._.js:59:4544)
+50.55     at r (.next/server/chunks/ssr/_898d8a7d._.js:1:6830) {
+50.55   digest: '2234734310'
+50.55 }
+50.55 Export encountered an error on /cliente/login/page: /cliente/login, exiting the build.
+50.57 ⚠ Unsupported metadata themeColor is configured in metadata export in /historial. Please move it to viewport export instead.
+50.57 Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+50.61 ⨯ Next.js build worker exited with code: 1 and signal: null
 ------
 [33m2 warnings found (use docker --debug to expand):
-[0m - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "NEXTAUTH_SECRET") (line 18)
-- SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "NEXTAUTH_SECRET") (line 12)
+[0m - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "NEXTAUTH_SECRET") (line 12)
+- SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "NEXTAUTH_SECRET") (line 18)
 Dockerfile:51
 --------------------
 |
