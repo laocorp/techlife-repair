@@ -280,7 +280,6 @@ Receiving objects:  70% (187/267)
 Receiving objects:  71% (190/267)
 Receiving objects:  72% (193/267)
 Receiving objects:  73% (195/267)
-remote: Total 267 (delta 48), reused 211 (delta 23), pack-reused 0 (from 0)
 Receiving objects:  74% (198/267)
 Receiving objects:  75% (201/267)
 Receiving objects:  76% (203/267)
@@ -297,6 +296,7 @@ Receiving objects:  86% (230/267)
 Receiving objects:  87% (233/267)
 Receiving objects:  88% (235/267)
 Receiving objects:  89% (238/267)
+remote: Total 267 (delta 48), reused 211 (delta 23), pack-reused 0 (from 0)
 Receiving objects:  90% (241/267)
 Receiving objects:  91% (243/267)
 Receiving objects:  92% (246/267)
@@ -308,7 +308,7 @@ Receiving objects:  97% (259/267)
 Receiving objects:  98% (262/267)
 Receiving objects:  99% (265/267)
 Receiving objects: 100% (267/267)
-Receiving objects: 100% (267/267), 1.16 MiB | 14.35 MiB/s, done.
+Receiving objects: 100% (267/267), 1.16 MiB | 15.57 MiB/s, done.
 Resolving deltas:   0% (0/48)
 Resolving deltas:   2% (1/48)
 Resolving deltas:   4% (2/48)
@@ -317,19 +317,22 @@ Resolving deltas:   8% (4/48)
 Resolving deltas:  10% (5/48)
 Resolving deltas:  12% (6/48)
 Resolving deltas:  14% (7/48)
+Resolving deltas:  16% (8/48)
 Resolving deltas:  18% (9/48)
 Resolving deltas:  20% (10/48)
+Resolving deltas:  22% (11/48)
 Resolving deltas:  25% (12/48)
 Resolving deltas:  27% (13/48)
 Resolving deltas:  29% (14/48)
 Resolving deltas:  31% (15/48)
 Resolving deltas:  33% (16/48)
 Resolving deltas:  35% (17/48)
+Resolving deltas:  37% (18/48)
+Resolving deltas:  39% (19/48)
 Resolving deltas:  41% (20/48)
 Resolving deltas:  43% (21/48)
 Resolving deltas:  45% (22/48)
 Resolving deltas:  47% (23/48)
-Resolving deltas:  50% (24/48)
 Resolving deltas:  52% (25/48)
 Resolving deltas:  54% (26/48)
 Resolving deltas:  56% (27/48)
@@ -337,18 +340,20 @@ Resolving deltas:  58% (28/48)
 Resolving deltas:  60% (29/48)
 Resolving deltas:  62% (30/48)
 Resolving deltas:  64% (31/48)
+Resolving deltas:  66% (32/48)
 Resolving deltas:  68% (33/48)
 Resolving deltas:  70% (34/48)
-Resolving deltas:  72% (35/48)
 Resolving deltas:  75% (36/48)
 Resolving deltas:  77% (37/48)
 Resolving deltas:  79% (38/48)
+Resolving deltas:  81% (39/48)
 Resolving deltas:  83% (40/48)
 Resolving deltas:  85% (41/48)
 Resolving deltas:  87% (42/48)
 Resolving deltas:  89% (43/48)
 Resolving deltas:  91% (44/48)
 Resolving deltas:  93% (45/48)
+Resolving deltas:  95% (46/48)
 Resolving deltas:  97% (47/48)
 Resolving deltas: 100% (48/48)
 Resolving deltas: 100% (48/48), done.
@@ -358,26 +363,26 @@ Building techliferepair-repairapp-5z3xud
 #1 transferring dockerfile: 2.14kB done
 #1 DONE 0.0s
 #2 [internal] load metadata for docker.io/library/node:20-slim
-#2 DONE 1.1s
+#2 DONE 0.7s
 #3 [internal] load .dockerignore
 #3 transferring context: 451B done
 #3 DONE 0.0s
 #4 [builder  1/11] FROM docker.io/library/node:20-slim@sha256:1b38aaddff63cd0d3a9b5b03863a71fd33ee62047dd2e915f494d96b4b9c18cc
 #4 DONE 0.0s
 #5 [internal] load build context
-#5 transferring context: 2.53MB 0.1s done
+#5 transferring context: 2.48MB 0.1s done
 #5 DONE 0.1s
-#6 [builder  2/11] WORKDIR /app
+#6 [builder  5/11] COPY prisma ./prisma/
 #6 CACHED
-#7 [builder  5/11] COPY prisma ./prisma/
+#7 [builder  7/11] RUN npm install --legacy-peer-deps
 #7 CACHED
-#8 [builder  6/11] RUN rm -f package-lock.json
+#8 [builder  2/11] WORKDIR /app
 #8 CACHED
-#9 [builder  3/11] RUN apt-get update && apt-get install -y     openssl     python3     make     g++     && rm -rf /var/lib/apt/lists/*
+#9 [builder  4/11] COPY package*.json ./
 #9 CACHED
-#10 [builder  4/11] COPY package*.json ./
+#10 [builder  6/11] RUN rm -f package-lock.json
 #10 CACHED
-#11 [builder  7/11] RUN npm install --legacy-peer-deps
+#11 [builder  3/11] RUN apt-get update && apt-get install -y     openssl     python3     make     g++     && rm -rf /var/lib/apt/lists/*
 #11 CACHED
 #12 [builder  8/11] RUN npm install lightningcss-linux-x64-gnu --save-optional || true
 #12 CACHED
@@ -386,52 +391,48 @@ Building techliferepair-repairapp-5z3xud
 #14 [builder 10/11] COPY . .
 #14 DONE 0.1s
 #15 [builder 11/11] RUN npm run build
-#15 0.804
-#15 0.804 > repairappv2@0.1.0 build
-#15 0.804 > next build
-#15 0.804
-#15 2.344 ▲ Next.js 16.1.0 (Turbopack)
-#15 2.345 - Experiments (use with caution):
-#15 2.345   · serverActions
-#15 2.346
-#15 2.350 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-#15 2.425   Creating an optimized production build ...
-#15 34.89 ✓ Compiled successfully in 31.9s
-#15 34.90   Running TypeScript ...
-#15 55.74 Failed to compile.
-#15 55.74
-#15 55.74 ./src/app/(dashboard)/ordenes/[id]/page.tsx:244:25
-#15 55.74 Type error: No overload matches this call.
-#15 55.74   Overload 1 of 2, '(props: PDFDownloadButtonProps, context?: any): string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | ... 4 more ... | undefined', gave the following error.
-#15 55.74     Property 'empresa' is missing in type '{ numero_orden: string; equipo: string; marca: string | null; modelo: string | null; serie: string | null; problema: string | null; cliente: { id: string; nombre: string; identificacion: string; telefono: string | null; email: string | null; direccion: string | null; } | null; ... 15 more ...; tecnico: { id: string;...' but required in type 'OrdenDataForPDF'.
-#15 55.74   Overload 2 of 2, '(props: PDFDownloadButtonProps): string | number | bigint | boolean | ReactElement<unknown, string | JSXElementConstructor<any>> | ... 4 more ... | undefined', gave the following error.
-#15 55.74     Property 'empresa' is missing in type '{ numero_orden: string; equipo: string; marca: string | null; modelo: string | null; serie: string | null; problema: string | null; cliente: { id: string; nombre: string; identificacion: string; telefono: string | null; email: string | null; direccion: string | null; } | null; ... 15 more ...; tecnico: { id: string;...' but required in type 'OrdenDataForPDF'.
-#15 55.74
-#15 55.74 [0m [90m 242 |[39m                 [33m<[39m[33mdiv[39m className[33m=[39m[32m"flex gap-2"[39m[33m>[39m
-#15 55.74  [90m 243 |[39m                     [33m<[39m[33mPDFDownloadButton[39m
-#15 55.74 [31m[1m>[22m[39m[90m 244 |[39m                         orden[33m=[39m{{
-#15 55.74  [90m     |[39m                         [31m[1m^[22m[39m
-#15 55.74  [90m 245 |[39m                             [33m...[39morden[33m,[39m
-#15 55.74  [90m 246 |[39m                             numero_orden[33m:[39m orden[33m.[39mnumero[33m,[39m
-#15 55.74  [90m 247 |[39m                             equipo[33m:[39m orden[33m.[39mequipo_tipo[33m,[39m[0m
-#15 55.94 Next.js build worker exited with code: 1 and signal: null
+#15 0.583
+#15 0.583 > repairappv2@0.1.0 build
+#15 0.583 > next build
+#15 0.583
+#15 1.689 ▲ Next.js 16.1.0 (Turbopack)
+#15 1.689 - Experiments (use with caution):
+#15 1.689   · serverActions
+#15 1.690
+#15 1.694 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+#15 1.764   Creating an optimized production build ...
+#15 31.73 ✓ Compiled successfully in 29.4s
+#15 31.75   Running TypeScript ...
+#15 49.15 Failed to compile.
+#15 49.15
+#15 49.15 ./src/app/api/caja/route.ts:45:24
+#15 49.15 Type error: Object literal may only specify known properties, and 'fecha_apertura' does not exist in type 'CajaOrderByWithRelationInput | CajaOrderByWithRelationInput[]'.
+#15 49.15
+#15 49.15 [0m [90m 43 |[39m                 usuario[33m:[39m { select[33m:[39m { nombre[33m:[39m [36mtrue[39m } }
+#15 49.15  [90m 44 |[39m             }[33m,[39m
+#15 49.15 [31m[1m>[22m[39m[90m 45 |[39m             orderBy[33m:[39m { fecha_apertura[33m:[39m [32m'desc'[39m }[33m,[39m
+#15 49.15  [90m    |[39m                        [31m[1m^[22m[39m
+#15 49.15  [90m 46 |[39m             take[33m:[39m [35m10[39m
+#15 49.15  [90m 47 |[39m         })
+#15 49.15  [90m 48 |[39m[0m
+#15 49.31 Next.js build worker exited with code: 1 and signal: null
 #15 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
 ------
 > [builder 11/11] RUN npm run build:
-55.74     Property 'empresa' is missing in type '{ numero_orden: string; equipo: string; marca: string | null; modelo: string | null; serie: string | null; problema: string | null; cliente: { id: string; nombre: string; identificacion: string; telefono: string | null; email: string | null; direccion: string | null; } | null; ... 15 more ...; tecnico: { id: string;...' but required in type 'OrdenDataForPDF'.
-55.74
-55.74 [0m [90m 242 |[39m                 [33m<[39m[33mdiv[39m className[33m=[39m[32m"flex gap-2"[39m[33m>[39m
-55.74  [90m 243 |[39m                     [33m<[39m[33mPDFDownloadButton[39m
-55.74 [31m[1m>[22m[39m[90m 244 |[39m                         orden[33m=[39m{{
-55.74  [90m     |[39m                         [31m[1m^[22m[39m
-55.74  [90m 245 |[39m                             [33m...[39morden[33m,[39m
-55.74  [90m 246 |[39m                             numero_orden[33m:[39m orden[33m.[39mnumero[33m,[39m
-55.74  [90m 247 |[39m                             equipo[33m:[39m orden[33m.[39mequipo_tipo[33m,[39m[0m
-55.94 Next.js build worker exited with code: 1 and signal: null
+49.15 Type error: Object literal may only specify known properties, and 'fecha_apertura' does not exist in type 'CajaOrderByWithRelationInput | CajaOrderByWithRelationInput[]'.
+49.15
+49.15 [0m [90m 43 |[39m                 usuario[33m:[39m { select[33m:[39m { nombre[33m:[39m [36mtrue[39m } }
+49.15  [90m 44 |[39m             }[33m,[39m
+49.15 [31m[1m>[22m[39m[90m 45 |[39m             orderBy[33m:[39m { fecha_apertura[33m:[39m [32m'desc'[39m }[33m,[39m
+49.15  [90m    |[39m                        [31m[1m^[22m[39m
+49.15  [90m 46 |[39m             take[33m:[39m [35m10[39m
+49.15  [90m 47 |[39m         })
+49.15  [90m 48 |[39m[0m
+49.31 Next.js build worker exited with code: 1 and signal: null
 ------
 [33m2 warnings found (use docker --debug to expand):
-[0m - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "NEXTAUTH_SECRET") (line 12)
-- SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "NEXTAUTH_SECRET") (line 18)
+[0m - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "NEXTAUTH_SECRET") (line 18)
+- SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "NEXTAUTH_SECRET") (line 12)
 Dockerfile:51
 --------------------
 |

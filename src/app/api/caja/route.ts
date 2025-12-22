@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
             include: {
                 usuario: { select: { nombre: true } }
             },
-            orderBy: { fecha_apertura: 'desc' },
+            orderBy: { created_at: 'desc' },
             take: 10
         })
 
@@ -86,8 +86,7 @@ export async function POST(request: NextRequest) {
                 empresa_id,
                 usuario_id,
                 monto_apertura: parseFloat(monto_apertura),
-                estado: 'abierta',
-                fecha_apertura: new Date()
+                estado: 'abierta'
             }
         })
 
