@@ -278,7 +278,7 @@ export default function TrackingPage() {
                                     <div>
                                         <div className="flex items-center gap-2 mb-2">
                                             <Badge className="bg-cyan-500/10 text-cyan-400 border-0 text-xs font-semibold">
-                                                {order.numero_orden}
+                                                {order.numero}
                                             </Badge>
                                             <Badge className={`border-0 text-xs font-semibold ${order.estado === 'entregado'
                                                 ? 'bg-emerald-500/10 text-emerald-400'
@@ -289,15 +289,15 @@ export default function TrackingPage() {
                                                 {order.estado.replace('_', ' ').toUpperCase()}
                                             </Badge>
                                         </div>
-                                        <h3 className="text-xl font-bold text-white">{order.equipo}</h3>
+                                        <h3 className="text-xl font-bold text-white">{order.equipo_tipo}</h3>
                                         <p className="text-zinc-400 text-sm mt-1">
-                                            {order.marca} {order.modelo}
+                                            {order.equipo_marca} {order.equipo_modelo}
                                         </p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-xs text-zinc-500 mb-1">Costo estimado</p>
                                         <p className="text-2xl font-bold text-white">
-                                            ${(order.costo_final || order.cotizacion || 0).toFixed(2)}
+                                            ${(order.costo_final || order.costo_estimado || 0).toFixed(2)}
                                         </p>
                                     </div>
                                 </div>
@@ -306,7 +306,7 @@ export default function TrackingPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">Problema Reportado</p>
-                                        <p className="text-sm text-zinc-300">{order.problema}</p>
+                                        <p className="text-sm text-zinc-300">{order.problema_reportado}</p>
                                     </div>
                                     {order.diagnostico && (
                                         <div>
