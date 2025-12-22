@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -62,16 +61,15 @@ export default function NuevaOrdenPage() {
     const [clientes, setClientes] = useState<Cliente[]>([])
     const [tecnicos, setTecnicos] = useState<Usuario[]>([])
     const [showClienteDropdown, setShowClienteDropdown] = useState(false)
-    const supabase = createClient()
 
     const [formData, setFormData] = useState({
         cliente_id: '',
         clienteNombre: '',
         // Equipo
-        equipo: '',
-        marca: '',
-        modelo: '',
-        serie: '',
+        equipo_tipo: '',
+        equipo_marca: '',
+        equipo_modelo: '',
+        equipo_serie: '',
         accesorios: '',
         // Problema
         problema_reportado: '',
@@ -82,22 +80,23 @@ export default function NuevaOrdenPage() {
     })
 
     // Load tecnicos
-    useEffect(() => {
-        const loadTecnicos = async () => {
-            if (!user?.empresa_id) return
+    const loadTecnicos = useCallback(async () => {
+        if (!user?.empresa_id) return
 
-            const { data } = await supabase
-                .from('usuarios')
-                .select('id, nombre, rol')
-                .eq('empresa_id', user.empresa_id)
-                .in('rol', ['admin', 'tecnico'])
-                .eq('activo', true)
-
-            setTecnicos(data || [])
+        try {
+            const response = await fetch(`/api/usuarios?empresa_id=${user.empresa_id}&rol=admin,tecnico`)
+            if (response.ok) {
+                const data = await response.json()
+                setTecnicos(data || [])
+            }
+        } catch (error) {
+            console.error('Error loading tecnicos:', error)
         }
+    }, [user?.empresa_id])
 
+    useEffect(() => {
         loadTecnicos()
-    }, [user?.empresa_id, supabase])
+    }, [loadTecnicos])
 
     // Search clientes
     useEffect(() => {
@@ -107,19 +106,20 @@ export default function NuevaOrdenPage() {
                 return
             }
 
-            const { data } = await supabase
-                .from('clientes')
-                .select('id, nombre, identificacion, telefono, email')
-                .eq('empresa_id', user.empresa_id)
-                .or(`nombre.ilike.%${clienteSearch}%,identificacion.ilike.%${clienteSearch}%`)
-                .limit(10)
-
-            setClientes(data || [])
+            try {
+                const response = await fetch(`/api/clientes?empresa_id=${user.empresa_id}&search=${encodeURIComponent(clienteSearch)}`)
+                if (response.ok) {
+                    const data = await response.json()
+                    setClientes(data || [])
+                }
+            } catch (error) {
+                console.error('Error searching clientes:', error)
+            }
         }
 
         const debounce = setTimeout(searchClientes, 300)
         return () => clearTimeout(debounce)
-    }, [clienteSearch, user?.empresa_id, supabase])
+    }, [clienteSearch, user?.empresa_id])
 
     const handleSelectCliente = (cliente: Cliente) => {
         setFormData(f => ({ ...f, cliente_id: cliente.id, clienteNombre: cliente.nombre }))
@@ -128,36 +128,42 @@ export default function NuevaOrdenPage() {
     }
 
     const handleSubmit = async () => {
-        if (!formData.equipo) {
-            toast.error('El equipo es requerido')
+        if (!formData.equipo_tipo) {
+            toast.error('El tipo de equipo es requerido')
             return
         }
 
         setIsLoading(true)
         try {
-            const { data, error } = await supabase
-                .from('ordenes_servicio')
-                .insert({
+            const response = await fetch('/api/ordenes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     empresa_id: user?.empresa_id,
                     cliente_id: formData.cliente_id || null,
                     tecnico_id: formData.tecnico_id || null,
-                    equipo: formData.equipo,
-                    marca: formData.marca || null,
-                    modelo: formData.modelo || null,
-                    serie: formData.serie || null,
+                    creado_por_id: user?.id,
+                    equipo_tipo: formData.equipo_tipo,
+                    equipo_marca: formData.equipo_marca || null,
+                    equipo_modelo: formData.equipo_modelo || null,
+                    equipo_serie: formData.equipo_serie || null,
                     accesorios: formData.accesorios || null,
                     problema_reportado: formData.problema_reportado || null,
                     observaciones_recepcion: formData.observaciones || null,
                     prioridad: formData.prioridad,
                     estado: 'recibido',
                 })
-                .select()
-                .single()
+            })
 
-            if (error) throw error
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || 'Error al crear orden')
+            }
+
+            const data = await response.json()
 
             toast.success('Orden creada exitosamente', {
-                description: `Número: ${data.numero_orden}`,
+                description: `Número: ${data.numero}`,
             })
 
             router.push(`/ordenes/${data.id}`)
@@ -252,8 +258,8 @@ export default function NuevaOrdenPage() {
                         <div className="space-y-2">
                             <Label className="text-slate-300">Equipo / Herramienta *</Label>
                             <Input
-                                value={formData.equipo}
-                                onChange={(e) => setFormData(f => ({ ...f, equipo: e.target.value }))}
+                                value={formData.equipo_tipo}
+                                onChange={(e) => setFormData(f => ({ ...f, equipo_tipo: e.target.value }))}
                                 className="bg-white/5 border-white/10 text-white"
                                 placeholder="Ej: Taladro percutor, Amoladora 9 pulgadas"
                             />
@@ -263,8 +269,8 @@ export default function NuevaOrdenPage() {
                             <div className="space-y-2">
                                 <Label className="text-slate-300">Marca</Label>
                                 <Select
-                                    value={formData.marca}
-                                    onValueChange={(v) => setFormData(f => ({ ...f, marca: v }))}
+                                    value={formData.equipo_marca}
+                                    onValueChange={(v) => setFormData(f => ({ ...f, equipo_marca: v }))}
                                 >
                                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                                         <SelectValue placeholder="Seleccionar" />
@@ -281,8 +287,8 @@ export default function NuevaOrdenPage() {
                             <div className="space-y-2">
                                 <Label className="text-slate-300">Modelo</Label>
                                 <Input
-                                    value={formData.modelo}
-                                    onChange={(e) => setFormData(f => ({ ...f, modelo: e.target.value }))}
+                                    value={formData.equipo_modelo}
+                                    onChange={(e) => setFormData(f => ({ ...f, equipo_modelo: e.target.value }))}
                                     className="bg-white/5 border-white/10 text-white"
                                     placeholder="GBH 2-26"
                                 />
@@ -290,8 +296,8 @@ export default function NuevaOrdenPage() {
                             <div className="space-y-2">
                                 <Label className="text-slate-300">N° Serie</Label>
                                 <Input
-                                    value={formData.serie}
-                                    onChange={(e) => setFormData(f => ({ ...f, serie: e.target.value }))}
+                                    value={formData.equipo_serie}
+                                    onChange={(e) => setFormData(f => ({ ...f, equipo_serie: e.target.value }))}
                                     className="bg-white/5 border-white/10 text-white"
                                     placeholder="ABC123456"
                                 />

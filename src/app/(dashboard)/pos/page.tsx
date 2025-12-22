@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore, usePOSStore } from '@/stores'
 import { PermissionGate } from '@/hooks/use-permissions'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,13 +17,6 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
@@ -37,14 +29,12 @@ import {
     CreditCard,
     Banknote,
     Building2,
-    QrCode,
     Receipt,
     User,
     Package,
     Loader2,
     X,
     Check,
-    Calculator,
     Percent,
 } from 'lucide-react'
 
@@ -52,10 +42,8 @@ interface Producto {
     id: string
     codigo: string | null
     nombre: string
-    precio: number
+    precio_venta: number
     stock: number
-    tipo: string
-    iva: number
 }
 
 interface Cliente {
@@ -97,34 +85,28 @@ export default function POSPage() {
     const [clienteSearch, setClienteSearch] = useState('')
 
     const searchInputRef = useRef<HTMLInputElement>(null)
-    const supabase = createClient()
-
 
     // Load products
-    useEffect(() => {
-        const loadProducts = async () => {
-            if (!user?.empresa_id) return
+    const loadProducts = useCallback(async () => {
+        if (!user?.empresa_id) return
 
-            try {
-                const { data, error } = await supabase
-                    .from('productos')
-                    .select('id, codigo, nombre, precio, stock, tipo, iva')
-                    .eq('empresa_id', user.empresa_id)
-                    .eq('activo', true)
-                    .order('nombre')
+        try {
+            const response = await fetch(`/api/productos?empresa_id=${user.empresa_id}`)
+            if (!response.ok) throw new Error('Error al cargar productos')
 
-                if (error) throw error
-                setProductos(data || [])
-                setFilteredProducts(data || [])
-            } catch (error: any) {
-                toast.error('Error al cargar productos', { description: error.message })
-            } finally {
-                setIsLoading(false)
-            }
+            const data = await response.json()
+            setProductos(data || [])
+            setFilteredProducts(data || [])
+        } catch (error: any) {
+            toast.error('Error al cargar productos', { description: error.message })
+        } finally {
+            setIsLoading(false)
         }
+    }, [user?.empresa_id])
 
+    useEffect(() => {
         loadProducts()
-    }, [user?.empresa_id, supabase])
+    }, [loadProducts])
 
     // Search products
     useEffect(() => {
@@ -152,35 +134,41 @@ export default function POSPage() {
                 return
             }
 
-            const { data } = await supabase
-                .from('clientes')
-                .select('id, nombre, identificacion, email, telefono')
-                .eq('empresa_id', user.empresa_id)
-                .or(`nombre.ilike.%${clienteSearch}%,identificacion.ilike.%${clienteSearch}%`)
-                .limit(10)
-
-            setClientes(data || [])
+            try {
+                const response = await fetch(`/api/clientes?empresa_id=${user.empresa_id}&search=${encodeURIComponent(clienteSearch)}`)
+                if (response.ok) {
+                    const data = await response.json()
+                    setClientes(data || [])
+                }
+            } catch (error) {
+                console.error('Error searching clientes:', error)
+            }
         }
 
         const debounce = setTimeout(searchClientes, 300)
         return () => clearTimeout(debounce)
-    }, [clienteSearch, user?.empresa_id, supabase])
+    }, [clienteSearch, user?.empresa_id])
 
     // Add product to cart
     const handleAddProduct = (producto: Producto) => {
-        if (producto.stock <= 0 && producto.tipo === 'producto') {
+        if (producto.stock <= 0) {
             toast.error('Producto sin stock')
             return
         }
 
         const existingItem = items.find(i => i.producto.id === producto.id)
-        if (existingItem && existingItem.cantidad >= producto.stock && producto.tipo === 'producto') {
+        if (existingItem && existingItem.cantidad >= producto.stock) {
             toast.error('Stock insuficiente')
             return
         }
 
-        // Store expects Producto object, not individual fields
-        addItem(producto as any)
+        // Adapt producto to match expected interface
+        addItem({
+            ...producto,
+            precio: Number(producto.precio_venta),
+            tipo: 'producto',
+            iva: 15
+        } as any)
 
         toast.success(`${producto.nombre} agregado`)
         searchInputRef.current?.focus()
@@ -197,41 +185,38 @@ export default function POSPage() {
         setIsProcessing(true)
 
         try {
-            // Create venta
-            const { data: venta, error: ventaError } = await supabase
-                .from('ventas')
-                .insert({
+            const response = await fetch('/api/ventas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     empresa_id: user?.empresa_id,
                     usuario_id: user?.id,
                     cliente_id: selectedCliente?.id || null,
                     subtotal: subtotal,
                     iva: totalIva,
+                    descuento: discount,
                     total: total - discount,
+                    metodo_pago: paymentMethod,
+                    items: items.map(item => ({
+                        producto_id: item.producto.id,
+                        descripcion: item.producto.nombre,
+                        cantidad: item.cantidad,
+                        precio_unitario: item.precioUnitario,
+                        subtotal: item.subtotal,
+                        iva: item.iva,
+                    }))
                 })
-                .select()
-                .single()
+            })
 
-            if (ventaError) throw ventaError
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || 'Error al procesar venta')
+            }
 
-            // Create detalle
-            const detalles = items.map(item => ({
-                venta_id: venta.id,
-                producto_id: item.producto.id,
-                descripcion: item.producto.nombre,
-                cantidad: item.cantidad,
-                precio_unitario: item.precioUnitario,
-                subtotal: item.subtotal,
-                iva: item.iva,
-            }))
-
-            const { error: detalleError } = await supabase
-                .from('ventas_detalle')
-                .insert(detalles)
-
-            if (detalleError) throw detalleError
+            const venta = await response.json()
 
             toast.success('Venta procesada exitosamente', {
-                description: `Factura: ${venta.numero_factura}`,
+                description: `Factura: ${venta.numero || venta.id.slice(0, 8)}`,
             })
 
             // Clear cart and close dialog
@@ -302,26 +287,20 @@ export default function POSPage() {
                                     whileTap={{ scale: 0.98 }}
                                 >
                                     <Card
-                                        className={`bg-white/5 border-white/10 cursor-pointer transition-all hover:bg-white/10 hover:border-blue-500/50 ${producto.stock <= 0 && producto.tipo === 'producto' ? 'opacity-50' : ''
-                                            }`}
+                                        className={`bg-white/5 border-white/10 cursor-pointer transition-all hover:bg-white/10 hover:border-blue-500/50 ${producto.stock <= 0 ? 'opacity-50' : ''}`}
                                         onClick={() => handleAddProduct(producto)}
                                     >
                                         <CardContent className="p-4">
                                             <div className="flex justify-between items-start mb-2">
                                                 <Badge
                                                     variant="outline"
-                                                    className={`text-xs ${producto.tipo === 'servicio'
-                                                        ? 'border-purple-500/50 text-purple-400'
-                                                        : 'border-blue-500/50 text-blue-400'
-                                                        }`}
+                                                    className="text-xs border-blue-500/50 text-blue-400"
                                                 >
-                                                    {producto.tipo === 'servicio' ? 'Servicio' : 'Producto'}
+                                                    Producto
                                                 </Badge>
-                                                {producto.tipo === 'producto' && (
-                                                    <span className={`text-xs ${producto.stock <= 5 ? 'text-amber-400' : 'text-slate-500'}`}>
-                                                        Stock: {producto.stock}
-                                                    </span>
-                                                )}
+                                                <span className={`text-xs ${producto.stock <= 5 ? 'text-amber-400' : 'text-slate-500'}`}>
+                                                    Stock: {producto.stock}
+                                                </span>
                                             </div>
                                             <h3 className="font-medium text-white text-sm line-clamp-2 mb-2">
                                                 {producto.nombre}
@@ -330,7 +309,7 @@ export default function POSPage() {
                                                 <p className="text-xs text-slate-500 mb-2">{producto.codigo}</p>
                                             )}
                                             <p className="text-lg font-bold text-emerald-400">
-                                                ${producto.precio.toFixed(2)}
+                                                ${Number(producto.precio_venta).toFixed(2)}
                                             </p>
                                         </CardContent>
                                     </Card>

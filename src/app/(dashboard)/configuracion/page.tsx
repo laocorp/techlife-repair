@@ -1,12 +1,12 @@
 // src/app/(dashboard)/configuracion/page.tsx
 // Business settings and configuration
+// NOTE: Storage features (logo/certificate upload) need separate migration
 
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

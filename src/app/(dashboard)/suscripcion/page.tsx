@@ -3,10 +3,9 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -58,67 +57,33 @@ export default function SuscripcionPage() {
     const [suscripcion, setSuscripcion] = useState<SuscripcionInfo | null>(null)
     const [usage, setUsage] = useState<UsageInfo | null>(null)
     const [isLoading, setIsLoading] = useState(true)
-    const supabase = createClient()
-
-    useEffect(() => {
-        loadSuscripcion()
-    }, [user?.empresa_id])
-
-    const loadSuscripcion = async () => {
+    const loadSuscripcion = useCallback(async () => {
         if (!user?.empresa_id) return
 
+        setIsLoading(true)
         try {
-            // Get subscription
-            const { data: sub } = await supabase
-                .from('suscripciones')
-                .select('*, plan:planes(*)')
-                .eq('empresa_id', user.empresa_id)
-                .single()
+            const response = await fetch(`/api/suscripcion?empresa_id=${user.empresa_id}`)
+            if (!response.ok) throw new Error('Error loading subscription')
 
-            if (sub) {
-                setSuscripcion(sub as unknown as SuscripcionInfo)
+            const data = await response.json()
+
+            if (data.suscripcion) {
+                setSuscripcion(data.suscripcion as SuscripcionInfo)
             }
 
-            // Get usage
-            const { count: usuarios } = await supabase
-                .from('usuarios')
-                .select('*', { count: 'exact', head: true })
-                .eq('empresa_id', user.empresa_id)
-                .eq('activo', true)
-
-            const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
-
-            const { count: ordenes } = await supabase
-                .from('ordenes_servicio')
-                .select('*', { count: 'exact', head: true })
-                .eq('empresa_id', user.empresa_id)
-                .gte('created_at', startOfMonth)
-
-            const { count: productos } = await supabase
-                .from('productos')
-                .select('*', { count: 'exact', head: true })
-                .eq('empresa_id', user.empresa_id)
-                .eq('activo', true)
-
-            const { count: facturas } = await supabase
-                .from('facturacion_electronica')
-                .select('*', { count: 'exact', head: true })
-                .eq('empresa_id', user.empresa_id)
-                .gte('created_at', startOfMonth)
-
-            setUsage({
-                usuarios: usuarios || 0,
-                ordenes: ordenes || 0,
-                productos: productos || 0,
-                facturas: facturas || 0,
-            })
-
+            if (data.usage) {
+                setUsage(data.usage)
+            }
         } catch (error) {
             console.error('Error loading subscription:', error)
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id])
+
+    useEffect(() => {
+        loadSuscripcion()
+    }, [loadSuscripcion])
 
     const estadoColors: Record<string, string> = {
         activa: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',

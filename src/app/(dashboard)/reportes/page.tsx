@@ -3,10 +3,9 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -58,82 +57,28 @@ export default function ReportesPage() {
     const [stats, setStats] = useState<ReportStats | null>(null)
     const [periodo, setPeriodo] = useState('mes')
     const [isLoading, setIsLoading] = useState(true)
-    const supabase = createClient()
 
-    useEffect(() => {
-        loadReports()
-    }, [user?.empresa_id, periodo])
-
-    const loadReports = async () => {
+    const loadReports = useCallback(async () => {
         if (!user?.empresa_id) return
 
         setIsLoading(true)
         try {
-            let startDate: Date
-            const endDate = new Date()
+            const response = await fetch(`/api/reportes?empresa_id=${user.empresa_id}&periodo=${periodo}`)
 
-            switch (periodo) {
-                case 'semana':
-                    startDate = subDays(new Date(), 7)
-                    break
-                case 'mes':
-                    startDate = startOfMonth(new Date())
-                    break
-                case 'trimestre':
-                    startDate = subDays(new Date(), 90)
-                    break
-                case 'año':
-                    startDate = new Date(new Date().getFullYear(), 0, 1)
-                    break
-                default:
-                    startDate = startOfMonth(new Date())
-            }
+            if (!response.ok) throw new Error('Error al cargar reportes')
 
-            // Get sales
-            const { data: ventas } = await supabase
-                .from('ventas')
-                .select('total')
-                .eq('empresa_id', user.empresa_id)
-                .gte('created_at', startDate.toISOString())
-
-            const ventasTotal = ventas?.reduce((acc, v) => acc + (v.total || 0), 0) || 0
-
-            // Get orders
-            const { count: ordenesCompletadas } = await supabase
-                .from('ordenes_servicio')
-                .select('*', { count: 'exact', head: true })
-                .eq('empresa_id', user.empresa_id)
-                .eq('estado', 'entregado')
-                .gte('created_at', startDate.toISOString())
-
-            const { count: ordenesPendientes } = await supabase
-                .from('ordenes_servicio')
-                .select('*', { count: 'exact', head: true })
-                .eq('empresa_id', user.empresa_id)
-                .neq('estado', 'entregado')
-
-            // Get new clients
-            const { count: clientesNuevos } = await supabase
-                .from('clientes')
-                .select('*', { count: 'exact', head: true })
-                .eq('empresa_id', user.empresa_id)
-                .gte('created_at', startDate.toISOString())
-
-            setStats({
-                ventas_total: ventasTotal,
-                ordenes_completadas: ordenesCompletadas || 0,
-                ordenes_pendientes: ordenesPendientes || 0,
-                clientes_nuevos: clientesNuevos || 0,
-                productos_vendidos: 0,
-                ingreso_promedio: ventas?.length ? ventasTotal / ventas.length : 0,
-            })
-
+            const data = await response.json()
+            setStats(data)
         } catch (error) {
             console.error('Error loading reports:', error)
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id, periodo])
+
+    useEffect(() => {
+        loadReports()
+    }, [loadReports])
 
     const statCards = [
         {

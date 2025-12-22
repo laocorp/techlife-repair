@@ -4,9 +4,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence, Reorder } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuthStore } from '@/stores'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -40,10 +39,10 @@ import {
 
 interface Orden {
     id: string
-    numero_orden: string
-    equipo: string
-    marca: string | null
-    modelo: string | null
+    numero: string
+    equipo_tipo: string
+    equipo_marca: string | null
+    equipo_modelo: string | null
     estado: string
     prioridad: string
     problema_reportado: string | null
@@ -64,7 +63,7 @@ const columnas = [
         icon: Clock
     },
     {
-        id: 'diagnostico',
+        id: 'en_diagnostico',
         titulo: 'Diagnóstico',
         color: 'from-amber-500 to-orange-600',
         bgColor: 'bg-amber-500/10',
@@ -72,7 +71,7 @@ const columnas = [
         icon: AlertTriangle
     },
     {
-        id: 'reparacion',
+        id: 'en_reparacion',
         titulo: 'En Reparación',
         color: 'from-violet-500 to-purple-600',
         bgColor: 'bg-violet-500/10',
@@ -80,7 +79,7 @@ const columnas = [
         icon: Wrench
     },
     {
-        id: 'listo',
+        id: 'terminado',
         titulo: 'Listo',
         color: 'from-emerald-500 to-green-600',
         bgColor: 'bg-emerald-500/10',
@@ -101,67 +100,44 @@ export default function KanbanPage() {
     const [ordenes, setOrdenes] = useState<Orden[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [updatingId, setUpdatingId] = useState<string | null>(null)
-    const supabase = createClient()
 
-    useEffect(() => {
-        loadOrdenes()
-
-        // Real-time subscription
-        const channel = supabase
-            .channel('ordenes-realtime')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'ordenes_servicio',
-                },
-                (payload) => {
-                    console.log('Realtime update:', payload)
-                    loadOrdenes() // Reload on any change
-                }
-            )
-            .subscribe()
-
-        return () => {
-            supabase.removeChannel(channel)
-        }
-    }, [user?.empresa_id])
-
-    const loadOrdenes = async () => {
+    const loadOrdenes = useCallback(async () => {
         if (!user?.empresa_id) return
 
         try {
-            const { data, error } = await supabase
-                .from('ordenes_servicio')
-                .select(`
-                    id, numero_orden, equipo, marca, modelo, estado, prioridad, problema_reportado, created_at,
-                    cliente:clientes(nombre, telefono)
-                `)
-                .eq('empresa_id', user.empresa_id)
-                .neq('estado', 'entregado')
-                .order('created_at', { ascending: false })
+            const response = await fetch(`/api/ordenes?empresa_id=${user.empresa_id}&exclude_estado=entregado`)
 
-            if (error) throw error
-            setOrdenes(data as unknown as Orden[] || [])
+            if (!response.ok) throw new Error('Error al cargar órdenes')
+
+            const data = await response.json()
+            setOrdenes(data || [])
         } catch (error: any) {
             console.error('Error loading orders:', error)
             toast.error('Error al cargar órdenes')
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id])
+
+    useEffect(() => {
+        loadOrdenes()
+
+        // Polling every 30 seconds
+        const interval = setInterval(loadOrdenes, 30000)
+        return () => clearInterval(interval)
+    }, [loadOrdenes])
 
     const handleDrop = async (ordenId: string, nuevoEstado: string) => {
         setUpdatingId(ordenId)
 
         try {
-            const { error } = await supabase
-                .from('ordenes_servicio')
-                .update({ estado: nuevoEstado })
-                .eq('id', ordenId)
+            const response = await fetch(`/api/ordenes/${ordenId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estado: nuevoEstado })
+            })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error al actualizar')
 
             // Update local state
             setOrdenes(prev => prev.map(o =>
@@ -301,7 +277,7 @@ export default function KanbanPage() {
                                                     <div className="flex items-center gap-2">
                                                         <div className={`w-2 h-2 rounded-full ${prioridad.dot}`} />
                                                         <span className="font-mono text-sm font-medium text-[hsl(var(--text-primary))]">
-                                                            {orden.numero_orden}
+                                                            {orden.numero}
                                                         </span>
                                                     </div>
                                                     <DropdownMenu>
@@ -323,10 +299,10 @@ export default function KanbanPage() {
 
                                                 {/* Equipment */}
                                                 <p className="text-sm font-medium text-[hsl(var(--text-primary))] mb-1 line-clamp-1">
-                                                    {orden.equipo}
+                                                    {orden.equipo_tipo}
                                                 </p>
                                                 <p className="text-xs text-[hsl(var(--text-muted))] mb-2 line-clamp-1">
-                                                    {orden.marca} {orden.modelo}
+                                                    {orden.equipo_marca} {orden.equipo_modelo}
                                                 </p>
 
                                                 {/* Problem */}

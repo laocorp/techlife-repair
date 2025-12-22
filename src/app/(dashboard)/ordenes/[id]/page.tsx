@@ -1,52 +1,38 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores'
 import { useTenant } from '@/hooks'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
 import {
     ArrowLeft,
-    Calendar,
     CheckCircle,
     Clock,
-    DollarSign,
     FileText,
-    MessageSquare,
-    Printer,
     Save,
-    Share2,
     User,
     Wrench,
     AlertTriangle,
-    Send,
-    Plus,
-    Trash2,
     Edit,
     Phone,
     Mail,
-    MapPin,
     QrCode,
     Search,
-    Download,
     Package,
     ExternalLink,
     Loader2
@@ -68,7 +54,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { PermissionGate } from '@/hooks/use-permissions'
 import { generateOrderQR } from '@/lib/qr-generator'
 
-// Import PDFDownloadButton dynamically (renamed from Wrapper to match export and usage)
+// Import PDFDownloadButton dynamically
 const PDFDownloadButton = dynamic(
     () => import('@/components/pdf/pdf-download-wrapper').then(mod => mod.PDFDownloadButton),
     { ssr: false }
@@ -76,11 +62,11 @@ const PDFDownloadButton = dynamic(
 
 interface OrdenServicio {
     id: string
-    numero_orden: string
-    equipo: string
-    marca: string | null
-    modelo: string | null
-    serie: string | null
+    numero: string
+    equipo_tipo: string
+    equipo_marca: string | null
+    equipo_modelo: string | null
+    equipo_serie: string | null
     accesorios: string | null
     problema_reportado: string | null
     diagnostico: string | null
@@ -90,7 +76,6 @@ interface OrdenServicio {
     costo_estimado: number | null
     costo_final: number | null
     created_at: string
-    updated_at: string
     cliente: {
         id: string
         nombre: string
@@ -103,13 +88,6 @@ interface OrdenServicio {
         id: string
         nombre: string
     } | null
-    empresa: {
-        nombre: string
-        ruc: string
-        direccion: string | null
-        telefono: string | null
-        email: string | null
-    }
 }
 
 const estadoConfig: Record<string, { label: string; color: string; bgColor: string; icon: any }> = {
@@ -143,30 +121,20 @@ export default function OrdenDetallePage() {
         costo_final: '',
     })
 
-    const supabase = createClient()
     const ordenId = params.id as string
 
-    useEffect(() => {
-        loadOrden()
-    }, [ordenId])
-
-    const loadOrden = async () => {
+    const loadOrden = useCallback(async () => {
         if (!ordenId) return
 
         setIsLoading(true)
         try {
-            const { data, error } = await supabase
-                .from('ordenes_servicio')
-                .select(`
-          *,
-          cliente:clientes(*),
-          tecnico:usuarios!ordenes_servicio_tecnico_id_fkey(id, nombre),
-          empresa:empresas(nombre, ruc, direccion, telefono, email)
-        `)
-                .eq('id', ordenId)
-                .single()
+            const response = await fetch(`/api/ordenes/${ordenId}`)
 
-            if (error) throw error
+            if (!response.ok) {
+                throw new Error('Orden no encontrada')
+            }
+
+            const data = await response.json()
             setOrden(data)
             setFormData({
                 estado: data.estado,
@@ -180,24 +148,31 @@ export default function OrdenDetallePage() {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [ordenId, router])
+
+    useEffect(() => {
+        loadOrden()
+    }, [loadOrden])
 
     const handleSave = async () => {
         if (!orden) return
 
         setIsSaving(true)
         try {
-            const { error } = await supabase
-                .from('ordenes_servicio')
-                .update({
+            const response = await fetch(`/api/ordenes/${orden.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     estado: formData.estado,
                     diagnostico: formData.diagnostico || null,
-                    costo_estimado: formData.costo_estimado ? parseFloat(formData.costo_estimado) : null,
-                    costo_final: formData.costo_final ? parseFloat(formData.costo_final) : null,
+                    costo_estimado: formData.costo_estimado || null,
+                    costo_final: formData.costo_final || null,
                 })
-                .eq('id', orden.id)
+            })
 
-            if (error) throw error
+            if (!response.ok) {
+                throw new Error('Error al guardar')
+            }
 
             toast.success('Orden actualizada')
             setIsEditing(false)
@@ -252,7 +227,7 @@ export default function OrdenDetallePage() {
                     </Link>
                     <div>
                         <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-                            Orden {orden.numero_orden}
+                            Orden {orden.numero}
                             <Badge className={`${estado.bgColor} border-0 text-white gap-1`}>
                                 <EstadoIcon className="h-3 w-3" />
                                 {estado.label}
@@ -268,12 +243,17 @@ export default function OrdenDetallePage() {
                     <PDFDownloadButton
                         orden={{
                             ...orden,
+                            numero_orden: orden.numero,
+                            equipo: orden.equipo_tipo,
+                            marca: orden.equipo_marca,
+                            modelo: orden.equipo_modelo,
+                            serie: orden.equipo_serie,
                             problema: orden.problema_reportado,
                             cliente: orden.cliente || null,
                         }}
                         qrCodeUrl={qrData?.qrDataUrl || ''}
                         trackingUrl={typeof window !== 'undefined' ? `${window.location.origin}/tracking/${orden.id}` : ''}
-                        fileName={`Orden-${orden.numero_orden}.pdf`}
+                        fileName={`Orden-${orden.numero}.pdf`}
                         className="border-white/10 text-white hover:bg-white/5"
                     >
                         Descargar PDF
@@ -284,6 +264,7 @@ export default function OrdenDetallePage() {
                         onClick={handleGenerateQR}
                         className="gap-2 border-white/10 text-white hover:bg-white/5"
                     >
+                        <QrCode className="h-4 w-4" />
                     </Button>
 
                     <PermissionGate permission="orders.update">
@@ -333,19 +314,19 @@ export default function OrdenDetallePage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <p className="text-sm text-slate-500">Equipo</p>
-                                    <p className="text-white font-medium">{orden.equipo}</p>
+                                    <p className="text-white font-medium">{orden.equipo_tipo}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-slate-500">Marca</p>
-                                    <p className="text-white">{orden.marca || '-'}</p>
+                                    <p className="text-white">{orden.equipo_marca || '-'}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-slate-500">Modelo</p>
-                                    <p className="text-white">{orden.modelo || '-'}</p>
+                                    <p className="text-white">{orden.equipo_modelo || '-'}</p>
                                 </div>
                                 <div>
                                     <p className="text-sm text-slate-500">N° Serie</p>
-                                    <p className="text-white font-mono">{orden.serie || '-'}</p>
+                                    <p className="text-white font-mono">{orden.equipo_serie || '-'}</p>
                                 </div>
                             </div>
                             {orden.accesorios && (
@@ -443,13 +424,13 @@ export default function OrdenDetallePage() {
                                                 {orden.costo_estimado && (
                                                     <div>
                                                         <p className="text-sm text-slate-500">Costo Estimado</p>
-                                                        <p className="text-xl text-white">${orden.costo_estimado.toFixed(2)}</p>
+                                                        <p className="text-xl text-white">${Number(orden.costo_estimado).toFixed(2)}</p>
                                                     </div>
                                                 )}
                                                 {orden.costo_final && (
                                                     <div>
                                                         <p className="text-sm text-slate-500">Costo Final</p>
-                                                        <p className="text-xl font-bold text-emerald-400">${orden.costo_final.toFixed(2)}</p>
+                                                        <p className="text-xl font-bold text-emerald-400">${Number(orden.costo_final).toFixed(2)}</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -560,13 +541,12 @@ export default function OrdenDetallePage() {
                                         alt="QR Code"
                                         fill
                                         className="object-contain"
-                                        unoptimized // QR data URLs might not be cacheable/optimizable by Next.js Image Optimization API properly if they are base64, but let's try standard approach or use unoptimized if it's base64 data URI usually.
+                                        unoptimized
                                     />
                                 </div>
                                 <p className="text-slate-400 text-sm mt-4 text-center">
                                     El cliente puede escanear este código para ver el estado de su orden
                                 </p>
-
                                 <p className="text-xs text-blue-400 mt-2 break-all text-center">
                                     {qrData.trackingUrl}
                                 </p>

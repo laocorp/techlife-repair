@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
 import { PermissionGate } from '@/hooks/use-permissions'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -24,13 +23,6 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
@@ -87,53 +79,29 @@ export default function CajaPage() {
     const [movementMonto, setMovementMonto] = useState('')
     const [movementConcepto, setMovementConcepto] = useState('')
 
-    const supabase = createClient()
-
-    useEffect(() => {
-        loadData()
-    }, [user?.empresa_id])
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         if (!user?.empresa_id) return
 
         setIsLoading(true)
         try {
-            // Get active cash register
-            const { data: caja } = await supabase
-                .from('caja')
-                .select('*, usuario:usuarios!caja_usuario_id_fkey(nombre)')
-                .eq('empresa_id', user.empresa_id)
-                .eq('estado', 'abierta')
-                .single()
+            const response = await fetch(`/api/caja?empresa_id=${user.empresa_id}`)
 
-            setCajaActiva(caja)
+            if (!response.ok) throw new Error('Error al cargar caja')
 
-            // Get movements for active caja
-            if (caja) {
-                const { data: movs } = await supabase
-                    .from('caja_movimientos')
-                    .select('*')
-                    .eq('caja_id', caja.id)
-                    .order('created_at', { ascending: false })
-
-                setMovimientos(movs || [])
-            }
-
-            // Get history
-            const { data: hist } = await supabase
-                .from('caja')
-                .select('*, usuario:usuarios!caja_usuario_id_fkey(nombre)')
-                .eq('empresa_id', user.empresa_id)
-                .order('fecha_apertura', { ascending: false })
-                .limit(10)
-
-            setHistorial(hist || [])
+            const data = await response.json()
+            setCajaActiva(data.cajaActiva)
+            setMovimientos(data.movimientos || [])
+            setHistorial(data.historial || [])
         } catch (error) {
             console.error('Error loading caja:', error)
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id])
+
+    useEffect(() => {
+        loadData()
+    }, [loadData])
 
     const handleOpenCaja = async () => {
         if (!montoInicial) {
@@ -143,14 +111,20 @@ export default function CajaPage() {
 
         setIsProcessing(true)
         try {
-            const { error } = await supabase.from('caja').insert({
-                empresa_id: user?.empresa_id,
-                usuario_id: user?.id,
-                monto_apertura: parseFloat(montoInicial),
-                estado: 'abierta',
+            const response = await fetch('/api/caja', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    empresa_id: user?.empresa_id,
+                    usuario_id: user?.id,
+                    monto_apertura: montoInicial
+                })
             })
 
-            if (error) throw error
+            if (!response.ok) {
+                const data = await response.json()
+                throw new Error(data.error || 'Error al abrir caja')
+            }
 
             toast.success('Caja abierta exitosamente')
             setIsOpenDialogOpen(false)
@@ -171,22 +145,22 @@ export default function CajaPage() {
             // Calculate final amount
             const totalIngresos = movimientos
                 .filter(m => m.tipo === 'ingreso')
-                .reduce((acc, m) => acc + m.monto, 0)
+                .reduce((acc, m) => acc + Number(m.monto), 0)
             const totalEgresos = movimientos
                 .filter(m => m.tipo === 'egreso')
-                .reduce((acc, m) => acc + m.monto, 0)
-            const montoFinal = cajaActiva.monto_apertura + totalIngresos - totalEgresos
+                .reduce((acc, m) => acc + Number(m.monto), 0)
+            const montoFinal = Number(cajaActiva.monto_apertura) + totalIngresos - totalEgresos
 
-            const { error } = await supabase
-                .from('caja')
-                .update({
+            const response = await fetch(`/api/caja/${cajaActiva.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     estado: 'cerrada',
-                    monto_cierre: montoFinal,
-                    fecha_cierre: new Date().toISOString(),
+                    monto_cierre: montoFinal
                 })
-                .eq('id', cajaActiva.id)
+            })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error al cerrar caja')
 
             toast.success('Caja cerrada', {
                 description: `Monto final: $${montoFinal.toFixed(2)}`,
@@ -208,14 +182,18 @@ export default function CajaPage() {
 
         setIsProcessing(true)
         try {
-            const { error } = await supabase.from('caja_movimientos').insert({
-                caja_id: cajaActiva.id,
-                tipo: movementType,
-                concepto: movementConcepto,
-                monto: parseFloat(movementMonto),
+            const response = await fetch('/api/caja/movimientos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    caja_id: cajaActiva.id,
+                    tipo: movementType,
+                    concepto: movementConcepto,
+                    monto: movementMonto
+                })
             })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error al registrar movimiento')
 
             toast.success(`${movementType === 'ingreso' ? 'Ingreso' : 'Egreso'} registrado`)
             setIsMovementDialogOpen(false)
@@ -230,9 +208,9 @@ export default function CajaPage() {
     }
 
     // Calculate totals
-    const totalIngresos = movimientos.filter(m => m.tipo === 'ingreso').reduce((acc, m) => acc + m.monto, 0)
-    const totalEgresos = movimientos.filter(m => m.tipo === 'egreso').reduce((acc, m) => acc + m.monto, 0)
-    const saldoActual = (cajaActiva?.monto_apertura || 0) + totalIngresos - totalEgresos
+    const totalIngresos = movimientos.filter(m => m.tipo === 'ingreso').reduce((acc, m) => acc + Number(m.monto), 0)
+    const totalEgresos = movimientos.filter(m => m.tipo === 'egreso').reduce((acc, m) => acc + Number(m.monto), 0)
+    const saldoActual = (Number(cajaActiva?.monto_apertura) || 0) + totalIngresos - totalEgresos
 
     return (
         <motion.div
@@ -339,7 +317,7 @@ export default function CajaPage() {
                     <Card className="bg-white/5 border-white/10">
                         <CardContent className="p-4">
                             <p className="text-slate-400 text-sm">Monto Inicial</p>
-                            <p className="text-2xl font-bold text-white">${cajaActiva.monto_apertura.toFixed(2)}</p>
+                            <p className="text-2xl font-bold text-white">${Number(cajaActiva.monto_apertura).toFixed(2)}</p>
                         </CardContent>
                     </Card>
                     <Card className="bg-white/5 border-white/10">
@@ -409,7 +387,7 @@ export default function CajaPage() {
                                             </TableCell>
                                             <TableCell className="text-white">{mov.concepto}</TableCell>
                                             <TableCell className={`text-right font-medium ${mov.tipo === 'ingreso' ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                {mov.tipo === 'ingreso' ? '+' : '-'}${mov.monto.toFixed(2)}
+                                                {mov.tipo === 'ingreso' ? '+' : '-'}${Number(mov.monto).toFixed(2)}
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -465,7 +443,7 @@ export default function CajaPage() {
                         <div className="bg-white/5 rounded-xl p-4 space-y-2">
                             <div className="flex justify-between">
                                 <span className="text-slate-400">Monto Inicial:</span>
-                                <span className="text-white">${cajaActiva?.monto_apertura.toFixed(2)}</span>
+                                <span className="text-white">${Number(cajaActiva?.monto_apertura || 0).toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-slate-400">+ Ingresos:</span>

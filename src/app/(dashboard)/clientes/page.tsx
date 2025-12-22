@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
 import { PermissionGate } from '@/hooks/use-permissions'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -46,14 +45,11 @@ interface Cliente {
     id: string
     nombre: string
     identificacion: string
-    tipo_identificacion: string
+    tipo_id: string
     email: string | null
     telefono: string | null
     direccion: string | null
     created_at: string
-    _count?: {
-        ordenes: number
-    }
 }
 
 export default function ClientesPage() {
@@ -64,44 +60,41 @@ export default function ClientesPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
     const [isSaving, setIsSaving] = useState(false)
-    const supabase = createClient()
 
     const [formData, setFormData] = useState({
         nombre: '',
         identificacion: '',
-        tipo_identificacion: 'cedula',
+        tipo_id: 'cedula',
         email: '',
         telefono: '',
         direccion: '',
     })
 
-    useEffect(() => {
-        loadClientes()
-    }, [user?.empresa_id])
-
-    const loadClientes = async () => {
+    const loadClientes = useCallback(async () => {
         if (!user?.empresa_id) return
 
         setIsLoading(true)
         try {
-            const { data, error } = await supabase
-                .from('clientes')
-                .select('*')
-                .eq('empresa_id', user.empresa_id)
-                .order('nombre')
+            const response = await fetch(`/api/clientes?empresa_id=${user.empresa_id}`)
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error al cargar clientes')
+
+            const data = await response.json()
             setClientes(data || [])
         } catch (error: any) {
             toast.error('Error al cargar clientes', { description: error.message })
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id])
+
+    useEffect(() => {
+        loadClientes()
+    }, [loadClientes])
 
     const filteredClientes = clientes.filter(c =>
         c.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.identificacion.includes(searchQuery) ||
+        (c.identificacion && c.identificacion.includes(searchQuery)) ||
         (c.telefono && c.telefono.includes(searchQuery))
     )
 
@@ -110,7 +103,7 @@ export default function ClientesPage() {
         setFormData({
             nombre: '',
             identificacion: '',
-            tipo_identificacion: 'cedula',
+            tipo_id: 'cedula',
             email: '',
             telefono: '',
             direccion: '',
@@ -122,8 +115,8 @@ export default function ClientesPage() {
         setSelectedCliente(cliente)
         setFormData({
             nombre: cliente.nombre,
-            identificacion: cliente.identificacion,
-            tipo_identificacion: cliente.tipo_identificacion,
+            identificacion: cliente.identificacion || '',
+            tipo_id: cliente.tipo_id || 'cedula',
             email: cliente.email || '',
             telefono: cliente.telefono || '',
             direccion: cliente.direccion || '',
@@ -132,8 +125,8 @@ export default function ClientesPage() {
     }
 
     const handleSave = async () => {
-        if (!formData.nombre || !formData.identificacion) {
-            toast.error('Nombre e identificación son requeridos')
+        if (!formData.nombre) {
+            toast.error('Nombre es requerido')
             return
         }
 
@@ -142,30 +135,34 @@ export default function ClientesPage() {
             const clienteData = {
                 empresa_id: user?.empresa_id,
                 nombre: formData.nombre,
-                identificacion: formData.identificacion,
-                tipo_identificacion: formData.tipo_identificacion,
+                identificacion: formData.identificacion || null,
+                tipo_id: formData.tipo_id,
                 email: formData.email || null,
                 telefono: formData.telefono || null,
                 direccion: formData.direccion || null,
             }
 
+            let response
             if (selectedCliente) {
-                const { error } = await supabase
-                    .from('clientes')
-                    .update(clienteData)
-                    .eq('id', selectedCliente.id)
-
-                if (error) throw error
-                toast.success('Cliente actualizado')
+                response = await fetch(`/api/clientes/${selectedCliente.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(clienteData)
+                })
             } else {
-                const { error } = await supabase
-                    .from('clientes')
-                    .insert(clienteData)
-
-                if (error) throw error
-                toast.success('Cliente creado')
+                response = await fetch('/api/clientes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(clienteData)
+                })
             }
 
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || 'Error al guardar')
+            }
+
+            toast.success(selectedCliente ? 'Cliente actualizado' : 'Cliente creado')
             setIsDialogOpen(false)
             loadClientes()
         } catch (error: any) {
@@ -282,9 +279,9 @@ export default function ClientesPage() {
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className="border-white/10 text-slate-300">
-                                                {cliente.tipo_identificacion.toUpperCase()}
+                                                {(cliente.tipo_id || 'cedula').toUpperCase()}
                                             </Badge>
-                                            <p className="text-white mt-1">{cliente.identificacion}</p>
+                                            <p className="text-white mt-1">{cliente.identificacion || '-'}</p>
                                         </TableCell>
                                         <TableCell>
                                             {cliente.telefono && (
@@ -350,8 +347,8 @@ export default function ClientesPage() {
                             <div className="space-y-2">
                                 <Label className="text-slate-300">Tipo</Label>
                                 <select
-                                    value={formData.tipo_identificacion}
-                                    onChange={(e) => setFormData(f => ({ ...f, tipo_identificacion: e.target.value }))}
+                                    value={formData.tipo_id}
+                                    onChange={(e) => setFormData(f => ({ ...f, tipo_id: e.target.value }))}
                                     className="w-full h-10 rounded-md bg-white/5 border border-white/10 text-white px-3"
                                 >
                                     <option value="cedula">Cédula</option>
@@ -360,7 +357,7 @@ export default function ClientesPage() {
                                 </select>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-slate-300">Identificación *</Label>
+                                <Label className="text-slate-300">Identificación</Label>
                                 <Input
                                     value={formData.identificacion}
                                     onChange={(e) => setFormData(f => ({ ...f, identificacion: e.target.value }))}

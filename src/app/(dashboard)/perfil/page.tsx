@@ -3,10 +3,9 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,7 +36,6 @@ export default function PerfilPage() {
     const { user } = useAuthStore()
     const [isLoading, setIsLoading] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
-    const supabase = createClient()
 
     const [formData, setFormData] = useState({
         nombre: user?.nombre || '',
@@ -56,14 +54,14 @@ export default function PerfilPage() {
 
         setIsSaving(true)
         try {
-            const { error } = await supabase
-                .from('usuarios')
-                .update({
-                    nombre: formData.nombre,
-                })
-                .eq('id', user.id)
+            const response = await fetch(`/api/usuarios/${user.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre: formData.nombre })
+            })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error al guardar')
+
             toast.success('Perfil actualizado')
         } catch (error: any) {
             console.error('Error saving profile:', error)
@@ -86,11 +84,20 @@ export default function PerfilPage() {
 
         setIsLoading(true)
         try {
-            const { error } = await supabase.auth.updateUser({
-                password: passwordData.new,
+            const response = await fetch(`/api/usuarios/${user?.id}/password`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    currentPassword: passwordData.current,
+                    newPassword: passwordData.new
+                })
             })
 
-            if (error) throw error
+            if (!response.ok) {
+                const data = await response.json()
+                throw new Error(data.error || 'Error al cambiar contraseña')
+            }
+
             toast.success('Contraseña actualizada')
             setPasswordData({ current: '', new: '', confirm: '' })
         } catch (error: any) {

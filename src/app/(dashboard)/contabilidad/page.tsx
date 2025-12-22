@@ -3,11 +3,10 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
 import { PermissionGate } from '@/hooks/use-permissions'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -104,36 +103,27 @@ export default function ContabilidadPage() {
         fecha: format(new Date(), 'yyyy-MM-dd'),
     })
 
-    const supabase = createClient()
-
-    useEffect(() => {
-        loadMovimientos()
-    }, [user?.empresa_id, mesActual])
-
-    const loadMovimientos = async () => {
+    const loadMovimientos = useCallback(async () => {
         if (!user?.empresa_id) return
 
         setIsLoading(true)
         try {
-            const inicio = startOfMonth(mesActual)
-            const fin = endOfMonth(mesActual)
+            const mes = format(mesActual, 'yyyy-MM')
+            const response = await fetch(`/api/contabilidad?empresa_id=${user.empresa_id}&mes=${mes}`)
+            if (!response.ok) throw new Error('Error loading movements')
 
-            const { data, error } = await supabase
-                .from('contabilidad')
-                .select('*')
-                .eq('empresa_id', user.empresa_id)
-                .gte('fecha', inicio.toISOString())
-                .lte('fecha', fin.toISOString())
-                .order('fecha', { ascending: false })
-
-            if (error) throw error
+            const data = await response.json()
             setMovimientos(data || [])
         } catch (error: any) {
             console.error('Error loading movements:', error)
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id, mesActual])
+
+    useEffect(() => {
+        loadMovimientos()
+    }, [loadMovimientos])
 
     const handleSubmit = async () => {
         if (!formData.categoria || !formData.monto) {
@@ -143,18 +133,20 @@ export default function ContabilidadPage() {
 
         setIsSaving(true)
         try {
-            const { error } = await supabase
-                .from('contabilidad')
-                .insert({
+            const response = await fetch('/api/contabilidad', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     empresa_id: user?.empresa_id,
                     tipo: formData.tipo,
                     categoria: formData.categoria,
-                    monto: parseFloat(formData.monto),
+                    monto: formData.monto,
                     descripcion: formData.descripcion || null,
                     fecha: formData.fecha,
                 })
+            })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error saving movement')
 
             toast.success('Movimiento registrado')
             setIsDialogOpen(false)
@@ -389,8 +381,8 @@ export default function ContabilidadPage() {
                             <button
                                 onClick={() => setFormData(f => ({ ...f, tipo: 'ingreso', categoria: '' }))}
                                 className={`py-2 rounded-md text-sm font-medium transition-colors ${formData.tipo === 'ingreso'
-                                        ? 'bg-emerald-500 text-white'
-                                        : 'text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))]'
+                                    ? 'bg-emerald-500 text-white'
+                                    : 'text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))]'
                                     }`}
                             >
                                 Ingreso
@@ -398,8 +390,8 @@ export default function ContabilidadPage() {
                             <button
                                 onClick={() => setFormData(f => ({ ...f, tipo: 'egreso', categoria: '' }))}
                                 className={`py-2 rounded-md text-sm font-medium transition-colors ${formData.tipo === 'egreso'
-                                        ? 'bg-red-500 text-white'
-                                        : 'text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))]'
+                                    ? 'bg-red-500 text-white'
+                                    : 'text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))]'
                                     }`}
                             >
                                 Egreso

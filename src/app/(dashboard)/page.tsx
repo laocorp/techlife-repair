@@ -26,8 +26,7 @@ import {
     Zap,
 } from 'lucide-react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 
 // Dynamically import charts to reduce initial bundle size
@@ -94,102 +93,36 @@ export default function DashboardPage() {
     const [recentOrders, setRecentOrders] = useState<any[]>([])
     const [lowStock, setLowStock] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const supabase = createClient()
 
-    const loadDashboardData = async () => {
+    const loadDashboardData = useCallback(async () => {
         if (!user?.empresa_id) return
 
         try {
-            // Get recent orders
-            const { data: ordersData } = await supabase
-                .from('ordenes_servicio')
-                .select('*, cliente:clientes(nombre)')
-                .eq('empresa_id', user.empresa_id)
-                .neq('estado', 'entregado')
-                .order('created_at', { ascending: false })
-                .limit(5)
+            const response = await fetch(`/api/dashboard?empresa_id=${user.empresa_id}`)
 
-            setRecentOrders(ordersData || [])
+            if (!response.ok) {
+                throw new Error('Failed to fetch dashboard data')
+            }
 
-            // Get low stock products
-            const { data: stockData } = await supabase
-                .from('productos')
-                .select('id, nombre, stock, stock_minimo')
-                .eq('empresa_id', user.empresa_id)
-                .eq('activo', true)
-                .order('stock', { ascending: true })
-                .limit(5)
+            const data = await response.json()
 
-            const filtered = stockData?.filter(p => p.stock <= p.stock_minimo) || []
-            setLowStock(filtered)
-
-            // Count active orders
-            const { count: ordenesActivas } = await supabase
-                .from('ordenes_servicio')
-                .select('*', { count: 'exact', head: true })
-                .eq('empresa_id', user.empresa_id)
-                .neq('estado', 'entregado')
-
-            // Count completed orders
-            const { count: ordenesCompletadas } = await supabase
-                .from('ordenes_servicio')
-                .select('*', { count: 'exact', head: true })
-                .eq('empresa_id', user.empresa_id)
-                .eq('estado', 'entregado')
-
-            // Count orders today
-            const today = new Date().toISOString().split('T')[0]
-            const { count: ordenesHoy } = await supabase
-                .from('ordenes_servicio')
-                .select('*', { count: 'exact', head: true })
-                .eq('empresa_id', user.empresa_id)
-                .gte('created_at', today)
-
-            // Count total clients
-            const { count: clientesTotal } = await supabase
-                .from('clientes')
-                .select('*', { count: 'exact', head: true })
-                .eq('empresa_id', user.empresa_id)
-
-            // Get sales this month
-            const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
-            const { data: ventasData } = await supabase
-                .from('ventas')
-                .select('total')
-                .eq('empresa_id', user.empresa_id)
-                .gte('created_at', startOfMonth)
-
-            const ventasMes = ventasData?.reduce((acc, v) => acc + (v.total || 0), 0) || 0
-
-            setStats({
-                ordenes_activas: ordenesActivas || 0,
-                ordenes_hoy: ordenesHoy || 0,
-                ventas_hoy: 0,
-                ventas_mes: ventasMes,
-                clientes_total: clientesTotal || 0,
-                clientes_nuevos_mes: 0,
-                productos_stock_bajo: filtered.length,
-                ordenes_completadas: ordenesCompletadas || 0,
-            })
-
+            setStats(data.stats)
+            setRecentOrders(data.recentOrders || [])
+            setLowStock(data.lowStock || [])
         } catch (error) {
             console.error('Error loading dashboard:', error)
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id])
 
     useEffect(() => {
         loadDashboardData()
 
-        const channel = supabase
-            .channel('dashboard-realtime')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'ordenes_servicio' }, () => loadDashboardData())
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'ventas' }, () => loadDashboardData())
-            .subscribe()
-
-        return () => { supabase.removeChannel(channel) }
-    }, [user?.empresa_id])
+        // Poll every 30 seconds for updates
+        const interval = setInterval(loadDashboardData, 30000)
+        return () => clearInterval(interval)
+    }, [loadDashboardData])
 
     const statCards = [
         {
@@ -379,10 +312,10 @@ export default function DashboardPage() {
                                                             </div>
                                                             <div>
                                                                 <p className="text-sm font-medium text-white">
-                                                                    {order.equipo}
+                                                                    {order.equipo_tipo} {order.equipo_marca}
                                                                 </p>
                                                                 <p className="text-xs text-zinc-500 mt-0.5">
-                                                                    {order.cliente?.nombre || 'Sin cliente'} · {order.numero_orden}
+                                                                    {order.cliente?.nombre || 'Sin cliente'} · {order.numero}
                                                                 </p>
                                                             </div>
                                                         </div>

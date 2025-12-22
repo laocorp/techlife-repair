@@ -50,6 +50,12 @@ model Empresa {
   ventas                Venta[]
   notificaciones        Notificacion[]
   secuenciales          Secuencial[]
+  marcas                Marca[]
+  modelos               Modelo[]
+  cajas                 Caja[]
+  contabilidad          Contabilidad[]
+  suscripciones         Suscripcion[]
+  facturas              FacturacionElectronica[]
   
   @@map("empresas")
 }
@@ -70,6 +76,7 @@ model Usuario {
   // Relaciones
   ordenes_asignadas OrdenServicio[] @relation("TecnicoAsignado")
   ordenes_creadas   OrdenServicio[] @relation("CreadoPor")
+  cajas             Caja[]
   
   @@map("usuarios")
 }
@@ -293,3 +300,164 @@ model SriConfiguracion {
   
   @@map("sri_configuracion")
 }
+
+// ============ MARCAS Y MODELOS ============
+
+model Marca {
+  id          String    @id @default(uuid())
+  nombre      String
+  pais        String?
+  activo      Boolean   @default(true)
+  
+  empresa_id  String
+  empresa     Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
+  
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  
+  modelos     Modelo[]
+  
+  @@map("marcas")
+}
+
+model Modelo {
+  id              String    @id @default(uuid())
+  nombre          String
+  tipo_equipo     String?
+  activo          Boolean   @default(true)
+  
+  marca_id        String
+  marca           Marca     @relation(fields: [marca_id], references: [id], onDelete: Cascade)
+  
+  empresa_id      String
+  empresa         Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
+  
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  
+  @@map("modelos")
+}
+
+// ============ CAJA ============
+
+model Caja {
+  id              String    @id @default(uuid())
+  monto_apertura  Decimal   @db.Decimal(10, 2)
+  monto_cierre    Decimal?  @db.Decimal(10, 2)
+  estado          String    @default("abierta") // 'abierta' | 'cerrada'
+  
+  empresa_id      String
+  empresa         Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
+  
+  usuario_id      String?
+  usuario         Usuario?  @relation(fields: [usuario_id], references: [id])
+  
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  
+  movimientos     CajaMovimiento[]
+  
+  @@map("cajas")
+}
+
+model CajaMovimiento {
+  id          String    @id @default(uuid())
+  tipo        String    // 'ingreso' | 'egreso'
+  monto       Decimal   @db.Decimal(10, 2)
+  concepto    String?
+  
+  caja_id     String
+  caja        Caja      @relation(fields: [caja_id], references: [id], onDelete: Cascade)
+  
+  created_at  DateTime  @default(now())
+  
+  @@map("caja_movimientos")
+}
+
+// ============ CONTABILIDAD ============
+
+model Contabilidad {
+  id          String    @id @default(uuid())
+  tipo        String    // 'ingreso' | 'egreso'
+  categoria   String
+  monto       Decimal   @db.Decimal(10, 2)
+  descripcion String?
+  fecha       DateTime  @default(now())
+  
+  empresa_id  String
+  empresa     Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
+  
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  
+  @@map("contabilidad")
+}
+
+// ============ PLANES Y SUSCRIPCIONES ============
+
+model Plan {
+  id              String    @id @default(uuid())
+  nombre          String
+  tipo            String
+  precio          Decimal   @db.Decimal(10, 2)
+  
+  max_usuarios    Int       @default(1)
+  max_ordenes_mes Int       @default(50)
+  max_productos   Int       @default(100)
+  max_facturas_mes Int      @default(20)
+  
+  activo          Boolean   @default(true)
+  
+  created_at      DateTime  @default(now())
+  
+  suscripciones   Suscripcion[]
+  
+  @@map("planes")
+}
+
+model Suscripcion {
+  id              String    @id @default(uuid())
+  estado          String    @default("activa") // 'activa' | 'trial' | 'vencida' | 'cancelada'
+  periodo         String    @default("mensual") // 'mensual' | 'anual'
+  fecha_inicio    DateTime  @default(now())
+  fecha_fin       DateTime?
+  
+  empresa_id      String
+  empresa         Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
+  
+  plan_id         String?
+  plan            Plan?     @relation(fields: [plan_id], references: [id])
+  
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  
+  @@map("suscripciones")
+}
+
+// ============ FACTURACIÓN ELECTRÓNICA ============
+
+model FacturacionElectronica {
+  id                      String    @id @default(uuid())
+  numero                  String
+  tipo_comprobante        String
+  
+  cliente_nombre          String
+  cliente_identificacion  String
+  
+  subtotal                Decimal   @db.Decimal(10, 2)
+  iva                     Decimal   @db.Decimal(10, 2)
+  total                   Decimal   @db.Decimal(10, 2)
+  
+  estado                  String    @default("pendiente") // 'pendiente' | 'autorizado' | 'rechazado' | 'anulado'
+  clave_acceso            String?
+  numero_autorizacion     String?
+  
+  empresa_id              String
+  empresa                 Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
+  
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+  
+  @@map("facturacion_electronica")
+}
+

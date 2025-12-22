@@ -1,50 +1,45 @@
-# Dependencies
-node_modules
-npm-debug.log*
-
-# Next.js
+# Build artifacts
 .next
 out
-
-# Build
-dist
 build
 
-# Environment files (secrets)
+# Dependencies
+node_modules
+
+# Local development
 .env
 .env.local
-.env*.local
-
-# IDE
-.vscode
-.idea
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Git
 .git
 .gitignore
 
-# Docker
-Dockerfile*
-docker-compose*
-.dockerignore
+# IDE
+.vscode
+.idea
 
-# Docs and misc
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs
 README.md
-MEJORAS_TAREAS.md
-*.md
-LICENSE
+CHANGELOG.md
+docs
 
 # Tests
-coverage
-.nyc_output
 __tests__
 *.test.ts
 *.test.tsx
 *.spec.ts
-*.spec.tsx
+jest.config.*
+vitest.config.*
+
+# Misc
+*.log
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*

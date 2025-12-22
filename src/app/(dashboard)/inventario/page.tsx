@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
 import { PermissionGate } from '@/hooks/use-permissions'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -50,15 +49,15 @@ import {
 
 interface Producto {
     id: string
-    codigo: string | null
+    codigo: string
     nombre: string
     descripcion: string | null
-    precio: number
-    costo: number
+    precio_venta: number
+    precio_compra: number
     stock: number
     stock_minimo: number
-    tipo: string
     categoria: string | null
+    marca: string | null
     activo: boolean
 }
 
@@ -67,49 +66,45 @@ export default function InventarioPage() {
     const [productos, setProductos] = useState<Producto[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
-    const [filterTipo, setFilterTipo] = useState<string>('all')
     const [filterStock, setFilterStock] = useState<string>('all')
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [selectedProducto, setSelectedProducto] = useState<Producto | null>(null)
     const [isSaving, setIsSaving] = useState(false)
-    const supabase = createClient()
 
     // Form state
     const [formData, setFormData] = useState({
         codigo: '',
         nombre: '',
         descripcion: '',
-        precio: '',
-        costo: '',
+        precio_venta: '',
+        precio_compra: '',
         stock: '',
         stock_minimo: '',
-        tipo: 'producto',
         categoria: '',
+        marca: '',
     })
 
-    useEffect(() => {
-        loadProductos()
-    }, [user?.empresa_id])
-
-    const loadProductos = async () => {
+    const loadProductos = useCallback(async () => {
         if (!user?.empresa_id) return
 
         setIsLoading(true)
         try {
-            const { data, error } = await supabase
-                .from('productos')
-                .select('*')
-                .eq('empresa_id', user.empresa_id)
-                .order('nombre')
+            const response = await fetch(`/api/productos?empresa_id=${user.empresa_id}`)
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error al cargar inventario')
+
+            const data = await response.json()
             setProductos(data || [])
         } catch (error: any) {
             toast.error('Error al cargar inventario', { description: error.message })
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id])
+
+    useEffect(() => {
+        loadProductos()
+    }, [loadProductos])
 
     // Filter products
     const filteredProductos = productos.filter(p => {
@@ -117,13 +112,12 @@ export default function InventarioPage() {
             p.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (p.codigo && p.codigo.toLowerCase().includes(searchQuery.toLowerCase()))
 
-        const matchesTipo = filterTipo === 'all' || p.tipo === filterTipo
         const matchesStock =
             filterStock === 'all' ||
             (filterStock === 'bajo' && p.stock <= p.stock_minimo) ||
             (filterStock === 'sinStock' && p.stock === 0)
 
-        return matchesSearch && matchesTipo && matchesStock
+        return matchesSearch && matchesStock
     })
 
     // Stats
@@ -131,7 +125,7 @@ export default function InventarioPage() {
         total: productos.length,
         stockBajo: productos.filter(p => p.stock <= p.stock_minimo && p.stock > 0).length,
         sinStock: productos.filter(p => p.stock === 0).length,
-        valorTotal: productos.reduce((acc, p) => acc + (p.costo * p.stock), 0),
+        valorTotal: productos.reduce((acc, p) => acc + (Number(p.precio_compra) * p.stock), 0),
     }
 
     const openCreateDialog = () => {
@@ -140,12 +134,12 @@ export default function InventarioPage() {
             codigo: '',
             nombre: '',
             descripcion: '',
-            precio: '',
-            costo: '',
+            precio_venta: '',
+            precio_compra: '',
             stock: '',
             stock_minimo: '5',
-            tipo: 'producto',
             categoria: '',
+            marca: '',
         })
         setIsDialogOpen(true)
     }
@@ -156,19 +150,19 @@ export default function InventarioPage() {
             codigo: producto.codigo || '',
             nombre: producto.nombre,
             descripcion: producto.descripcion || '',
-            precio: producto.precio.toString(),
-            costo: producto.costo.toString(),
-            stock: producto.stock.toString(),
-            stock_minimo: producto.stock_minimo.toString(),
-            tipo: producto.tipo,
+            precio_venta: String(producto.precio_venta),
+            precio_compra: String(producto.precio_compra),
+            stock: String(producto.stock),
+            stock_minimo: String(producto.stock_minimo),
             categoria: producto.categoria || '',
+            marca: producto.marca || '',
         })
         setIsDialogOpen(true)
     }
 
     const handleSave = async () => {
-        if (!formData.nombre || !formData.precio) {
-            toast.error('Nombre y precio son requeridos')
+        if (!formData.nombre || !formData.codigo || !formData.precio_venta || !formData.precio_compra) {
+            toast.error('Código, nombre y precios son requeridos')
             return
         }
 
@@ -176,37 +170,38 @@ export default function InventarioPage() {
         try {
             const productoData = {
                 empresa_id: user?.empresa_id,
-                codigo: formData.codigo || null,
+                codigo: formData.codigo,
                 nombre: formData.nombre,
                 descripcion: formData.descripcion || null,
-                precio: parseFloat(formData.precio),
-                costo: parseFloat(formData.costo) || 0,
-                stock: parseInt(formData.stock) || 0,
-                stock_minimo: parseInt(formData.stock_minimo) || 5,
-                tipo: formData.tipo,
+                precio_venta: formData.precio_venta,
+                precio_compra: formData.precio_compra,
+                stock: formData.stock || '0',
+                stock_minimo: formData.stock_minimo || '5',
                 categoria: formData.categoria || null,
-                iva: 15,
+                marca: formData.marca || null,
             }
 
+            let response
             if (selectedProducto) {
-                // Update
-                const { error } = await supabase
-                    .from('productos')
-                    .update(productoData)
-                    .eq('id', selectedProducto.id)
-
-                if (error) throw error
-                toast.success('Producto actualizado')
+                response = await fetch(`/api/productos/${selectedProducto.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productoData)
+                })
             } else {
-                // Create
-                const { error } = await supabase
-                    .from('productos')
-                    .insert(productoData)
-
-                if (error) throw error
-                toast.success('Producto creado')
+                response = await fetch('/api/productos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productoData)
+                })
             }
 
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || 'Error al guardar')
+            }
+
+            toast.success(selectedProducto ? 'Producto actualizado' : 'Producto creado')
             setIsDialogOpen(false)
             loadProductos()
         } catch (error: any) {
@@ -300,16 +295,6 @@ export default function InventarioPage() {
                                 className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-500"
                             />
                         </div>
-                        <Select value={filterTipo} onValueChange={setFilterTipo}>
-                            <SelectTrigger className="w-[150px] bg-white/5 border-white/10 text-white">
-                                <SelectValue placeholder="Tipo" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-white/10">
-                                <SelectItem value="all" className="text-white">Todos</SelectItem>
-                                <SelectItem value="producto" className="text-white">Productos</SelectItem>
-                                <SelectItem value="servicio" className="text-white">Servicios</SelectItem>
-                            </SelectContent>
-                        </Select>
                         <Select value={filterStock} onValueChange={setFilterStock}>
                             <SelectTrigger className="w-[150px] bg-white/5 border-white/10 text-white">
                                 <SelectValue placeholder="Stock" />
@@ -361,7 +346,6 @@ export default function InventarioPage() {
                                 <TableRow className="border-white/10 hover:bg-transparent">
                                     <TableHead className="text-slate-400">Código</TableHead>
                                     <TableHead className="text-slate-400">Producto</TableHead>
-                                    <TableHead className="text-slate-400">Tipo</TableHead>
                                     <TableHead className="text-slate-400 text-right">Precio</TableHead>
                                     <TableHead className="text-slate-400 text-right">Costo</TableHead>
                                     <TableHead className="text-slate-400 text-center">Stock</TableHead>
@@ -382,40 +366,24 @@ export default function InventarioPage() {
                                                     <p className="text-sm text-slate-500">{producto.categoria}</p>
                                                 )}
                                             </TableCell>
-                                            <TableCell>
-                                                <Badge
-                                                    variant="outline"
-                                                    className={
-                                                        producto.tipo === 'servicio'
-                                                            ? 'border-purple-500/50 text-purple-400'
-                                                            : 'border-blue-500/50 text-blue-400'
-                                                    }
-                                                >
-                                                    {producto.tipo === 'servicio' ? 'Servicio' : 'Producto'}
-                                                </Badge>
+                                            <TableCell className="text-right">
+                                                <span className="text-emerald-400 font-medium">${Number(producto.precio_venta).toFixed(2)}</span>
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <span className="text-emerald-400 font-medium">${producto.precio.toFixed(2)}</span>
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                <span className="text-slate-400">${producto.costo.toFixed(2)}</span>
+                                                <span className="text-slate-400">${Number(producto.precio_compra).toFixed(2)}</span>
                                             </TableCell>
                                             <TableCell className="text-center">
-                                                {producto.tipo === 'servicio' ? (
-                                                    <span className="text-slate-500">-</span>
-                                                ) : (
-                                                    <Badge
-                                                        className={
-                                                            producto.stock === 0
-                                                                ? 'bg-red-500/20 text-red-400 border-0'
-                                                                : stockBajo
-                                                                    ? 'bg-amber-500/20 text-amber-400 border-0'
-                                                                    : 'bg-emerald-500/20 text-emerald-400 border-0'
-                                                        }
-                                                    >
-                                                        {producto.stock}
-                                                    </Badge>
-                                                )}
+                                                <Badge
+                                                    className={
+                                                        producto.stock === 0
+                                                            ? 'bg-red-500/20 text-red-400 border-0'
+                                                            : stockBajo
+                                                                ? 'bg-amber-500/20 text-amber-400 border-0'
+                                                                : 'bg-emerald-500/20 text-emerald-400 border-0'
+                                                    }
+                                                >
+                                                    {producto.stock}
+                                                </Badge>
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <PermissionGate permission="inventory.update">
@@ -451,7 +419,7 @@ export default function InventarioPage() {
                     <div className="space-y-4 py-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-slate-300">Código</Label>
+                                <Label className="text-slate-300">Código *</Label>
                                 <Input
                                     value={formData.codigo}
                                     onChange={(e) => setFormData(f => ({ ...f, codigo: e.target.value }))}
@@ -460,19 +428,13 @@ export default function InventarioPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-slate-300">Tipo</Label>
-                                <Select
-                                    value={formData.tipo}
-                                    onValueChange={(v) => setFormData(f => ({ ...f, tipo: v }))}
-                                >
-                                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-slate-800 border-white/10">
-                                        <SelectItem value="producto" className="text-white">Producto</SelectItem>
-                                        <SelectItem value="servicio" className="text-white">Servicio</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <Label className="text-slate-300">Marca</Label>
+                                <Input
+                                    value={formData.marca}
+                                    onChange={(e) => setFormData(f => ({ ...f, marca: e.target.value }))}
+                                    className="bg-white/5 border-white/10 text-white"
+                                    placeholder="Marca"
+                                />
                             </div>
                         </div>
 
@@ -498,53 +460,51 @@ export default function InventarioPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-slate-300">Precio *</Label>
+                                <Label className="text-slate-300">Precio Compra *</Label>
                                 <Input
                                     type="number"
                                     step="0.01"
-                                    value={formData.precio}
-                                    onChange={(e) => setFormData(f => ({ ...f, precio: e.target.value }))}
+                                    value={formData.precio_compra}
+                                    onChange={(e) => setFormData(f => ({ ...f, precio_compra: e.target.value }))}
                                     className="bg-white/5 border-white/10 text-white"
                                     placeholder="0.00"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-slate-300">Costo</Label>
+                                <Label className="text-slate-300">Precio Venta *</Label>
                                 <Input
                                     type="number"
                                     step="0.01"
-                                    value={formData.costo}
-                                    onChange={(e) => setFormData(f => ({ ...f, costo: e.target.value }))}
+                                    value={formData.precio_venta}
+                                    onChange={(e) => setFormData(f => ({ ...f, precio_venta: e.target.value }))}
                                     className="bg-white/5 border-white/10 text-white"
                                     placeholder="0.00"
                                 />
                             </div>
                         </div>
 
-                        {formData.tipo === 'producto' && (
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label className="text-slate-300">Stock</Label>
-                                    <Input
-                                        type="number"
-                                        value={formData.stock}
-                                        onChange={(e) => setFormData(f => ({ ...f, stock: e.target.value }))}
-                                        className="bg-white/5 border-white/10 text-white"
-                                        placeholder="0"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-slate-300">Stock Mínimo</Label>
-                                    <Input
-                                        type="number"
-                                        value={formData.stock_minimo}
-                                        onChange={(e) => setFormData(f => ({ ...f, stock_minimo: e.target.value }))}
-                                        className="bg-white/5 border-white/10 text-white"
-                                        placeholder="5"
-                                    />
-                                </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label className="text-slate-300">Stock</Label>
+                                <Input
+                                    type="number"
+                                    value={formData.stock}
+                                    onChange={(e) => setFormData(f => ({ ...f, stock: e.target.value }))}
+                                    className="bg-white/5 border-white/10 text-white"
+                                    placeholder="0"
+                                />
                             </div>
-                        )}
+                            <div className="space-y-2">
+                                <Label className="text-slate-300">Stock Mínimo</Label>
+                                <Input
+                                    type="number"
+                                    value={formData.stock_minimo}
+                                    onChange={(e) => setFormData(f => ({ ...f, stock_minimo: e.target.value }))}
+                                    className="bg-white/5 border-white/10 text-white"
+                                    placeholder="5"
+                                />
+                            </div>
+                        </div>
 
                         <div className="space-y-2">
                             <Label className="text-slate-300">Categoría</Label>

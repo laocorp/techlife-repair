@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
 import { PermissionGate } from '@/hooks/use-permissions'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -69,7 +68,6 @@ const tiposEquipo = [
     'Lijadora',
     'Compresor',
     'Soldadora',
-    'Compresor',
     'Generador',
     'Hidrolavadora',
     'Cortadora',
@@ -95,40 +93,27 @@ export default function CatalogoPage() {
     const [marcaForm, setMarcaForm] = useState({ nombre: '', pais: '' })
     const [modeloForm, setModeloForm] = useState({ marca_id: '', nombre: '', tipo_equipo: '' })
 
-    const supabase = createClient()
-
-    useEffect(() => {
-        loadData()
-    }, [user?.empresa_id])
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         if (!user?.empresa_id) return
 
         setIsLoading(true)
         try {
-            // Load marcas
-            const { data: marcasData } = await supabase
-                .from('marcas')
-                .select('*')
-                .eq('empresa_id', user.empresa_id)
-                .order('nombre')
+            const response = await fetch(`/api/catalogo?empresa_id=${user.empresa_id}`)
+            if (!response.ok) throw new Error('Error al cargar datos')
 
-            setMarcas(marcasData || [])
-
-            // Load modelos
-            const { data: modelosData } = await supabase
-                .from('modelos')
-                .select('*, marca:marcas(nombre)')
-                .eq('empresa_id', user.empresa_id)
-                .order('nombre')
-
-            setModelos(modelosData || [])
+            const data = await response.json()
+            setMarcas(data.marcas || [])
+            setModelos(data.modelos || [])
         } catch (error: any) {
             toast.error('Error al cargar datos', { description: error.message })
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id])
+
+    useEffect(() => {
+        loadData()
+    }, [loadData])
 
     // Marcas handlers
     const openMarcaDialog = (marca?: Marca) => {
@@ -148,26 +133,24 @@ export default function CatalogoPage() {
 
         setIsSaving(true)
         try {
-            const data = {
-                empresa_id: user?.empresa_id,
-                nombre: marcaForm.nombre,
-                pais: marcaForm.pais || null,
-                activo: true,
-            }
+            const url = selectedMarca ? `/api/catalogo/${selectedMarca.id}` : '/api/catalogo'
+            const method = selectedMarca ? 'PATCH' : 'POST'
 
-            if (selectedMarca) {
-                const { error } = await supabase
-                    .from('marcas')
-                    .update(data)
-                    .eq('id', selectedMarca.id)
-                if (error) throw error
-                toast.success('Marca actualizada')
-            } else {
-                const { error } = await supabase.from('marcas').insert(data)
-                if (error) throw error
-                toast.success('Marca creada')
-            }
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipo: 'marca',
+                    empresa_id: user?.empresa_id,
+                    nombre: marcaForm.nombre,
+                    pais: marcaForm.pais || null,
+                    activo: true,
+                })
+            })
 
+            if (!response.ok) throw new Error('Error al guardar')
+
+            toast.success(selectedMarca ? 'Marca actualizada' : 'Marca creada')
             setIsMarcaDialogOpen(false)
             loadData()
         } catch (error: any) {
@@ -196,27 +179,25 @@ export default function CatalogoPage() {
 
         setIsSaving(true)
         try {
-            const data = {
-                empresa_id: user?.empresa_id,
-                marca_id: modeloForm.marca_id,
-                nombre: modeloForm.nombre,
-                tipo_equipo: modeloForm.tipo_equipo || null,
-                activo: true,
-            }
+            const url = selectedModelo ? `/api/catalogo/${selectedModelo.id}` : '/api/catalogo'
+            const method = selectedModelo ? 'PATCH' : 'POST'
 
-            if (selectedModelo) {
-                const { error } = await supabase
-                    .from('modelos')
-                    .update(data)
-                    .eq('id', selectedModelo.id)
-                if (error) throw error
-                toast.success('Modelo actualizado')
-            } else {
-                const { error } = await supabase.from('modelos').insert(data)
-                if (error) throw error
-                toast.success('Modelo creado')
-            }
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipo: 'modelo',
+                    empresa_id: user?.empresa_id,
+                    marca_id: modeloForm.marca_id,
+                    nombre: modeloForm.nombre,
+                    tipo_equipo: modeloForm.tipo_equipo || null,
+                    activo: true,
+                })
+            })
 
+            if (!response.ok) throw new Error('Error al guardar')
+
+            toast.success(selectedModelo ? 'Modelo actualizado' : 'Modelo creado')
             setIsModeloDialogOpen(false)
             loadData()
         } catch (error: any) {

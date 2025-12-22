@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
 import { PermissionGate } from '@/hooks/use-permissions'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -45,20 +44,22 @@ import { es } from 'date-fns/locale'
 
 interface OrdenServicio {
     id: string
-    numero_orden: string
-    equipo: string
-    marca: string | null
-    modelo: string | null
-    serie: string | null
+    numero: string
+    equipo_tipo: string
+    equipo_marca: string
+    equipo_modelo: string | null
+    equipo_serie: string | null
     problema_reportado: string | null
     estado: string
     prioridad: string
     created_at: string
     cliente: {
+        id: string
         nombre: string
         telefono: string | null
     } | null
     tecnico: {
+        id: string
         nombre: string
     } | null
 }
@@ -86,43 +87,39 @@ export default function OrdenesPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [filterEstado, setFilterEstado] = useState<string>('all')
-    const supabase = createClient()
 
-    useEffect(() => {
-        loadOrdenes()
-    }, [user?.empresa_id])
-
-    const loadOrdenes = async () => {
+    const loadOrdenes = useCallback(async () => {
         if (!user?.empresa_id) return
 
         setIsLoading(true)
         try {
-            const { data, error } = await supabase
-                .from('ordenes_servicio')
-                .select(`
-          id, numero_orden, equipo, marca, modelo, serie, problema_reportado, estado, prioridad, created_at,
-          cliente:clientes(nombre, telefono),
-          tecnico:usuarios!ordenes_servicio_tecnico_id_fkey(nombre)
-        `)
-                .eq('empresa_id', user.empresa_id)
-                .order('created_at', { ascending: false })
+            const response = await fetch(`/api/ordenes?empresa_id=${user.empresa_id}`)
 
-            if (error) throw error
-            setOrdenes((data as unknown as OrdenServicio[]) || [])
+            if (!response.ok) {
+                throw new Error('Error al cargar órdenes')
+            }
+
+            const data = await response.json()
+            setOrdenes(data || [])
         } catch (error: any) {
             toast.error('Error al cargar órdenes', { description: error.message })
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id])
+
+    useEffect(() => {
+        loadOrdenes()
+    }, [loadOrdenes])
 
     // Filter orders
     const filteredOrdenes = ordenes.filter(orden => {
         const matchesSearch =
-            orden.numero_orden.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            orden.equipo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            orden.numero.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            orden.equipo_tipo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            orden.equipo_marca.toLowerCase().includes(searchQuery.toLowerCase()) ||
             orden.cliente?.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (orden.serie && orden.serie.toLowerCase().includes(searchQuery.toLowerCase()))
+            (orden.equipo_serie && orden.equipo_serie.toLowerCase().includes(searchQuery.toLowerCase()))
 
         const matchesEstado = filterEstado === 'all' || orden.estado === filterEstado
 
@@ -268,14 +265,14 @@ export default function OrdenesPage() {
                                     return (
                                         <TableRow key={orden.id} className="border-white/10 hover:bg-white/5">
                                             <TableCell>
-                                                <p className="font-mono text-white font-medium">{orden.numero_orden}</p>
+                                                <p className="font-mono text-white font-medium">{orden.numero}</p>
                                             </TableCell>
                                             <TableCell>
                                                 <div>
                                                     <p className="text-white font-medium">{orden.cliente?.nombre || 'Sin cliente'}</p>
                                                     <p className="text-sm text-slate-400 flex items-center gap-2">
-                                                        {orden.equipo}
-                                                        {orden.marca && <span className="text-slate-500">· {orden.marca}</span>}
+                                                        {orden.equipo_tipo}
+                                                        {orden.equipo_marca && <span className="text-slate-500">· {orden.equipo_marca}</span>}
                                                     </p>
                                                 </div>
                                             </TableCell>

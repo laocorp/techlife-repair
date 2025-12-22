@@ -3,11 +3,10 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores'
 import { PermissionGate } from '@/hooks/use-permissions'
-import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -117,56 +116,38 @@ export default function FacturacionPage() {
         tipo_emision: 'normal',
     })
 
-    const supabase = createClient()
-
-    useEffect(() => {
-        loadFacturas()
-        loadConfig()
-    }, [user?.empresa_id])
-
-    const loadFacturas = async () => {
+    const loadData = useCallback(async () => {
         if (!user?.empresa_id) return
 
         setIsLoading(true)
         try {
-            const { data, error } = await supabase
-                .from('facturacion_electronica')
-                .select('*')
-                .eq('empresa_id', user.empresa_id)
-                .order('created_at', { ascending: false })
-                .limit(50)
+            const response = await fetch(`/api/facturacion?empresa_id=${user.empresa_id}`)
+            if (!response.ok) throw new Error('Error loading data')
 
-            if (error) throw error
-            setFacturas(data || [])
+            const data = await response.json()
+            setFacturas(data.facturas || [])
+
+            if (data.empresa) {
+                setConfig(prev => ({
+                    ...prev,
+                    ruc: data.empresa.ruc || '',
+                    razon_social: data.empresa.nombre || '',
+                    direccion_matriz: data.empresa.direccion || '',
+                    ambiente: data.empresa.ambiente_sri || 'pruebas',
+                    establecimiento: data.empresa.establecimiento || '001',
+                    punto_emision: data.empresa.punto_emision || '001'
+                }))
+            }
         } catch (error: any) {
-            console.error('Error loading invoices:', error)
+            console.error('Error loading data:', error)
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id])
 
-    const loadConfig = async () => {
-        if (!user?.empresa_id) return
-
-        try {
-            const { data: empresa } = await supabase
-                .from('empresas')
-                .select('ruc, nombre, direccion, telefono')
-                .eq('id', user.empresa_id)
-                .single()
-
-            if (empresa) {
-                setConfig(prev => ({
-                    ...prev,
-                    ruc: empresa.ruc || '',
-                    razon_social: empresa.nombre || '',
-                    direccion_matriz: empresa.direccion || '',
-                }))
-            }
-        } catch (error) {
-            console.error('Error loading config:', error)
-        }
-    }
+    useEffect(() => {
+        loadData()
+    }, [loadData])
 
     const filteredFacturas = facturas.filter(f =>
         f.numero.includes(searchQuery) ||
@@ -309,7 +290,7 @@ export default function FacturacionPage() {
                             <Button
                                 variant="outline"
                                 size="icon"
-                                onClick={loadFacturas}
+                                onClick={loadData}
                                 className="border-[hsl(var(--border-subtle))]"
                             >
                                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
