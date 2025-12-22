@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores'
-import { createClient } from '@/lib/supabase/client'
 import {
     LayoutDashboard,
     ShoppingCart,
@@ -109,10 +108,8 @@ function SidebarInner({ isCollapsed, onToggle, isMobile, onCloseMobile }: { isCo
     const pathname = usePathname()
     const router = useRouter()
     const { user, logout } = useAuthStore()
-    const supabase = createClient()
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut()
+    const handleLogout = () => {
         logout()
         router.push('/login')
     }

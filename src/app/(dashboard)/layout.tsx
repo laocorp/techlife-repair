@@ -7,7 +7,6 @@ import { Sidebar } from '@/components/layout/sidebar'
 import { Header } from '@/components/layout/header'
 import { useAuthStore } from '@/stores'
 import { TenantProvider, useMediaQuery } from '@/hooks'
-import { createClient } from '@/lib/supabase/client'
 import { Loader2, Wrench } from 'lucide-react'
 
 export default function DashboardLayout({
@@ -20,69 +19,31 @@ export default function DashboardLayout({
     const [isMobileOpen, setIsMobileOpen] = useState(false)
     const isMobile = useMediaQuery('(max-width: 768px)')
 
-    const { user, setUser, setEmpresa, setLoading } = useAuthStore()
+    const { user, isAuthenticated, setLoading } = useAuthStore()
     const router = useRouter()
-    const supabase = createClient()
 
     useEffect(() => {
-        const loadUser = async () => {
-            try {
-                const { data: { user: authUser } } = await supabase.auth.getUser()
-
-                if (!authUser) {
-                    router.push('/login')
-                    return
-                }
-
-                // Get user profile with empresa
-                const { data: profile, error } = await supabase
-                    .from('usuarios')
-                    .select('*, empresa:empresas(*)')
-                    .eq('id', authUser.id)
-                    .single()
-
-                if (error || !profile) {
-                    console.error('Error loading profile:', error)
-                    router.push('/login')
-                    return
-                }
-
-                // Check if account is active
-                if (!profile.activo) {
-                    router.push('/login?error=account_inactive')
-                    return
-                }
-
-                // Check subscription
-                if (profile.empresa && !profile.empresa.suscripcion_activa) {
-                    router.push('/subscription-expired')
-                    return
-                }
-
-                setUser(profile)
-                setEmpresa(profile.empresa)
-            } catch (error) {
-                console.error('Auth error:', error)
+        // Check if user is authenticated from store (persisted)
+        const checkAuth = () => {
+            if (!isAuthenticated || !user) {
                 router.push('/login')
-            } finally {
-                setIsLoading(false)
-                setLoading(false)
+                return
             }
+
+            // Check if account is active
+            if (!user.activo) {
+                router.push('/login?error=account_inactive')
+                return
+            }
+
+            setIsLoading(false)
+            setLoading(false)
         }
 
-        loadUser()
-
-        // Subscribe to auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event) => {
-                if (event === 'SIGNED_OUT') {
-                    router.push('/login')
-                }
-            }
-        )
-
-        return () => subscription.unsubscribe()
-    }, [supabase, router, setUser, setEmpresa, setLoading])
+        // Small delay to allow hydration
+        const timer = setTimeout(checkAuth, 100)
+        return () => clearTimeout(timer)
+    }, [isAuthenticated, user, router, setLoading])
 
     if (isLoading) {
         return (

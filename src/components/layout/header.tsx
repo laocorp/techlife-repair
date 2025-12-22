@@ -34,7 +34,6 @@ import {
     AlertCircle,
 } from 'lucide-react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
 // Map routes to readable titles
@@ -61,7 +60,6 @@ export function Header({ isSidebarCollapsed, onMenuClick }: HeaderProps) {
     const { user, logout } = useAuthStore()
     const { empresa } = useTenant()
     const router = useRouter()
-    const supabase = createClient()
     const { notificaciones, unreadCount, isLoading: loadingNotifs, marcarLeida, marcarTodasLeidas } = useNotificaciones()
 
     // Format time ago
@@ -102,8 +100,7 @@ export function Header({ isSidebarCollapsed, onMenuClick }: HeaderProps) {
     ) || '/'
     const pageInfo = routeTitles[currentRoute]
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut()
+    const handleLogout = () => {
         logout()
         router.push('/login')
     }

@@ -1,14 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores'
-import type { RealtimeChannel } from '@supabase/supabase-js'
 
 export interface Notificacion {
     id: string
     empresa_id: string
-    usuario_id: string | null
     tipo: 'orden' | 'pago' | 'sistema' | 'completada'
     titulo: string
     mensaje: string
@@ -30,7 +27,6 @@ export function useNotificaciones(): UseNotificacionesReturn {
     const [notificaciones, setNotificaciones] = useState<Notificacion[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const { user } = useAuthStore()
-    const supabase = createClient()
 
     const fetchNotificaciones = useCallback(async () => {
         if (!user?.empresa_id) {
@@ -40,34 +36,31 @@ export function useNotificaciones(): UseNotificacionesReturn {
         }
 
         try {
-            const { data, error } = await supabase
-                .from('notificaciones')
-                .select('*')
-                .eq('empresa_id', user.empresa_id)
-                .order('created_at', { ascending: false })
-                .limit(20)
+            const response = await fetch(`/api/notificaciones?empresa_id=${user.empresa_id}&limit=20`)
 
-            if (error) {
-                console.error('Error fetching notificaciones:', error)
+            if (!response.ok) {
+                console.error('Error fetching notificaciones')
                 return
             }
 
+            const data = await response.json()
             setNotificaciones(data || [])
         } catch (error) {
             console.error('Error fetching notificaciones:', error)
         } finally {
             setIsLoading(false)
         }
-    }, [user?.empresa_id, supabase])
+    }, [user?.empresa_id])
 
     const marcarLeida = useCallback(async (id: string) => {
         try {
-            const { error } = await supabase
-                .from('notificaciones')
-                .update({ leida: true })
-                .eq('id', id)
+            const response = await fetch('/api/notificaciones', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Failed to mark as read')
 
             setNotificaciones(prev =>
                 prev.map(n => n.id === id ? { ...n, leida: true } : n)
@@ -75,19 +68,19 @@ export function useNotificaciones(): UseNotificacionesReturn {
         } catch (error) {
             console.error('Error marking notification as read:', error)
         }
-    }, [supabase])
+    }, [])
 
     const marcarTodasLeidas = useCallback(async () => {
         if (!user?.empresa_id) return
 
         try {
-            const { error } = await supabase
-                .from('notificaciones')
-                .update({ leida: true })
-                .eq('empresa_id', user.empresa_id)
-                .eq('leida', false)
+            const response = await fetch('/api/notificaciones', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ marcar_todas: true, empresa_id: user.empresa_id })
+            })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Failed to mark all as read')
 
             setNotificaciones(prev =>
                 prev.map(n => ({ ...n, leida: true }))
@@ -95,61 +88,20 @@ export function useNotificaciones(): UseNotificacionesReturn {
         } catch (error) {
             console.error('Error marking all as read:', error)
         }
-    }, [user?.empresa_id, supabase])
+    }, [user?.empresa_id])
 
     // Initial fetch
     useEffect(() => {
         fetchNotificaciones()
     }, [fetchNotificaciones])
 
-    // Realtime subscription
+    // Poll for new notifications every 30 seconds
     useEffect(() => {
         if (!user?.empresa_id) return
 
-        let channel: RealtimeChannel
-
-        const setupRealtime = async () => {
-            channel = supabase
-                .channel(`notificaciones:${user.empresa_id}`)
-                .on(
-                    'postgres_changes',
-                    {
-                        event: 'INSERT',
-                        schema: 'public',
-                        table: 'notificaciones',
-                        filter: `empresa_id=eq.${user.empresa_id}`,
-                    },
-                    (payload) => {
-                        const newNotificacion = payload.new as Notificacion
-                        setNotificaciones(prev => [newNotificacion, ...prev.slice(0, 19)])
-                    }
-                )
-                .on(
-                    'postgres_changes',
-                    {
-                        event: 'UPDATE',
-                        schema: 'public',
-                        table: 'notificaciones',
-                        filter: `empresa_id=eq.${user.empresa_id}`,
-                    },
-                    (payload) => {
-                        const updated = payload.new as Notificacion
-                        setNotificaciones(prev =>
-                            prev.map(n => n.id === updated.id ? updated : n)
-                        )
-                    }
-                )
-                .subscribe()
-        }
-
-        setupRealtime()
-
-        return () => {
-            if (channel) {
-                supabase.removeChannel(channel)
-            }
-        }
-    }, [user?.empresa_id, supabase])
+        const interval = setInterval(fetchNotificaciones, 30000)
+        return () => clearInterval(interval)
+    }, [user?.empresa_id, fetchNotificaciones])
 
     const unreadCount = notificaciones.filter(n => !n.leida).length
 

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/stores'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,26 +17,54 @@ export default function LoginPage() {
     const [password, setPassword] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
-    const supabase = createClient()
+    const { setUser, setEmpresa } = useAuthStore()
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
             })
 
-            if (error) {
+            const data = await response.json()
+
+            if (!response.ok) {
                 toast.error('Error al iniciar sesión', {
-                    description: error.message,
+                    description: data.error || 'Credenciales inválidas',
                 })
                 return
             }
 
-            if (data.user?.user_metadata?.is_super_admin) {
+            // Guardar en el store
+            setUser({
+                id: data.user.id,
+                email: data.user.email,
+                nombre: data.user.nombre,
+                rol: data.user.rol,
+                empresa_id: data.user.empresa_id,
+                activo: true,
+                created_at: new Date().toISOString(),
+            })
+
+            setEmpresa({
+                id: data.user.empresa.id,
+                nombre: data.user.empresa.nombre,
+                ruc: '',
+                logo_url: data.user.empresa.logo_url,
+                plan: data.user.empresa.plan,
+                suscripcion_activa: true,
+                ambiente_sri: 'pruebas',
+                punto_emision: '001',
+                establecimiento: '001',
+                created_at: new Date().toISOString(),
+            })
+
+            // Redirigir según rol
+            if (data.user.rol === 'superadmin') {
                 router.push('/superadmin')
             } else {
                 router.push('/')
@@ -98,35 +126,33 @@ export default function LoginPage() {
 
                 {/* Premium Card */}
                 <Card className="border-0 bg-white/80 backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.12)] rounded-2xl overflow-hidden">
-                    <CardHeader className="text-center space-y-1 pb-2 pt-8">
-                        <CardTitle className="text-xl font-semibold text-slate-900 tracking-tight">
-                            Bienvenido de nuevo
+                    <CardHeader className="space-y-1 pb-4 pt-8 px-8">
+                        <CardTitle className="text-xl font-semibold text-slate-900">
+                            Iniciar Sesión
                         </CardTitle>
                         <CardDescription className="text-slate-500">
-                            Ingresa tus credenciales para continuar
+                            Ingresa tus credenciales para acceder
                         </CardDescription>
                     </CardHeader>
-
-                    <form onSubmit={handleLogin}>
-                        <CardContent className="space-y-5 px-8">
+                    <CardContent className="px-8 pb-6">
+                        <form onSubmit={handleLogin} className="space-y-5">
                             <div className="space-y-2">
                                 <Label htmlFor="email" className="text-sm font-medium text-slate-700">
                                     Correo electrónico
                                 </Label>
-                                <div className="relative group">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400 group-focus-within:text-slate-600 transition-colors duration-200" strokeWidth={1.5} />
+                                <div className="relative">
+                                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400" />
                                     <Input
                                         id="email"
                                         type="email"
-                                        placeholder="correo@empresa.com"
+                                        placeholder="tu@email.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="pl-12 h-[52px] bg-slate-50/80 border-slate-200/80 text-slate-900 placeholder:text-slate-400 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:bg-white transition-all duration-200 text-[15px]"
                                         required
+                                        className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 rounded-xl text-slate-900 placeholder:text-slate-400 transition-all"
                                     />
                                 </div>
                             </div>
-
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="password" className="text-sm font-medium text-slate-700">
@@ -134,62 +160,71 @@ export default function LoginPage() {
                                     </Label>
                                     <Link
                                         href="/forgot-password"
-                                        className="text-sm text-slate-500 hover:text-slate-900 transition-colors duration-200"
+                                        className="text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors"
                                     >
                                         ¿Olvidaste tu contraseña?
                                     </Link>
                                 </div>
-                                <div className="relative group">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400 group-focus-within:text-slate-600 transition-colors duration-200" strokeWidth={1.5} />
+                                <div className="relative">
+                                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-slate-400" />
                                     <Input
                                         id="password"
                                         type="password"
                                         placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="pl-12 h-[52px] bg-slate-50/80 border-slate-200/80 text-slate-900 placeholder:text-slate-400 rounded-xl focus:border-slate-400 focus:ring-2 focus:ring-slate-200 focus:bg-white transition-all duration-200 text-[15px]"
                                         required
+                                        className="pl-11 h-12 bg-slate-50/50 border-slate-200 focus:border-slate-400 focus:ring-slate-400/20 rounded-xl text-slate-900 placeholder:text-slate-400 transition-all"
                                     />
                                 </div>
                             </div>
-                        </CardContent>
-
-                        <CardFooter className="flex flex-col gap-5 pt-4 pb-8 px-8">
-                            <Button
-                                type="submit"
-                                className="w-full h-[52px] bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-[0_4px_14px_0_rgba(0,0,0,0.2)] hover:shadow-[0_6px_20px_0_rgba(0,0,0,0.25)] rounded-xl transition-all duration-200 active:scale-[0.98] text-[15px]"
-                                disabled={isLoading}
+                            <motion.div
+                                whileHover={{ scale: 1.01 }}
+                                whileTap={{ scale: 0.99 }}
+                                className="pt-2"
                             >
-                                {isLoading ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                        Iniciando sesión...
-                                    </>
-                                ) : (
-                                    <>
-                                        Iniciar sesión
-                                        <ArrowRight className="ml-2 h-5 w-5" strokeWidth={1.5} />
-                                    </>
-                                )}
-                            </Button>
-
-                            <p className="text-sm text-center text-slate-500">
-                                ¿No tienes cuenta?{' '}
-                                <Link
-                                    href="/register"
-                                    className="text-slate-900 hover:underline font-medium transition-colors"
+                                <Button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full h-12 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-medium text-[15px] shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)] transition-all"
                                 >
-                                    Regístrate gratis
-                                </Link>
-                            </p>
-                        </CardFooter>
-                    </form>
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Iniciando sesión...
+                                        </>
+                                    ) : (
+                                        <>
+                                            Iniciar Sesión
+                                            <ArrowRight className="ml-2 h-4 w-4" />
+                                        </>
+                                    )}
+                                </Button>
+                            </motion.div>
+                        </form>
+                    </CardContent>
+                    <CardFooter className="px-8 pb-8 pt-2">
+                        <p className="text-sm text-center w-full text-slate-500">
+                            ¿No tienes una cuenta?{' '}
+                            <Link
+                                href="/register"
+                                className="font-medium text-slate-900 hover:underline underline-offset-4"
+                            >
+                                Registrarse
+                            </Link>
+                        </p>
+                    </CardFooter>
                 </Card>
 
                 {/* Footer */}
-                <p className="mt-10 text-center text-xs text-slate-400 tracking-wide">
-                    RepairApp © {new Date().getFullYear()} · Ecuador
-                </p>
+                <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                    className="text-center text-xs text-slate-400 mt-8"
+                >
+                    © 2025 RepairApp. Todos los derechos reservados.
+                </motion.p>
             </motion.div>
         </div>
     )
