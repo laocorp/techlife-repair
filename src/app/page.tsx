@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Loader2, Wrench } from 'lucide-react'
+import { useAuthStore } from '@/stores'
 
 // Dynamic imports for code splitting
 import dynamic from 'next/dynamic'
@@ -32,36 +32,23 @@ function DashboardLoading() {
 }
 
 export default function RootPage() {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
-    const supabase = createClient()
+    const { user, isAuthenticated, isLoading } = useAuthStore()
+    const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
-        const checkAuth = async () => {
-            const { data: { user } } = await supabase.auth.getUser()
-            setIsAuthenticated(!!user)
-        }
-
-        checkAuth()
-
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            (event, session) => {
-                setIsAuthenticated(!!session?.user)
-            }
-        )
-
-        return () => subscription.unsubscribe()
-    }, [supabase])
+        setMounted(true)
+    }, [])
 
     // Loading state
-    if (isAuthenticated === null) {
+    if (!mounted || isLoading) {
         return <DashboardLoading />
     }
 
-    // Show dashboard for authenticated users, landing for guests
-    if (isAuthenticated) {
+    // If authenticated, show dashboard
+    if (isAuthenticated && user) {
         return <DashboardContent />
     }
 
+    // If not authenticated, show landing page
     return <LandingContent />
 }

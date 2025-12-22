@@ -7,7 +7,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -54,51 +53,29 @@ const planGradients: Record<string, string> = {
     enterprise: 'from-amber-500 to-orange-500',
 }
 
+// Static plans - no need for database
+const defaultPlans: Plan[] = [
+    {
+        id: '1', nombre: 'Básico', tipo: 'basico', descripcion: 'Perfecto para talleres pequeños',
+        precio_mensual: 29, precio_anual: 290, max_usuarios: 2, max_ordenes_mes: 100,
+        portal_clientes: false, reportes_avanzados: false, api_acceso: false, multi_sucursal: false, soporte_prioritario: false
+    },
+    {
+        id: '2', nombre: 'Profesional', tipo: 'profesional', descripcion: 'Para talleres en crecimiento',
+        precio_mensual: 59, precio_anual: 590, max_usuarios: 10, max_ordenes_mes: null,
+        portal_clientes: true, reportes_avanzados: true, api_acceso: false, multi_sucursal: false, soporte_prioritario: true
+    },
+    {
+        id: '3', nombre: 'Enterprise', tipo: 'enterprise', descripcion: 'Para grandes operaciones',
+        precio_mensual: 149, precio_anual: 1490, max_usuarios: null, max_ordenes_mes: null,
+        portal_clientes: true, reportes_avanzados: true, api_acceso: true, multi_sucursal: true, soporte_prioritario: true
+    },
+]
+
 export default function PricingPage() {
-    const [plans, setPlans] = useState<Plan[]>([])
+    const [plans] = useState<Plan[]>(defaultPlans)
     const [isAnnual, setIsAnnual] = useState(false)
-    const [isLoading, setIsLoading] = useState(true)
     const router = useRouter()
-    const supabase = createClient()
-
-    useEffect(() => {
-        const loadPlans = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('planes')
-                    .select('*')
-                    .eq('activo', true)
-                    .order('orden')
-
-                if (error) throw error
-                setPlans(data || [])
-            } catch (error) {
-                console.error('Error loading plans:', error)
-                // Fallback plans if DB not configured
-                setPlans([
-                    {
-                        id: '1', nombre: 'Básico', tipo: 'basico', descripcion: 'Perfecto para talleres pequeños',
-                        precio_mensual: 29, precio_anual: 290, max_usuarios: 2, max_ordenes_mes: 100,
-                        portal_clientes: false, reportes_avanzados: false, api_acceso: false, multi_sucursal: false, soporte_prioritario: false
-                    },
-                    {
-                        id: '2', nombre: 'Profesional', tipo: 'profesional', descripcion: 'Para talleres en crecimiento',
-                        precio_mensual: 59, precio_anual: 590, max_usuarios: 10, max_ordenes_mes: null,
-                        portal_clientes: true, reportes_avanzados: true, api_acceso: false, multi_sucursal: false, soporte_prioritario: true
-                    },
-                    {
-                        id: '3', nombre: 'Enterprise', tipo: 'enterprise', descripcion: 'Para grandes operaciones',
-                        precio_mensual: 149, precio_anual: 1490, max_usuarios: null, max_ordenes_mes: null,
-                        portal_clientes: true, reportes_avanzados: true, api_acceso: true, multi_sucursal: true, soporte_prioritario: true
-                    },
-                ])
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
-        loadPlans()
-    }, [supabase])
 
     const handleSelectPlan = (planId: string) => {
         router.push(`/register?plan=${planId}&billing=${isAnnual ? 'annual' : 'monthly'}`)

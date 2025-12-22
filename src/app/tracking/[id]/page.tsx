@@ -1,9 +1,6 @@
 // Public Order Tracking Page - No authentication required
-import { Suspense } from 'react'
+// Uses fetch instead of Supabase server
 
-// Revalidar la página cada 60 segundos (ISR)
-export const revalidate = 60
-import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
@@ -18,7 +15,6 @@ import {
     Phone,
     MapPin,
     Calendar,
-    ArrowRight,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -39,21 +35,18 @@ const estadoConfig: Record<string, { label: string; color: string; bgColor: stri
 const allSteps = ['recibido', 'en_diagnostico', 'cotizado', 'aprobado', 'en_reparacion', 'terminado', 'entregado']
 
 async function getOrdenData(id: string) {
-    const supabase = await createClient()
+    try {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+        const response = await fetch(`${baseUrl}/api/ordenes/${id}`, {
+            cache: 'no-store'
+        })
 
-    const { data, error } = await supabase
-        .from('ordenes_servicio')
-        .select(`
-      *,
-      cliente:clientes(nombre, telefono),
-      tecnico:usuarios!ordenes_servicio_tecnico_id_fkey(nombre),
-      empresa:empresas(nombre, telefono, direccion)
-    `)
-        .eq('id', id)
-        .single()
-
-    if (error) return null
-    return data
+        if (!response.ok) return null
+        return await response.json()
+    } catch (error) {
+        console.error('Error fetching order:', error)
+        return null
+    }
 }
 
 function formatDate(date: string) {
@@ -118,7 +111,7 @@ export default async function TrackingPage({ params }: PageProps) {
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
                                 <p className="text-sm text-slate-400 mb-1">Orden de Servicio</p>
-                                <h1 className="text-2xl font-bold text-white">{orden.numero_orden}</h1>
+                                <h1 className="text-2xl font-bold text-white">{orden.numero}</h1>
                                 <p className="text-slate-400 mt-1">{orden.empresa?.nombre}</p>
                             </div>
                             <div className="text-right">
@@ -185,34 +178,34 @@ export default async function TrackingPage({ params }: PageProps) {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <p className="text-sm text-slate-500">Equipo</p>
-                                <p className="text-white font-medium">{orden.equipo}</p>
+                                <p className="text-white font-medium">{orden.equipo_tipo}</p>
                             </div>
-                            {orden.marca && (
+                            {orden.equipo_marca && (
                                 <div>
                                     <p className="text-sm text-slate-500">Marca</p>
-                                    <p className="text-white">{orden.marca}</p>
+                                    <p className="text-white">{orden.equipo_marca}</p>
                                 </div>
                             )}
-                            {orden.modelo && (
+                            {orden.equipo_modelo && (
                                 <div>
                                     <p className="text-sm text-slate-500">Modelo</p>
-                                    <p className="text-white">{orden.modelo}</p>
+                                    <p className="text-white">{orden.equipo_modelo}</p>
                                 </div>
                             )}
-                            {orden.serie && (
+                            {orden.equipo_serie && (
                                 <div>
                                     <p className="text-sm text-slate-500">N° Serie</p>
-                                    <p className="text-white font-mono">{orden.serie}</p>
+                                    <p className="text-white font-mono">{orden.equipo_serie}</p>
                                 </div>
                             )}
                         </div>
 
-                        {orden.problema && (
+                        {orden.problema_reportado && (
                             <>
                                 <Separator className="bg-white/10 my-4" />
                                 <div>
                                     <p className="text-sm text-slate-500 mb-1">Problema reportado</p>
-                                    <p className="text-slate-300">{orden.problema}</p>
+                                    <p className="text-slate-300">{orden.problema_reportado}</p>
                                 </div>
                             </>
                         )}
@@ -281,7 +274,7 @@ export default async function TrackingPage({ params }: PageProps) {
                     <CardContent className="p-6">
                         <h2 className="text-lg font-semibold text-white mb-4">¿Tienes preguntas?</h2>
                         <p className="text-slate-300 mb-4">
-                            Comunícate con {orden.empresa?.nombre} para más información sobre tu equipo.
+                            Comunícate con {orden.empresa?.nombre || 'nosotros'} para más información sobre tu equipo.
                         </p>
                         <div className="flex flex-wrap gap-4">
                             {orden.empresa?.telefono && (

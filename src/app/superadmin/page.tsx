@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -66,6 +65,7 @@ import {
 } from 'lucide-react'
 import { format, differenceInDays } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useAuthStore } from '@/stores'
 
 interface Empresa {
     id: string
@@ -107,8 +107,7 @@ export default function SuperAdminPage() {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
     const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null)
     const [isSaving, setIsSaving] = useState(false)
-
-    const supabase = createClient()
+    const { logout } = useAuthStore()
 
     // Form state for create/edit
     const [formData, setFormData] = useState({
@@ -135,26 +134,18 @@ export default function SuperAdminPage() {
         enterprise: 149,
     }
 
-    useEffect(() => {
-        loadData()
-    }, [])
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setIsLoading(true)
         try {
-            // Load empresas
-            const { data: empresasData, error } = await supabase
-                .from('empresas')
-                .select('*')
-                .order('created_at', { ascending: false })
+            const response = await fetch('/api/empresas')
+            if (!response.ok) throw new Error('Error loading empresas')
 
-            if (error) throw error
-
+            const empresasData = await response.json()
             setEmpresas(empresasData || [])
 
             // Calculate stats
-            const activas = empresasData?.filter(e => e.suscripcion_activa).length || 0
-            const ingresos = empresasData?.reduce((acc, e) => {
+            const activas = empresasData?.filter((e: Empresa) => e.suscripcion_activa).length || 0
+            const ingresos = empresasData?.reduce((acc: number, e: Empresa) => {
                 if (e.suscripcion_activa && e.plan !== 'trial') {
                     return acc + (planPrices[e.plan] || 0)
                 }
@@ -172,7 +163,11 @@ export default function SuperAdminPage() {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [])
+
+    useEffect(() => {
+        loadData()
+    }, [loadData])
 
     const handleCreateEmpresa = async () => {
         if (!formData.nombre || !formData.ruc) {
@@ -182,18 +177,22 @@ export default function SuperAdminPage() {
 
         setIsSaving(true)
         try {
-            const { error } = await supabase.from('empresas').insert({
-                nombre: formData.nombre,
-                ruc: formData.ruc,
-                email: formData.email || null,
-                telefono: formData.telefono || null,
-                plan: formData.plan,
-                suscripcion_activa: formData.suscripcion_activa,
-                fecha_vencimiento: formData.fecha_vencimiento || null,
-                slug: formData.ruc.toLowerCase(),
+            const response = await fetch('/api/empresas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nombre: formData.nombre,
+                    ruc: formData.ruc,
+                    email: formData.email || null,
+                    telefono: formData.telefono || null,
+                    plan: formData.plan,
+                    suscripcion_activa: formData.suscripcion_activa,
+                    fecha_vencimiento: formData.fecha_vencimiento || null,
+                    slug: formData.ruc.toLowerCase(),
+                })
             })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error al crear empresa')
 
             toast.success('Empresa creada exitosamente')
             setIsCreateDialogOpen(false)
@@ -211,9 +210,10 @@ export default function SuperAdminPage() {
 
         setIsSaving(true)
         try {
-            const { error } = await supabase
-                .from('empresas')
-                .update({
+            const response = await fetch(`/api/empresas/${selectedEmpresa.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     nombre: formData.nombre,
                     ruc: formData.ruc,
                     email: formData.email || null,
@@ -222,9 +222,9 @@ export default function SuperAdminPage() {
                     suscripcion_activa: formData.suscripcion_activa,
                     fecha_vencimiento: formData.fecha_vencimiento || null,
                 })
-                .eq('id', selectedEmpresa.id)
+            })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error al actualizar')
 
             toast.success('Empresa actualizada')
             setIsEditDialogOpen(false)
@@ -244,12 +244,11 @@ export default function SuperAdminPage() {
         }
 
         try {
-            const { error } = await supabase
-                .from('empresas')
-                .delete()
-                .eq('id', empresa.id)
+            const response = await fetch(`/api/empresas/${empresa.id}`, {
+                method: 'DELETE'
+            })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error al eliminar')
 
             toast.success('Empresa eliminada')
             loadData()
@@ -260,12 +259,13 @@ export default function SuperAdminPage() {
 
     const handleToggleStatus = async (empresa: Empresa) => {
         try {
-            const { error } = await supabase
-                .from('empresas')
-                .update({ suscripcion_activa: !empresa.suscripcion_activa })
-                .eq('id', empresa.id)
+            const response = await fetch(`/api/empresas/${empresa.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ suscripcion_activa: !empresa.suscripcion_activa })
+            })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error al actualizar')
 
             toast.success(empresa.suscripcion_activa ? 'Suscripción desactivada' : 'Suscripción activada')
             loadData()
@@ -344,8 +344,8 @@ export default function SuperAdminPage() {
         return matchesSearch && matchesPlan && matchesStatus
     })
 
-    const handleLogout = async () => {
-        await supabase.auth.signOut()
+    const handleLogout = () => {
+        logout()
         window.location.href = '/login'
     }
 

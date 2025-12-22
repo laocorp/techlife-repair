@@ -22,7 +22,6 @@ import {
     FileText,
     AlertCircle,
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -52,14 +51,14 @@ interface TrackingStep {
 
 interface OrderData {
     id: string
-    numero_orden: string
-    equipo: string
-    marca: string
-    modelo: string
+    numero: string
+    equipo_tipo: string
+    equipo_marca: string
+    equipo_modelo: string
     estado: string
-    problema: string
+    problema_reportado: string
     diagnostico: string | null
-    cotizacion: number | null
+    costo_estimado: number | null
     costo_final: number | null
     created_at: string
     updated_at: string
@@ -67,8 +66,8 @@ interface OrderData {
         nombre: string
         telefono: string
         email: string
-    }
-    empresa: {
+    } | null
+    empresa?: {
         nombre: string
         telefono: string
     }
@@ -89,7 +88,6 @@ export default function TrackingPage() {
     const [isSearching, setIsSearching] = useState(false)
     const [order, setOrder] = useState<OrderData | null>(null)
     const [error, setError] = useState<string | null>(null)
-    const supabase = createClient()
 
     const handleSearch = async () => {
         if (!searchCode.trim()) return
@@ -99,22 +97,16 @@ export default function TrackingPage() {
         setOrder(null)
 
         try {
-            const { data, error: fetchError } = await supabase
-                .from('ordenes_servicio')
-                .select(`
-                    *,
-                    cliente:clientes(nombre, telefono, email),
-                    empresa:empresas(nombre, telefono)
-                `)
-                .eq('numero_orden', searchCode.toUpperCase().trim())
-                .single()
+            const response = await fetch(`/api/ordenes/tracking?numero=${encodeURIComponent(searchCode.toUpperCase().trim())}`)
 
-            if (fetchError || !data) {
-                setError('No se encontró ninguna orden con ese código. Verifica e intenta de nuevo.')
+            if (!response.ok) {
+                const data = await response.json()
+                setError(data.error || 'No se encontró ninguna orden con ese código. Verifica e intenta de nuevo.')
                 return
             }
 
-            setOrder(data as OrderData)
+            const data = await response.json()
+            setOrder(data)
         } catch (err) {
             setError('Error al buscar la orden. Intenta de nuevo.')
         } finally {

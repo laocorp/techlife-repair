@@ -1,9 +1,8 @@
-// Multi-tenant context and hooks
+// Multi-tenant context and hooks - using fetch API instead of Supabase
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Empresa, Usuario } from '@/types'
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
+import { Empresa } from '@/types'
 import { useAuthStore } from '@/stores'
 
 interface TenantContextType {
@@ -25,33 +24,29 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const { user } = useAuthStore()
-    const supabase = createClient()
 
-    const fetchEmpresa = async () => {
+    const fetchEmpresa = useCallback(async () => {
         if (!user?.empresa_id) {
             setIsLoading(false)
             return
         }
 
         try {
-            const { data, error } = await supabase
-                .from('empresas')
-                .select('*')
-                .eq('id', user.empresa_id)
-                .single()
+            const response = await fetch(`/api/empresas/${user.empresa_id}`)
+            if (!response.ok) throw new Error('Error loading empresa')
 
-            if (error) throw error
+            const data = await response.json()
             setEmpresa(data)
         } catch (err: any) {
             setError(err.message)
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id])
 
     useEffect(() => {
         fetchEmpresa()
-    }, [user?.empresa_id])
+    }, [fetchEmpresa])
 
     return (
         <TenantContext.Provider value={{ empresa, isLoading, error, refetch: fetchEmpresa }}>
@@ -68,69 +63,44 @@ export function useTenant() {
     return context
 }
 
-// Hook for tenant-scoped queries
+// Simplified hook for tenant-scoped queries using fetch API
+// Note: For complex queries, consider using specific API endpoints
 export function useTenantQuery<T>(
-    tableName: string,
+    endpoint: string,
     options?: {
-        select?: string
-        filters?: Record<string, any>
-        orderBy?: { column: string; ascending?: boolean }
-        limit?: number
+        enabled?: boolean
     }
 ) {
     const [data, setData] = useState<T[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const { user } = useAuthStore()
-    const supabase = createClient()
 
-    const fetchData = async () => {
-        if (!user?.empresa_id) {
+    const fetchData = useCallback(async () => {
+        if (!user?.empresa_id || options?.enabled === false) {
             setIsLoading(false)
             return
         }
 
         try {
-            let query = supabase
-                .from(tableName)
-                .select(options?.select || '*')
-                .eq('empresa_id', user.empresa_id)
+            const separator = endpoint.includes('?') ? '&' : '?'
+            const url = `${endpoint}${separator}empresa_id=${user.empresa_id}`
 
-            // Apply additional filters
-            if (options?.filters) {
-                Object.entries(options.filters).forEach(([key, value]) => {
-                    if (value !== undefined && value !== null) {
-                        query = query.eq(key, value)
-                    }
-                })
-            }
+            const response = await fetch(url)
+            if (!response.ok) throw new Error('Error fetching data')
 
-            // Apply ordering
-            if (options?.orderBy) {
-                query = query.order(options.orderBy.column, {
-                    ascending: options.orderBy.ascending ?? true,
-                })
-            }
-
-            // Apply limit
-            if (options?.limit) {
-                query = query.limit(options.limit)
-            }
-
-            const { data, error } = await query
-
-            if (error) throw error
-            setData((data as T[]) || [])
+            const result = await response.json()
+            setData(Array.isArray(result) ? result : [])
         } catch (err: any) {
             setError(err.message)
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id, endpoint, options?.enabled])
 
     useEffect(() => {
         fetchData()
-    }, [user?.empresa_id, tableName])
+    }, [fetchData])
 
     return { data, isLoading, error, refetch: fetchData }
 }

@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -34,7 +33,6 @@ export default function RegisterPage() {
     const [currentStep, setCurrentStep] = useState(1)
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
-    const supabase = createClient()
 
     const [formData, setFormData] = useState({
         empresaNombre: '',
@@ -87,46 +85,30 @@ export default function RegisterPage() {
         setIsLoading(true)
 
         try {
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
-                options: {
-                    data: {
-                        nombre: formData.nombre,
-                    }
-                }
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nombre: formData.nombre,
+                    email: formData.email,
+                    password: formData.password,
+                    empresaNombre: formData.empresaNombre,
+                    empresaRuc: formData.empresaRuc,
+                    empresaTelefono: formData.empresaTelefono || null,
+                    empresaDireccion: formData.empresaDireccion || null,
+                })
             })
 
-            if (authError) throw authError
+            const result = await response.json()
 
-            if (authData.user) {
-                const { data: result, error: rpcError } = await supabase.rpc(
-                    'register_empresa_and_admin',
-                    {
-                        p_user_id: authData.user.id,
-                        p_user_nombre: formData.nombre,
-                        p_user_email: formData.email,
-                        p_empresa_nombre: formData.empresaNombre,
-                        p_empresa_ruc: formData.empresaRuc,
-                        p_empresa_telefono: formData.empresaTelefono || null,
-                        p_empresa_direccion: formData.empresaDireccion || null,
-                    }
-                )
-
-                if (rpcError) {
-                    console.error('RPC Error:', rpcError)
-                    throw new Error(rpcError.message)
-                }
-
-                if (result && !result.success) {
-                    throw new Error(result.error || 'Error al crear empresa')
-                }
-
-                toast.success('¡Cuenta creada exitosamente!', {
-                    description: 'Revisa tu email para confirmar tu cuenta.',
-                })
-                router.push('/login')
+            if (!response.ok) {
+                throw new Error(result.error || 'Error al crear cuenta')
             }
+
+            toast.success('¡Cuenta creada exitosamente!', {
+                description: 'Ahora puedes iniciar sesión.',
+            })
+            router.push('/login')
         } catch (error: any) {
             console.error('Registration error:', error)
             toast.error('Error al crear la cuenta', {
