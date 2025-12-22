@@ -137,7 +137,7 @@ export default function TrackingPage() {
             {
                 id: 'cotizado',
                 title: 'Cotizado',
-                description: order.cotizacion ? `Cotización: $${order.cotizacion.toFixed(2)}` : 'Esperando cotización',
+                description: order.costo_estimado ? `Cotización: $${order.costo_estimado.toFixed(2)}` : 'Esperando cotización',
                 date: currentStep >= 2 ? order.updated_at : null,
                 status: currentStep > 2 ? 'completed' : currentStep === 2 ? 'active' : 'pending',
                 icon: FileText,
