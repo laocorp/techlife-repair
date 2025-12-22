@@ -258,12 +258,14 @@ export function Header({ isSidebarCollapsed, onMenuClick }: HeaderProps) {
                                     Marcar todas como leídas
                                 </Button>
                             )}
-                            <Button
-                                variant="ghost"
-                                className="flex-1 h-8 text-xs text-[hsl(var(--brand-accent))] hover:text-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--interactive-hover))]"
-                            >
-                                Ver todas
-                            </Button>
+                            <Link href="/notificaciones">
+                                <Button
+                                    variant="ghost"
+                                    className="flex-1 h-8 text-xs text-[hsl(var(--brand-accent))] hover:text-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--interactive-hover))]"
+                                >
+                                    Ver todas
+                                </Button>
+                            </Link>
                         </div>
                     </DropdownMenuContent>
                 </DropdownMenu>
