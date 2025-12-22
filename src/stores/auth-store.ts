@@ -81,6 +81,9 @@ export const useAuthStore = create<AuthState>()(
                 user: state.user,
                 empresa: state.empresa
             }),
+            onRehydrateStorage: () => (state) => {
+                state?.setLoading(false)
+            },
         }
     )
 )
