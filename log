@@ -278,11 +278,11 @@ Receiving objects:  68% (180/264)
 Receiving objects:  69% (183/264)
 Receiving objects:  70% (185/264)
 Receiving objects:  71% (188/264)
+remote: Total 264 (delta 51), reused 190 (delta 16), pack-reused 0 (from 0)
 Receiving objects:  72% (191/264)
 Receiving objects:  73% (193/264)
 Receiving objects:  74% (196/264)
 Receiving objects:  75% (198/264)
-remote: Total 264 (delta 51), reused 191 (delta 16), pack-reused 0 (from 0)
 Receiving objects:  76% (201/264)
 Receiving objects:  77% (204/264)
 Receiving objects:  78% (206/264)
@@ -308,33 +308,36 @@ Receiving objects:  97% (257/264)
 Receiving objects:  98% (259/264)
 Receiving objects:  99% (262/264)
 Receiving objects: 100% (264/264)
-Receiving objects: 100% (264/264), 1.15 MiB | 14.55 MiB/s, done.
+Receiving objects: 100% (264/264), 1.15 MiB | 19.00 MiB/s, done.
 Resolving deltas:   0% (0/51)
 Resolving deltas:   1% (1/51)
+Resolving deltas:   3% (2/51)
 Resolving deltas:   5% (3/51)
 Resolving deltas:   7% (4/51)
-Resolving deltas:   9% (5/51)
 Resolving deltas:  11% (6/51)
 Resolving deltas:  13% (7/51)
 Resolving deltas:  15% (8/51)
 Resolving deltas:  17% (9/51)
 Resolving deltas:  19% (10/51)
 Resolving deltas:  21% (11/51)
+Resolving deltas:  23% (12/51)
 Resolving deltas:  25% (13/51)
 Resolving deltas:  27% (14/51)
 Resolving deltas:  29% (15/51)
 Resolving deltas:  31% (16/51)
 Resolving deltas:  33% (17/51)
-Resolving deltas:  35% (18/51)
 Resolving deltas:  37% (19/51)
 Resolving deltas:  39% (20/51)
 Resolving deltas:  41% (21/51)
 Resolving deltas:  43% (22/51)
+Resolving deltas:  45% (23/51)
 Resolving deltas:  47% (24/51)
 Resolving deltas:  49% (25/51)
 Resolving deltas:  50% (26/51)
 Resolving deltas:  52% (27/51)
 Resolving deltas:  54% (28/51)
+Resolving deltas:  56% (29/51)
+Resolving deltas:  58% (30/51)
 Resolving deltas:  60% (31/51)
 Resolving deltas:  62% (32/51)
 Resolving deltas:  64% (33/51)
@@ -343,11 +346,15 @@ Resolving deltas:  68% (35/51)
 Resolving deltas:  70% (36/51)
 Resolving deltas:  72% (37/51)
 Resolving deltas:  74% (38/51)
+Resolving deltas:  76% (39/51)
+Resolving deltas:  78% (40/51)
 Resolving deltas:  80% (41/51)
 Resolving deltas:  82% (42/51)
 Resolving deltas:  84% (43/51)
+Resolving deltas:  88% (45/51)
 Resolving deltas:  90% (46/51)
 Resolving deltas:  92% (47/51)
+Resolving deltas:  94% (48/51)
 Resolving deltas:  96% (49/51)
 Resolving deltas:  98% (50/51)
 Resolving deltas: 100% (51/51)
@@ -360,106 +367,120 @@ Building techliferepair-repairapp-5z3xud
 #2 [internal] load metadata for docker.io/library/node:20-slim
 #2 DONE 0.4s
 #3 [internal] load .dockerignore
-#3 transferring context: 451B 0.0s done
+#3 transferring context: 451B done
 #3 DONE 0.0s
 #4 [builder  1/11] FROM docker.io/library/node:20-slim@sha256:1b38aaddff63cd0d3a9b5b03863a71fd33ee62047dd2e915f494d96b4b9c18cc
 #4 DONE 0.0s
 #5 [internal] load build context
 #5 transferring context: 2.47MB 0.1s done
 #5 DONE 0.1s
-#6 [builder  2/11] WORKDIR /app
+#6 [builder  7/11] RUN npm install --legacy-peer-deps
 #6 CACHED
-#7 [builder  6/11] RUN rm -f package-lock.json
+#7 [builder  8/11] RUN npm install lightningcss-linux-x64-gnu --save-optional || true
 #7 CACHED
-#8 [builder  7/11] RUN npm install --legacy-peer-deps
+#8 [builder  4/11] COPY package*.json ./
 #8 CACHED
-#9 [builder  4/11] COPY package*.json ./
+#9 [builder  3/11] RUN apt-get update && apt-get install -y     openssl     python3     make     g++     && rm -rf /var/lib/apt/lists/*
 #9 CACHED
-#10 [builder  8/11] RUN npm install lightningcss-linux-x64-gnu --save-optional || true
+#10 [builder  2/11] WORKDIR /app
 #10 CACHED
-#11 [builder  3/11] RUN apt-get update && apt-get install -y     openssl     python3     make     g++     && rm -rf /var/lib/apt/lists/*
+#11 [builder  5/11] COPY prisma ./prisma/
 #11 CACHED
-#12 [builder  5/11] COPY prisma ./prisma/
+#12 [builder  6/11] RUN rm -f package-lock.json
 #12 CACHED
 #13 [builder  9/11] RUN npx prisma generate
 #13 CACHED
 #14 [builder 10/11] COPY . .
 #14 DONE 0.1s
 #15 [builder 11/11] RUN npm run build
-#15 0.454
-#15 0.454 > repairappv2@0.1.0 build
-#15 0.454 > next build
-#15 0.454
-#15 1.378 ▲ Next.js 16.1.0 (Turbopack)
-#15 1.378 - Experiments (use with caution):
-#15 1.378   · serverActions
-#15 1.379
-#15 1.383 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-#15 1.456   Creating an optimized production build ...
-#15 28.51
-#15 28.51 > Build error occurred
-#15 28.52 Error: Turbopack build failed with 1 errors:
-#15 28.52 ./src/lib/offline/index.ts:6:1
-#15 28.52 Module not found: Can't resolve './sync-manager'
-#15 28.52 [0m [90m 4 |[39m [36mexport[39m { offlineDB[33m,[39m [33mSTORES[39m } [36mfrom[39m [32m'./indexed-db'[39m[33m;[39m
-#15 28.52  [90m 5 |[39m [36mexport[39m type { [33mSyncQueueItem[39m[33m,[39m [33mCachedData[39m } [36mfrom[39m [32m'./indexed-db'[39m[33m;[39m
-#15 28.52 [31m[1m>[22m[39m[90m 6 |[39m [36mexport[39m { syncManager } [36mfrom[39m [32m'./sync-manager'[39m[33m;[39m
-#15 28.52  [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
-#15 28.52  [90m 7 |[39m[0m
-#15 28.52
-#15 28.52
-#15 28.52
-#15 28.52 Import traces:
-#15 28.52   #1 [Client Component Browser]:
-#15 28.52     ./src/lib/offline/index.ts [Client Component Browser]
-#15 28.52     ./src/hooks/use-offline.ts [Client Component Browser]
-#15 28.52     ./src/hooks/index.ts [Client Component Browser]
-#15 28.52     ./src/app/(dashboard)/layout.tsx [Client Component Browser]
-#15 28.52     ./src/app/(dashboard)/layout.tsx [Server Component]
-#15 28.52
-#15 28.52   #2 [Client Component Browser]:
-#15 28.52     ./src/lib/offline/index.ts [Client Component Browser]
-#15 28.52     ./src/hooks/use-offline.ts [Client Component Browser]
-#15 28.52     ./src/hooks/index.ts [Client Component Browser]
-#15 28.52     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Client Component Browser]
-#15 28.52     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Server Component]
-#15 28.52
-#15 28.52   #3 [Client Component SSR]:
-#15 28.52     ./src/lib/offline/index.ts [Client Component SSR]
-#15 28.52     ./src/hooks/use-offline.ts [Client Component SSR]
-#15 28.52     ./src/hooks/index.ts [Client Component SSR]
-#15 28.52     ./src/app/(dashboard)/layout.tsx [Client Component SSR]
-#15 28.52     ./src/app/(dashboard)/layout.tsx [Server Component]
-#15 28.52
-#15 28.52   #4 [Client Component SSR]:
-#15 28.52     ./src/lib/offline/index.ts [Client Component SSR]
-#15 28.52     ./src/hooks/use-offline.ts [Client Component SSR]
-#15 28.52     ./src/hooks/index.ts [Client Component SSR]
-#15 28.52     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Client Component SSR]
-#15 28.52     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Server Component]
-#15 28.52
-#15 28.52 https://nextjs.org/docs/messages/module-not-found
-#15 28.52
-#15 28.52
-#15 28.52     at <unknown> (./src/lib/offline/index.ts:6:1)
-#15 28.52     at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+#15 0.533
+#15 0.533 > repairappv2@0.1.0 build
+#15 0.533 > next build
+#15 0.533
+#15 1.695 ▲ Next.js 16.1.0 (Turbopack)
+#15 1.696 - Experiments (use with caution):
+#15 1.697   · serverActions
+#15 1.697
+#15 1.702 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+#15 1.793   Creating an optimized production build ...
+#15 30.44
+#15 30.44 > Build error occurred
+#15 30.45 Error: Turbopack build failed with 2 errors:
+#15 30.45 ./src/hooks/use-offline.ts:7:1
+#15 30.45 Export syncManager doesn't exist in target module
+#15 30.45 [0m [90m  5 |[39m
+#15 30.45  [90m  6 |[39m [36mimport[39m { useState[33m,[39m useEffect[33m,[39m useCallback } [36mfrom[39m [32m'react'[39m[33m;[39m
+#15 30.45 [31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { syncManager } [36mfrom[39m [32m'@/lib/offline'[39m[33m;[39m
+#15 30.45  [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+#15 30.45  [90m  8 |[39m
+#15 30.45  [90m  9 |[39m [36minterface[39m [33mUseOfflineReturn[39m {
+#15 30.45  [90m 10 |[39m     isOnline[33m:[39m boolean[33m;[39m[0m
+#15 30.45
+#15 30.45 The export syncManager was not found in module [project]/src/lib/offline/index.ts [app-client] (ecmascript).
+#15 30.45 Did you mean to import offlineDB?
+#15 30.45 All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+#15 30.45
+#15 30.45 Import traces:
+#15 30.45   Client Component Browser:
+#15 30.45     ./src/hooks/use-offline.ts [Client Component Browser]
+#15 30.45     ./src/hooks/index.ts [Client Component Browser]
+#15 30.45     ./src/app/(dashboard)/layout.tsx [Client Component Browser]
+#15 30.45     ./src/app/(dashboard)/layout.tsx [Server Component]
+#15 30.45
+#15 30.45   Client Component SSR:
+#15 30.45     ./src/hooks/use-offline.ts [Client Component SSR]
+#15 30.45     ./src/hooks/index.ts [Client Component SSR]
+#15 30.45     ./src/app/(dashboard)/layout.tsx [Client Component SSR]
+#15 30.45     ./src/app/(dashboard)/layout.tsx [Server Component]
+#15 30.45
+#15 30.45
+#15 30.45 ./src/hooks/use-offline.ts:7:1
+#15 30.45 Export syncManager doesn't exist in target module
+#15 30.45 [0m [90m  5 |[39m
+#15 30.45  [90m  6 |[39m [36mimport[39m { useState[33m,[39m useEffect[33m,[39m useCallback } [36mfrom[39m [32m'react'[39m[33m;[39m
+#15 30.45 [31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { syncManager } [36mfrom[39m [32m'@/lib/offline'[39m[33m;[39m
+#15 30.45  [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+#15 30.45  [90m  8 |[39m
+#15 30.45  [90m  9 |[39m [36minterface[39m [33mUseOfflineReturn[39m {
+#15 30.45  [90m 10 |[39m     isOnline[33m:[39m boolean[33m;[39m[0m
+#15 30.45
+#15 30.45 The export syncManager was not found in module [project]/src/lib/offline/index.ts [app-ssr] (ecmascript).
+#15 30.45 Did you mean to import offlineDB?
+#15 30.45 All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+#15 30.45
+#15 30.45 Import traces:
+#15 30.45   Client Component Browser:
+#15 30.45     ./src/hooks/use-offline.ts [Client Component Browser]
+#15 30.45     ./src/hooks/index.ts [Client Component Browser]
+#15 30.45     ./src/app/(dashboard)/layout.tsx [Client Component Browser]
+#15 30.45     ./src/app/(dashboard)/layout.tsx [Server Component]
+#15 30.45
+#15 30.45   Client Component SSR:
+#15 30.45     ./src/hooks/use-offline.ts [Client Component SSR]
+#15 30.45     ./src/hooks/index.ts [Client Component SSR]
+#15 30.45     ./src/app/(dashboard)/layout.tsx [Client Component SSR]
+#15 30.45     ./src/app/(dashboard)/layout.tsx [Server Component]
+#15 30.45
+#15 30.45
+#15 30.45     at <unknown> (./src/hooks/use-offline.ts:7:1)
+#15 30.45     at <unknown> (./src/hooks/use-offline.ts:7:1)
 #15 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
 ------
 > [builder 11/11] RUN npm run build:
-28.52     ./src/hooks/use-offline.ts [Client Component SSR]
-28.52     ./src/hooks/index.ts [Client Component SSR]
-28.52     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Client Component SSR]
-28.52     ./src/app/(dashboard)/ordenes/[id]/page.tsx [Server Component]
-28.52
-28.52 https://nextjs.org/docs/messages/module-not-found
-28.52
-28.52
-28.52     at <unknown> (./src/lib/offline/index.ts:6:1)
-28.52     at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+30.45
+30.45   Client Component SSR:
+30.45     ./src/hooks/use-offline.ts [Client Component SSR]
+30.45     ./src/hooks/index.ts [Client Component SSR]
+30.45     ./src/app/(dashboard)/layout.tsx [Client Component SSR]
+30.45     ./src/app/(dashboard)/layout.tsx [Server Component]
+30.45
+30.45
+30.45     at <unknown> (./src/hooks/use-offline.ts:7:1)
+30.45     at <unknown> (./src/hooks/use-offline.ts:7:1)
 ------
 [33m2 warnings found (use docker --debug to expand):
-[0m - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "NEXTAUTH_SECRET") (line 18)
-- SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "NEXTAUTH_SECRET") (line 12)
+[0m - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "NEXTAUTH_SECRET") (line 12)
+- SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "NEXTAUTH_SECRET") (line 18)
 Dockerfile:51
 --------------------
 |
