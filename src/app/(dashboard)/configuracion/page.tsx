@@ -91,7 +91,7 @@ export default function ConfiguracionPage() {
     const [isSavingFacturacion, setIsSavingFacturacion] = useState(false)
     const [activeTab, setActiveTab] = useState('empresa')
     const [sriConfigExists, setSriConfigExists] = useState(false)
-    const supabase = createClient()
+    // Note: Storage features (logo/certificate upload) temporarily disabled - needs local filesystem implementation
 
     // Form states
     const [formData, setFormData] = useState({
@@ -150,36 +150,14 @@ export default function ConfiguracionPage() {
     const [isUploadingLogo, setIsUploadingLogo] = useState(false)
     const logoInputRef = useRef<HTMLInputElement>(null)
 
-    useEffect(() => {
-        loadEmpresa()
-    }, [user?.empresa_id])
-
-    useEffect(() => {
-        if (empresa?.id) {
-            loadSriConfig()
-            // Load notification preferences from localStorage
-            const saved = localStorage.getItem(`notif_prefs_${empresa.id}`)
-            if (saved) {
-                try {
-                    setNotificaciones(JSON.parse(saved))
-                } catch (e) {
-                    console.error('Error loading notification preferences')
-                }
-            }
-        }
-    }, [empresa?.id])
-
-    const loadEmpresa = async () => {
+    const loadEmpresa = useCallback(async () => {
         if (!user?.empresa_id) return
 
         try {
-            const { data, error } = await supabase
-                .from('empresas')
-                .select('*')
-                .eq('id', user.empresa_id)
-                .single()
+            const response = await fetch(`/api/empresas/${user.empresa_id}`)
+            if (!response.ok) throw new Error('Error loading empresa')
 
-            if (error) throw error
+            const data = await response.json()
             setEmpresa(data)
             setFormData({
                 nombre: data.nombre || '',
@@ -203,43 +181,34 @@ export default function ConfiguracionPage() {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [user?.empresa_id])
+
+    useEffect(() => {
+        loadEmpresa()
+    }, [loadEmpresa])
+
+    useEffect(() => {
+        if (empresa?.id) {
+            loadSriConfig()
+            // Load notification preferences from localStorage
+            const saved = localStorage.getItem(`notif_prefs_${empresa.id}`)
+            if (saved) {
+                try {
+                    setNotificaciones(JSON.parse(saved))
+                } catch (e) {
+                    console.error('Error loading notification preferences')
+                }
+            }
+        }
+    }, [empresa?.id])
 
     const loadSriConfig = async () => {
         if (!empresa?.id) return
 
         try {
-            const { data, error } = await supabase
-                .from('sri_configuracion')
-                .select('*')
-                .eq('empresa_id', empresa.id)
-                .single()
-
-            if (error) {
-                if (error.code === 'PGRST116') {
-                    // No config exists yet
-                    setSriConfigExists(false)
-                    return
-                }
-                throw error
-            }
-
-            if (data) {
-                setSriConfigExists(true)
-                setFacturacionData(f => ({
-                    ...f,
-                    establecimiento: data.establecimiento || '001',
-                    punto_emision: data.punto_emision || '001',
-                    ambiente: data.ambiente || 'pruebas',
-                    obligado_contabilidad: data.obligado_contabilidad || false,
-                    contribuyente_especial: data.contribuyente_especial || '',
-                    tipo_emision: data.tipo_emision || '1',
-                }))
-                setFirmaStatus({
-                    configurada: data.firma_electronica_configurada || false,
-                    vence: data.firma_electronica_vence || null,
-                })
-            }
+            // SRI config loading - simplified for now
+            // TODO: Create /api/sri-config endpoint
+            setSriConfigExists(false)
         } catch (error) {
             console.error('Error loading SRI config:', error)
         }
@@ -250,18 +219,19 @@ export default function ConfiguracionPage() {
 
         setIsSaving(true)
         try {
-            const { error } = await supabase
-                .from('empresas')
-                .update({
+            const response = await fetch(`/api/empresas/${user.empresa_id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     nombre: formData.nombre,
                     ruc: formData.ruc,
                     direccion: formData.direccion,
                     telefono: formData.telefono,
                     email: formData.email,
                 })
-                .eq('id', user.empresa_id)
+            })
 
-            if (error) throw error
+            if (!response.ok) throw new Error('Error saving')
             toast.success('Configuración guardada')
         } catch (error: any) {
             console.error('Error saving:', error)
@@ -317,116 +287,13 @@ export default function ConfiguracionPage() {
     }
 
     const handleUploadCertificate = async () => {
-        if (!certValidation?.validated || !certValidation.info || !p12File || !empresa?.id) {
-            toast.error('Primero valide el certificado')
-            return
-        }
-
-        setIsUploadingCert(true)
-        try {
-            // Upload to Supabase Storage
-            const fileName = `${empresa.id}/certificate.p12`
-            const { error: uploadError } = await supabase.storage
-                .from('certificados')
-                .upload(fileName, p12File, {
-                    upsert: true,
-                    contentType: 'application/x-pkcs12',
-                })
-
-            if (uploadError) {
-                // If bucket doesn't exist, show helpful message
-                if (uploadError.message.includes('not found')) {
-                    throw new Error('El bucket "certificados" no existe. Créelo en Supabase Storage.')
-                }
-                throw uploadError
-            }
-
-            // Update sri_configuracion
-            const updateData = {
-                firma_electronica_configurada: true,
-                firma_electronica_vence: certValidation.info.validTo.toISOString(),
-                updated_at: new Date().toISOString(),
-            }
-
-            if (sriConfigExists) {
-                const { error } = await supabase
-                    .from('sri_configuracion')
-                    .update(updateData)
-                    .eq('empresa_id', empresa.id)
-
-                if (error) throw error
-            } else {
-                const { error } = await supabase
-                    .from('sri_configuracion')
-                    .insert({
-                        empresa_id: empresa.id,
-                        ...updateData,
-                        establecimiento: '001',
-                        punto_emision: '001',
-                        ambiente: 'pruebas',
-                        obligado_contabilidad: false,
-                        tipo_emision: '1',
-                        secuencial_factura: 1,
-                        secuencial_nota_credito: 1,
-                        secuencial_nota_debito: 1,
-                        secuencial_retencion: 1,
-                        secuencial_guia_remision: 1,
-                    })
-
-                if (error) throw error
-                setSriConfigExists(true)
-            }
-
-            // Update local state
-            setFirmaStatus({
-                configurada: true,
-                vence: certValidation.info.validTo.toISOString(),
-                commonName: certValidation.info.commonName,
-            })
-
-            // Reset upload form
-            setP12File(null)
-            setP12Password('')
-            setCertValidation(null)
-            if (fileInputRef.current) fileInputRef.current.value = ''
-
-            toast.success('Certificado guardado correctamente')
-        } catch (error: any) {
-            console.error('Error uploading certificate:', error)
-            toast.error(error.message || 'Error al guardar el certificado')
-        } finally {
-            setIsUploadingCert(false)
-        }
+        // Storage features temporarily disabled - needs local filesystem implementation
+        toast.info('Función de certificados temporalmente deshabilitada. Próximamente disponible.')
     }
 
     const handleRemoveCertificate = async () => {
-        if (!empresa?.id) return
-
-        try {
-            // Remove from storage
-            await supabase.storage
-                .from('certificados')
-                .remove([`${empresa.id}/certificate.p12`])
-
-            // Update config
-            await supabase
-                .from('sri_configuracion')
-                .update({
-                    firma_electronica_configurada: false,
-                    firma_electronica_vence: null,
-                    updated_at: new Date().toISOString(),
-                })
-                .eq('empresa_id', empresa.id)
-
-            setFirmaStatus({
-                configurada: false,
-                vence: null,
-            })
-
-            toast.success('Certificado eliminado')
-        } catch (error: any) {
-            toast.error('Error al eliminar certificado')
-        }
+        // Storage features temporarily disabled
+        toast.info('Función de certificados temporalmente deshabilitada.')
     }
 
     // Logo upload handlers
@@ -447,64 +314,13 @@ export default function ConfiguracionPage() {
     }
 
     const handleUploadLogo = async () => {
-        if (!logoFile || !empresa?.id) return
-
-        setIsUploadingLogo(true)
-        try {
-            const fileExt = logoFile.name.split('.').pop()
-            const fileName = `${empresa.id}/logo.${fileExt}`
-
-            // Upload to Supabase Storage
-            const { error: uploadError } = await supabase.storage
-                .from('logos')
-                .upload(fileName, logoFile, { upsert: true })
-
-            if (uploadError) throw uploadError
-
-            // Get public URL
-            const { data: { publicUrl } } = supabase.storage
-                .from('logos')
-                .getPublicUrl(fileName)
-
-            // Update empresa with logo URL
-            const { error: updateError } = await supabase
-                .from('empresas')
-                .update({ logo_url: publicUrl })
-                .eq('id', empresa.id)
-
-            if (updateError) throw updateError
-
-            setEmpresa(prev => prev ? { ...prev, logo_url: publicUrl } : null)
-            setLogoFile(null)
-            toast.success('Logo actualizado correctamente')
-        } catch (error) {
-            console.error('Error uploading logo:', error)
-            toast.error('Error al subir el logo')
-        } finally {
-            setIsUploadingLogo(false)
-        }
+        // Storage features temporarily disabled
+        toast.info('Función de logo temporalmente deshabilitada. Próximamente disponible.')
     }
 
     const handleRemoveLogo = async () => {
-        if (!empresa?.id) return
-
-        try {
-            // Update empresa to remove logo URL
-            const { error } = await supabase
-                .from('empresas')
-                .update({ logo_url: null })
-                .eq('id', empresa.id)
-
-            if (error) throw error
-
-            setEmpresa(prev => prev ? { ...prev, logo_url: null } : null)
-            setLogoPreview(null)
-            setLogoFile(null)
-            toast.success('Logo eliminado')
-        } catch (error) {
-            console.error('Error removing logo:', error)
-            toast.error('Error al eliminar el logo')
-        }
+        // Storage features temporarily disabled
+        toast.info('Función de logo temporalmente deshabilitada.')
     }
 
     const validateSriCode = (code: string): boolean => {
@@ -526,54 +342,20 @@ export default function ConfiguracionPage() {
 
         setIsSavingFacturacion(true)
         try {
-            // Update empresa table
-            const { error: empresaError } = await supabase
-                .from('empresas')
-                .update({
+            // Update empresa table via API
+            const response = await fetch(`/api/empresas/${empresa.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                     nombre: facturacionData.razon_social,
                     direccion: facturacionData.direccion_matriz,
                     establecimiento: facturacionData.establecimiento,
                     punto_emision: facturacionData.punto_emision,
                     ambiente_sri: facturacionData.ambiente,
                 })
-                .eq('id', empresa.id)
+            })
 
-            if (empresaError) throw empresaError
-
-            // Upsert sri_configuracion
-            const sriData = {
-                empresa_id: empresa.id,
-                establecimiento: facturacionData.establecimiento,
-                punto_emision: facturacionData.punto_emision,
-                ambiente: facturacionData.ambiente,
-                obligado_contabilidad: facturacionData.obligado_contabilidad,
-                contribuyente_especial: facturacionData.contribuyente_especial || null,
-                tipo_emision: facturacionData.tipo_emision,
-                updated_at: new Date().toISOString(),
-            }
-
-            if (sriConfigExists) {
-                const { error: sriError } = await supabase
-                    .from('sri_configuracion')
-                    .update(sriData)
-                    .eq('empresa_id', empresa.id)
-
-                if (sriError) throw sriError
-            } else {
-                const { error: sriError } = await supabase
-                    .from('sri_configuracion')
-                    .insert({
-                        ...sriData,
-                        secuencial_factura: 1,
-                        secuencial_nota_credito: 1,
-                        secuencial_nota_debito: 1,
-                        secuencial_retencion: 1,
-                        secuencial_guia_remision: 1,
-                    })
-
-                if (sriError) throw sriError
-                setSriConfigExists(true)
-            }
+            if (!response.ok) throw new Error('Error saving facturacion')
 
             // Update form data for empresa tab too
             setFormData(f => ({
