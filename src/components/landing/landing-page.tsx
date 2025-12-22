@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, useInView, useScroll, useTransform } from 'framer-motion'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import {
     Wrench,
@@ -23,6 +25,7 @@ import {
     Sparkles,
     Play,
     Check,
+    Search,
 } from 'lucide-react'
 
 // Animation variants
@@ -302,7 +305,16 @@ function PremiumBackground() {
 }
 
 export default function LandingPage() {
+    const router = useRouter()
     const [scrolled, setScrolled] = useState(false)
+    const [trackingCode, setTrackingCode] = useState('')
+
+    const handleTrackingSearch = (e: React.FormEvent) => {
+        e.preventDefault()
+        if (trackingCode.trim()) {
+            router.push(`/tracking?numero=${encodeURIComponent(trackingCode.trim())}`)
+        }
+    }
 
     useEffect(() => {
         const handleScroll = () => {
@@ -468,6 +480,39 @@ export default function LandingPage() {
                                 Ver Demo
                             </Button>
                         </Link>
+                    </motion.div>
+
+                    {/* Quick Tracking Search */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.7 }}
+                        className="mt-12 max-w-md mx-auto"
+                    >
+                        <form onSubmit={handleTrackingSearch} className="relative group">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-slate-200 to-slate-100 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
+                            <div className="relative bg-white p-1.5 rounded-2xl shadow-xl shadow-slate-900/5 ring-1 ring-slate-900/5 flex items-center gap-2">
+                                <div className="pl-4 flex items-center justify-center">
+                                    <Search className="w-5 h-5 text-slate-400" />
+                                </div>
+                                <Input
+                                    placeholder="Rastrea tu orden (ej: ORD-001)"
+                                    className="border-0 bg-transparent focus-visible:ring-0 text-base h-12 px-2 shadow-none placeholder:text-slate-400"
+                                    value={trackingCode}
+                                    onChange={(e) => setTrackingCode(e.target.value)}
+                                />
+                                <Button
+                                    type="submit"
+                                    disabled={!trackingCode.trim()}
+                                    className="h-11 px-6 rounded-xl bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/20 transition-all disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Rastrear
+                                </Button>
+                            </div>
+                            <p className="text-xs text-slate-500 mt-3 text-center font-medium">
+                                Consulta el estado de tu reparación en tiempo real
+                            </p>
+                        </form>
                     </motion.div>
 
                     {/* Stats */}
