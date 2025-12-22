@@ -25,7 +25,7 @@ export async function PATCH(
 
         await prisma.usuario.update({
             where: { id },
-            data: { password_hash: hashedPassword }
+            data: { password: hashedPassword }
         })
 
         return NextResponse.json({ success: true })
