@@ -8,7 +8,7 @@ FROM node:20-slim AS builder
 WORKDIR /app
 
 # Build-time arguments
-ARG DATABASE_URL=postgresql://techlife:Life*9458@repairapp-db-l2j3ul:5432/repair-db
+ARG DATABASE_URL=postgresql://techlife:Life*9458@techliferepair-db-c4e8fr:5432/repair-db
 ARG NEXTAUTH_SECRET=KJH/uk8vP2gwAX+blvjGaPPcG9mYmjpiqvMgwsgJlrPg=
 ARG NEXTAUTH_URL=https://repair.laocorp.lat
 ARG NEXT_PUBLIC_APP_URL=https://repair.laocorp.lat
@@ -64,6 +64,8 @@ RUN apt-get update && apt-get install -y openssl curl && rm -rf /var/lib/apt/lis
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
 
 # Copy built output and necessary files
 COPY --from=builder /app/.next/standalone ./
