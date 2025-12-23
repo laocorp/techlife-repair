@@ -24,14 +24,12 @@ import {
     LogOut,
     User,
     CreditCard,
-    HelpCircle,
-    Moon,
-    Sun,
     Sparkles,
     Menu,
     CheckCheck,
     Package,
     AlertCircle,
+    Loader2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -113,244 +111,259 @@ export function Header({ isSidebarCollapsed, onMenuClick }: HeaderProps) {
                 width: `calc(100% - ${isSidebarCollapsed ? 64 : 240}px)`
             }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="header-linear fixed top-0 right-0 z-40 md:ml-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))] bg-white/40 backdrop-blur-xl border-b border-white/20"
-            style={{
-                // Override framer motion styles on mobile via standard CSS class overrides if needed,
-                // but since we render via JS logic in layout, we might just conditionalize the animate prop
-                marginLeft: undefined, // Let parent/layout handle generic positioning via classes for mobile?
-                // Actually, framer motion inline styles might conflict with media queries.
-                // We will handle the "mobile reset" in the layout component logic.
-            }}
+            className="header-linear fixed top-0 right-0 z-40 md:ml-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))] bg-white/60 backdrop-blur-xl border-b border-white/40 shadow-sm transition-all duration-200"
         >
-            <div className="flex items-center gap-4">
-                {/* Mobile Menu Button */}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="md:hidden -ml-2 text-[hsl(var(--text-secondary))]"
-                    onClick={onMenuClick}
-                >
-                    <Menu className="h-5 w-5" />
-                </Button>
+            <div className="flex h-16 items-center justify-between px-6 gap-4">
+                <div className="flex items-center gap-4">
+                    {/* Mobile Menu Button */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="md:hidden -ml-2 text-slate-600 hover:bg-white/50"
+                        onClick={onMenuClick}
+                    >
+                        <Menu className="h-5 w-5" />
+                    </Button>
 
-                {/* Page Title - Linear style */}
-                <div className="flex items-center gap-3">
-                    <div>
-                        <h1 className="text-sm font-semibold text-[hsl(var(--text-primary))] tracking-tight">
+                    {/* Page Title - Linear style */}
+                    <div className="flex flex-col">
+                        <h1 className="text-lg font-bold text-slate-800 tracking-tight leading-none">
                             {pageInfo.title}
                         </h1>
                         {pageInfo.description && (
-                            <p className="text-xs text-[hsl(var(--text-muted))] hidden sm:block">
+                            <p className="text-xs text-slate-500 font-medium hidden sm:block mt-1">
                                 {pageInfo.description}
                             </p>
                         )}
                     </div>
                 </div>
-            </div>
 
-            {/* Right Section */}
-            <div className="flex items-center gap-2">
-                {/* Quick Actions */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            size="sm"
-                            className="h-8 gap-1.5 bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-accent))]/90 text-white shadow-lg shadow-blue-500/20"
-                        >
-                            <Plus className="h-4 w-4" />
-                            <span className="hidden sm:inline">Crear</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                        align="end"
-                        className="w-48 bg-[hsl(var(--surface-elevated))] border-[hsl(var(--border-subtle))]"
-                    >
-                        <DropdownMenuItem asChild className="text-[hsl(var(--text-primary))] focus:bg-[hsl(var(--interactive-hover))]">
-                            <Link href="/ordenes/nueva">Nueva Orden</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild className="text-[hsl(var(--text-primary))] focus:bg-[hsl(var(--interactive-hover))]">
-                            <Link href="/pos">Nueva Venta</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild className="text-[hsl(var(--text-primary))] focus:bg-[hsl(var(--interactive-hover))]">
-                            <Link href="/clientes?new=true">Nuevo Cliente</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-[hsl(var(--border-subtle))]" />
-                        <DropdownMenuItem asChild className="text-[hsl(var(--text-primary))] focus:bg-[hsl(var(--interactive-hover))]">
-                            <Link href="/inventario?new=true">Nuevo Producto</Link>
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Notifications Dropdown */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--interactive-hover))] relative"
-                        >
-                            <Bell className="h-4 w-4" />
-                            {unreadCount > 0 && (
-                                <span className="absolute top-1 right-1 w-2 h-2 bg-[hsl(var(--status-error))] rounded-full" />
-                            )}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                        align="end"
-                        className="w-80 bg-[hsl(var(--surface-elevated))] border-[hsl(var(--border-subtle))] p-0"
-                    >
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(var(--border-subtle))]">
-                            <span className="text-sm font-semibold text-[hsl(var(--text-primary))]">Notificaciones</span>
-                            {unreadCount > 0 && (
-                                <Badge className="bg-[hsl(var(--status-error))] text-white text-[10px] px-1.5">{unreadCount}</Badge>
-                            )}
-                        </div>
-                        <div className="max-h-[300px] overflow-y-auto">
-                            {loadingNotifs ? (
-                                <div className="px-4 py-8 text-center text-[hsl(var(--text-muted))] text-sm">
-                                    Cargando...
+                {/* Right Section */}
+                <div className="flex items-center gap-4">
+                    {/* Quick Actions - Premium Gradient Button */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                size="sm"
+                                className="h-9 gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20 border-0 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                                <div className="bg-white/20 p-1 rounded-full">
+                                    <Plus className="h-3 w-3 text-white" />
                                 </div>
-                            ) : notificaciones.length === 0 ? (
-                                <div className="px-4 py-8 text-center text-[hsl(var(--text-muted))] text-sm">
-                                    No hay notificaciones
-                                </div>
-                            ) : (
-                                notificaciones.slice(0, 10).map((notif) => {
-                                    const { icon: Icon, color } = getNotifIcon(notif.tipo)
-                                    return (
-                                        <div
-                                            key={notif.id}
-                                            className={`px-4 py-3 hover:bg-[hsl(var(--interactive-hover))] border-b border-[hsl(var(--border-subtle))] cursor-pointer ${!notif.leida ? 'bg-[hsl(var(--surface-highlight))]' : ''}`}
-                                            onClick={() => {
-                                                if (!notif.leida) marcarLeida(notif.id)
-                                                if (notif.link) router.push(notif.link)
-                                            }}
-                                        >
-                                            <div className="flex items-start gap-3">
-                                                <div className={`w-8 h-8 rounded-full bg-${color}-500/10 flex items-center justify-center flex-shrink-0`}>
-                                                    <Icon className={`w-4 h-4 text-${color}-500`} />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-[hsl(var(--text-primary))] truncate">{notif.titulo}</p>
-                                                    <p className="text-xs text-[hsl(var(--text-muted))] mt-0.5 truncate">{notif.mensaje}</p>
-                                                    <p className="text-[10px] text-[hsl(var(--text-muted))] mt-1">{formatTimeAgo(notif.created_at)}</p>
-                                                </div>
-                                                {!notif.leida && (
-                                                    <div className="w-2 h-2 bg-[hsl(var(--brand-accent))] rounded-full flex-shrink-0 mt-1" />
-                                                )}
-                                            </div>
-                                        </div>
-                                    )
-                                })
-                            )}
-                        </div>
-                        <div className="px-4 py-2 border-t border-[hsl(var(--border-subtle))] flex gap-2">
-                            {unreadCount > 0 && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="flex-1 h-8 text-xs text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))]"
-                                    onClick={() => marcarTodasLeidas()}
-                                >
-                                    Marcar todas como leídas
-                                </Button>
-                            )}
-                            <Link href="/notificaciones">
-                                <Button
-                                    variant="ghost"
-                                    className="flex-1 h-8 text-xs text-[hsl(var(--brand-accent))] hover:text-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--interactive-hover))]"
-                                >
-                                    Ver todas
-                                </Button>
-                            </Link>
-                        </div>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Separator */}
-                <div className="h-6 w-px bg-[hsl(var(--border-subtle))]" />
-
-                {/* User Menu */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            className="h-8 gap-2 px-2 text-[hsl(var(--text-secondary))] hover:text-[hsl(var(--text-primary))] hover:bg-[hsl(var(--interactive-hover))]"
+                                <span className="font-semibold text-sm hidden sm:inline">Crear</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            align="end"
+                            className="w-56 bg-white/80 backdrop-blur-xl border-white/40 shadow-2xl p-1 rounded-xl"
                         >
-                            <Avatar className="h-6 w-6 bg-gradient-to-br from-violet-500 to-purple-600">
-                                <AvatarFallback className="text-white text-[10px] font-semibold bg-transparent">
-                                    {user?.nombre?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
-                                </AvatarFallback>
-                            </Avatar>
-                            <span className="hidden md:inline text-sm font-medium">
-                                {user?.nombre?.split(' ')[0] || 'Usuario'}
-                            </span>
-                            <ChevronDown className="h-3 w-3" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                        align="end"
-                        className="w-56 bg-[hsl(var(--surface-elevated))] border-[hsl(var(--border-subtle))]"
-                    >
-                        <DropdownMenuLabel className="font-normal">
-                            <div className="flex flex-col space-y-1">
-                                <p className="text-sm font-medium text-[hsl(var(--text-primary))]">
-                                    {user?.nombre}
-                                </p>
-                                <p className="text-xs text-[hsl(var(--text-muted))]">
-                                    {user?.email}
-                                </p>
-                                <Badge variant="secondary" className="w-fit mt-1 text-[10px] bg-[hsl(var(--surface-highlight))] text-[hsl(var(--text-secondary))]">
-                                    {user?.rol}
-                                </Badge>
+                            <DropdownMenuLabel className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-2 py-1.5">
+                                Acciones Rápidas
+                            </DropdownMenuLabel>
+                            <DropdownMenuItem asChild className="rounded-lg focus:bg-blue-50 focus:text-blue-700 cursor-pointer mb-1">
+                                <Link href="/ordenes/nueva" className="flex items-center gap-2">
+                                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                        <Package className="h-4 w-4" />
+                                    </div>
+                                    <span className="font-medium">Nueva Orden</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild className="rounded-lg focus:bg-emerald-50 focus:text-emerald-700 cursor-pointer mb-1">
+                                <Link href="/pos" className="flex items-center gap-2">
+                                    <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                        <CreditCard className="h-4 w-4" />
+                                    </div>
+                                    <span className="font-medium">Nueva Venta</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild className="rounded-lg focus:bg-violet-50 focus:text-violet-700 cursor-pointer">
+                                <Link href="/clientes?new=true" className="flex items-center gap-2">
+                                    <div className="h-8 w-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-600">
+                                        <User className="h-4 w-4" />
+                                    </div>
+                                    <span className="font-medium">Nuevo Cliente</span>
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    {/* Notifications Dropdown - Glass Pill */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-10 w-10 bg-white/50 hover:bg-white text-slate-500 hover:text-blue-600 border border-transparent hover:border-blue-100 shadow-sm rounded-xl transition-all relative group"
+                            >
+                                <Bell className="h-5 w-5 transition-transform group-hover:rotate-12" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse" />
+                                )}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            align="end"
+                            className="w-80 bg-white/90 backdrop-blur-2xl border-white/50 shadow-2xl rounded-2xl p-0 overflow-hidden"
+                        >
+                            <div className="flex items-center justify-between px-4 py-3 bg-slate-50/50 border-b border-slate-100">
+                                <span className="text-sm font-bold text-slate-900">Notificaciones</span>
+                                {unreadCount > 0 && (
+                                    <Badge className="bg-red-500 hover:bg-red-600 text-white border-0 shadow-lg shadow-red-500/20">{unreadCount} nuevas</Badge>
+                                )}
                             </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-[hsl(var(--border-subtle))]" />
+                            <div className="max-h-[350px] overflow-y-auto">
+                                {loadingNotifs ? (
+                                    <div className="p-8 text-center text-slate-400 text-sm">
+                                        <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2 opacity-50" />
+                                        Cargando...
+                                    </div>
+                                ) : notificaciones.length === 0 ? (
+                                    <div className="p-8 text-center text-slate-400 text-sm">
+                                        <Bell className="h-8 w-8 mx-auto mb-3 opacity-20" />
+                                        No hay notificaciones
+                                    </div>
+                                ) : (
+                                    notificaciones.slice(0, 10).map((notif) => {
+                                        const { icon: Icon, color } = getNotifIcon(notif.tipo)
+                                        return (
+                                            <div
+                                                key={notif.id}
+                                                className={`px-4 py-3 hover:bg-slate-50 border-b border-slate-50 cursor-pointer transition-colors ${!notif.leida ? 'bg-blue-50/40' : ''}`}
+                                                onClick={() => {
+                                                    if (!notif.leida) marcarLeida(notif.id)
+                                                    if (notif.link) router.push(notif.link)
+                                                }}
+                                            >
+                                                <div className="flex items-start gap-4">
+                                                    <div className={`w-9 h-9 rounded-full bg-${color}-500/10 flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                                                        <Icon className={`w-4 h-4 text-${color}-600`} />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex justify-between items-start gap-2">
+                                                            <p className={`text-sm font-semibold truncate ${!notif.leida ? 'text-slate-900' : 'text-slate-700'}`}>{notif.titulo}</p>
+                                                            {!notif.leida && (
+                                                                <span className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0 mt-1.5" />
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{notif.mensaje}</p>
+                                                        <p className="text-[10px] text-slate-400 mt-1.5 font-medium">{formatTimeAgo(notif.created_at)}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+                                    })
+                                )}
+                            </div>
+                            <div className="p-2 border-t border-slate-100 bg-slate-50/30 flex gap-2">
+                                {unreadCount > 0 && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="flex-1 h-8 text-xs text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg"
+                                        onClick={() => marcarTodasLeidas()}
+                                    >
+                                        Marcar leídas
+                                    </Button>
+                                )}
+                                <Link href="/notificaciones" className="flex-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg"
+                                    >
+                                        Ver todas
+                                    </Button>
+                                </Link>
+                            </div>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
-                        {empresa && (
-                            <>
-                                <DropdownMenuLabel className="text-xs text-[hsl(var(--text-muted))] font-normal">
-                                    Empresa
-                                </DropdownMenuLabel>
-                                <DropdownMenuItem className="text-[hsl(var(--text-primary))] focus:bg-[hsl(var(--interactive-hover))]">
-                                    <Sparkles className="h-4 w-4 mr-2 text-amber-400" />
-                                    <span>{empresa.nombre}</span>
-                                    <Badge className="ml-auto text-[10px] bg-amber-500/10 text-amber-400 border-0">
-                                        {empresa.plan || 'Trial'}
-                                    </Badge>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator className="bg-[hsl(var(--border-subtle))]" />
-                            </>
-                        )}
+                    {/* Separator - Subtle vertical line */}
+                    <div className="h-6 w-px bg-slate-200/60" />
 
-                        <DropdownMenuItem className="text-[hsl(var(--text-primary))] focus:bg-[hsl(var(--interactive-hover))]">
-                            <User className="h-4 w-4 mr-2" />
-                            Mi Perfil
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-[hsl(var(--text-primary))] focus:bg-[hsl(var(--interactive-hover))]">
-                            <CreditCard className="h-4 w-4 mr-2" />
-                            Suscripción
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-[hsl(var(--text-primary))] focus:bg-[hsl(var(--interactive-hover))]">
-                            <Settings className="h-4 w-4 mr-2" />
-                            Configuración
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-[hsl(var(--text-primary))] focus:bg-[hsl(var(--interactive-hover))]">
-                            <HelpCircle className="h-4 w-4 mr-2" />
-                            Ayuda
-                        </DropdownMenuItem>
-
-                        <DropdownMenuSeparator className="bg-[hsl(var(--border-subtle))]" />
-
-                        <DropdownMenuItem
-                            onClick={handleLogout}
-                            className="text-[hsl(var(--status-error))] focus:bg-[hsl(var(--status-error-bg))]"
+                    {/* User Menu - Glass Pill */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                className="h-10 pl-1.5 pr-3 bg-white/50 hover:bg-white border border-transparent hover:border-slate-100 rounded-full shadow-sm transition-all group gap-2"
+                            >
+                                <Avatar className="h-7 w-7 ring-2 ring-white shadow-sm">
+                                    <AvatarFallback className="bg-gradient-to-br from-slate-800 to-slate-900 text-white text-[10px] font-bold">
+                                        {user?.nombre?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U'}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col items-start hidden md:flex">
+                                    <span className="text-sm font-semibold text-slate-700 leading-none group-hover:text-slate-900">
+                                        {user?.nombre?.split(' ')[0] || 'Usuario'}
+                                    </span>
+                                    {user?.rol && (
+                                        <span className="text-[10px] text-slate-400 font-medium capitalize mt-0.5">
+                                            {user.rol}
+                                        </span>
+                                    )}
+                                </div>
+                                <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-slate-600 transition-transform group-data-[state=open]:rotate-180" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            align="end"
+                            className="w-60 bg-white/90 backdrop-blur-2xl border-white/50 shadow-2xl rounded-2xl p-1"
                         >
-                            <LogOut className="h-4 w-4 mr-2" />
-                            Cerrar sesión
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                            <DropdownMenuLabel className="font-normal px-4 py-3 bg-slate-50/50 rounded-xl mb-1">
+                                <div className="flex flex-col space-y-1">
+                                    <p className="text-sm font-bold text-slate-900">
+                                        {user?.nombre}
+                                    </p>
+                                    <p className="text-xs text-slate-500 truncate font-medium">
+                                        {user?.email}
+                                    </p>
+                                </div>
+                            </DropdownMenuLabel>
+
+                            {empresa && (
+                                <div className="px-2 py-2">
+                                    <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-blue-50/50 border border-blue-100/50">
+                                        <div className="flex items-center gap-2">
+                                            <Sparkles className="h-3.5 w-3.5 text-blue-500/70" />
+                                            <span className="text-xs font-semibold text-blue-700/80">{empresa.nombre}</span>
+                                        </div>
+                                        <Badge variant="secondary" className="text-[9px] h-4 px-1 bg-white shadow-sm text-blue-600 border-0">
+                                            {empresa.plan || 'Free'}
+                                        </Badge>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="p-1 space-y-0.5">
+                                <DropdownMenuItem className="rounded-lg focus:bg-slate-100 cursor-pointer text-slate-600 focus:text-slate-900">
+                                    <User className="h-4 w-4 mr-2 opacity-70" />
+                                    Mi Perfil
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="rounded-lg focus:bg-slate-100 cursor-pointer text-slate-600 focus:text-slate-900">
+                                    <CreditCard className="h-4 w-4 mr-2 opacity-70" />
+                                    Suscripción
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="rounded-lg focus:bg-slate-100 cursor-pointer text-slate-600 focus:text-slate-900">
+                                    <Settings className="h-4 w-4 mr-2 opacity-70" />
+                                    Configuración
+                                </DropdownMenuItem>
+                            </div>
+
+                            <DropdownMenuSeparator className="bg-slate-100 mx-2" />
+
+                            <div className="p-1">
+                                <DropdownMenuItem
+                                    onClick={handleLogout}
+                                    className="rounded-lg text-red-600 focus:bg-red-50 focus:text-red-700 cursor-pointer font-medium"
+                                >
+                                    <LogOut className="h-4 w-4 mr-2" />
+                                    Cerrar sesión
+                                </DropdownMenuItem>
+                            </div>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
             </div>
         </motion.header>
     )
