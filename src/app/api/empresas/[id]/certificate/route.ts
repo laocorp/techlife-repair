@@ -64,7 +64,7 @@ export async function POST(
         })
 
         // Also update separate configuration table if it exists
-        // (Ignoring SriConfiguracion for now as it seems redundant based on usage in `configuracion/page.tsx` which uses `Empresa`)
+
 
         return NextResponse.json({
             success: true,

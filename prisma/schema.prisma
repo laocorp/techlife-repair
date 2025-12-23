@@ -333,29 +333,29 @@ model Secuencial {
 
 // ============ SRI CONFIGURACIÓN ============
 
-model SriConfiguracion {
-  id                          String    @id @default(uuid())
-  empresa_id                  String    @unique
+// model SriConfiguracion {
+//   id                          String    @id @default(uuid())
+//   empresa_id                  String    @unique
   
-  razon_social                String?
-  nombre_comercial            String?
-  direccion_matriz            String?
-  establecimiento             String    @default("001")
-  punto_emision               String    @default("001")
-  direccion_establecimiento   String?
-  ambiente                    String    @default("pruebas")
-  obligado_contabilidad       Boolean   @default(false)
-  contribuyente_especial      String?
-  tipo_emision                String    @default("1")
+//   razon_social                String?
+//   nombre_comercial            String?
+//   direccion_matriz            String?
+//   establecimiento             String    @default("001")
+//   punto_emision               String    @default("001")
+//   direccion_establecimiento   String?
+//   ambiente                    String    @default("pruebas")
+//   obligado_contabilidad       Boolean   @default(false)
+//   contribuyente_especial      String?
+//   tipo_emision                String    @default("1")
   
-  firma_electronica_configurada Boolean @default(false)
-  firma_electronica_vence     DateTime?
+//   firma_electronica_configurada Boolean @default(false)
+//   firma_electronica_vence     DateTime?
   
-  created_at                  DateTime  @default(now())
-  updated_at                  DateTime  @updatedAt
+//   created_at                  DateTime  @default(now())
+//   updated_at                  DateTime  @updatedAt
   
-  @@map("sri_configuracion")
-}
+//   @@map("sri_configuracion")
+// }
 
 // ============ MARCAS Y MODELOS ============
 
