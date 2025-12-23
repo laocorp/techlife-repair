@@ -34,7 +34,7 @@ export default function LoginPage() {
 
             if (!response.ok) {
                 toast.error('Error al iniciar sesión', {
-                    description: data.error || 'Credenciales inválidas',
+                    description: data.details || data.error || 'Credenciales inválidas',
                 })
                 return
             }

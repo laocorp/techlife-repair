@@ -1,0 +1,59 @@
+Se ha completado la configuración base del nuevo servidor dedicado (Hetzner AX102). La infraestructura ha sido diseñada utilizando virtualización ligera (LXC) sobre Proxmox, optimizada para baja latencia (crítico para LiveKit) y cumpliendo estrictamente con las normativas de seguridad de red del proveedor (Hetzner) para evitar bloqueos por abuso de MAC.
+
+A continuación, se detallan los logros técnicos y la arquitectura de enrutamiento definida.
+
+1. Optimización de Hardware y Almacenamiento
+Servidor: Despliegue sobre Ryzen 9 (AX102) con 128GB RAM y Discos NVMe en RAID 1.
+
+Gestión de Espacio: Se reestructuró la tabla de particiones LVM por defecto de Proxmox. Se eliminó la partición data y se fusionó con root, logrando un pool de almacenamiento unificado de ~1.9 TB. Esto permite asignar el 100% del espacio disco de forma flexible entre backups, imágenes y contenedores sin restricciones de particionado.
+
+2. Arquitectura de Red (Compliance & Seguridad)
+Para mitigar el riesgo de bloqueo por "MAC Abuse" (política estricta de Hetzner que prohíbe múltiples direcciones MAC en un solo puerto físico), implementamos una arquitectura ROUTED NAT (Network Address Translation) en lugar de la configuración Bridge tradicional.
+
+Red Privada: Se creó una subred interna (10.0.0.0/24) aislada de internet.
+
+Enmascaramiento: El servidor Proxmox actúa como Router frontera. Todo el tráfico saliente de las aplicaciones es "enmascarado" (Masquerade) tras la IP pública del servidor.
+
+Beneficio: El proveedor solo ve una única MAC legítima, garantizando la estabilidad de la conexión y cero alertas de seguridad.
+
+3. Estrategia de Virtualización (LXC vs VM)
+Se optó por LXC (Linux Containers) en lugar de Máquinas Virtuales tradicionales para la mayoría de los servicios (LiveKit, Backend, Frontend).
+
+Ventaja: Los contenedores comparten el kernel del host, eliminando la sobrecarga de emulación de hardware. Esto se traduce en un rendimiento "Bare Metal" (nativo) para el procesamiento de video en tiempo real.
+
+Configuración Docker: Se habilitó la funcionalidad de Nesting en los contenedores para permitir el despliegue de microservicios Docker sin conflictos de permisos.
+
+4. Estrategia de Enrutamiento Híbrido (Traffic Flow)
+Hemos diseñado un flujo de tráfico dividido para garantizar seguridad en web y velocidad en video.
+
+A. Tráfico Web (HTTP/HTTPS) -> Vía Proxy Reverso
+Todo el tráfico web (puertos 80 y 443) es gestionado por un contenedor dedicado con Nginx Proxy Manager.
+
+Flujo: Internet -> Firewall Proxmox -> Nginx Proxy (10.0.0.2) -> Servicio Final (Backend/Frontend).
+
+Cómo funciona Nginx aquí:
+
+Recibe la petición y desencripta el SSL (Terminación SSL).
+
+Lee el dominio (ej. app.tuempresa.com).
+
+Redirige internamente al contenedor correcto (10.0.0.14).
+
+Gestiona automáticamente la renovación de certificados Let's Encrypt.
+
+B. Tráfico de Video (WebRTC/UDP) -> Vía NAT Directo
+El tráfico de video de LiveKit NO pasa por Nginx para evitar latencia innecesaria (cuellos de botella).
+
+Flujo: Internet -> IPTables Proxmox -> LiveKit SFU (10.0.0.10).
+
+Implementación: Se configuraron reglas de Port Forwarding a nivel de kernel para los puertos UDP críticos (Rango 50000-60000). Esto crea un "tubo directo" entre el usuario y el servidor de video.
+
+
+Servicio,Tipo,IP Interna,Función
+Nginx Proxy,    LXC,10.0.0.2,   Puerta de enlace Web y SSL.
+LiveKit SFU,    LXC,10.0.0.10,  Motor de Video/Audio (WebRTC).
+Egress,         LXC,10.0.0.11,  Grabación y Streaming RTMP.
+Agents,         LXC,10.0.0.12,  IA y procesamiento de señales.
+Backend,        LXC,10.0.0.13,  API y lógica de negocio.
+Frontend,       LXC,10.0.0.14,  Interfaz de usuario Web.
+Monitoring,     LXC,10.0.0.15,  Métricas y estado del servidor.
