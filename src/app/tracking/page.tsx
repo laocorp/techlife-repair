@@ -411,17 +411,17 @@ function TrackingContent() {
                                                     {/* Content */}
                                                     <div className="flex-1 pt-1">
                                                         <div className="flex items-center justify-between mb-1">
-                                                            <h5 className={`font-semibold text-base transition-colors ${step.status === 'pending' ? 'text-slate-400' : 'text-slate-900'
+                                                            <h5 className={`font-semibold text-base transition-colors ${step.status === 'pending' ? 'text-slate-500' : 'text-slate-900'
                                                                 }`}>
                                                                 {step.title}
                                                             </h5>
                                                             {step.date && step.status !== 'pending' && (
-                                                                <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
+                                                                <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md">
                                                                     {formatDate(step.date)}
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <p className={`text-sm leading-relaxed transition-colors ${step.status === 'pending' ? 'text-slate-300' : 'text-slate-600'
+                                                        <p className={`text-sm leading-relaxed transition-colors ${step.status === 'pending' ? 'text-slate-400' : 'text-slate-600'
                                                             }`}>
                                                             {step.description}
                                                         </p>
@@ -451,8 +451,7 @@ function TrackingContent() {
                                         {order.empresa?.telefono && (
                                             <a href={`tel:${order.empresa.telefono}`} className="flex-1 md:flex-none">
                                                 <Button
-                                                    variant="outline"
-                                                    className="w-full h-12 gap-2 border-slate-700 bg-transparent text-white hover:bg-slate-800 hover:text-white"
+                                                    className="w-full h-12 gap-2 border border-slate-700 bg-transparent text-white hover:bg-slate-800 hover:text-white"
                                                 >
                                                     <Phone className="h-4 w-4" />
                                                     Llamar
