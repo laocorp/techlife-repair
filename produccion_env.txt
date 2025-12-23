@@ -1,0 +1,4 @@
+DATABASE_URL="postgresql://techlife:Life*9458@techliferepair-db-c4e8fr:5432/repair-db"
+NEXTAUTH_SECRET="c8f942d9f78b12e9a5c6d3e8f1a4b7c2d5e8f9a0b3c6d9e2f5a8b1c4d7e0f3a6"
+NEXTAUTH_URL="https://repair.laocorp.lat"
+NEXT_PUBLIC_APP_URL="https://repair.laocorp.lat"
