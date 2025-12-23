@@ -69,6 +69,65 @@ El sistema actual cubre satisfactoriamente el **Tracking**, **Portal de Cliente*
     *   Agregar campo `fotos` (array) al modelo `Producto`.
     *   Ampliar el Enum de roles o crear una tabla `Permisos`.
     *   Crear modelo `Abono` vinculado a Ventas/Órdenes para trazabilidad de pagos parciales.
-2.  **Lógica de Negocio:**
-    *   Implementar "hook" que descuente inventario al aprobar una orden que usa repuestos.
-    *   Crear Dashboard de "Cuentas por Cobrar" para el módulo de cobranzas.
+
+---
+
+## 8. Comparativa con Features de Sistema Estándar (Referencia)
+
+A continuación se analiza la lista de features "Estándar" proporcionada, contrastándola con lo que el cliente pidió y lo que ya tenemos.
+
+### 📦 Point of Sale (POS)
+| Feature | Relación con Cliente | Estado Actual | Acción Requerida |
+| :--- | :--- | :---: | :--- |
+| **Integrated POS (Products/Services)** | Base del req. Tienda | ⚠️ Básico | Mejorar interfaz de venta. |
+| **Barcode Scanner Support** | Útil para Tienda/Inv | ❌ Faltante | Agregar soporte de entrada de pistola códigos de barras. |
+| **Real-time Cart / Multi-currency** | Req. "Carrito" | ❌ Faltante | Falta soporte multi-moneda y carrito persistente real (tabs). |
+
+### 🧾 Repair Order Management
+| Feature | Relación con Cliente | Estado Actual | Acción Requerida |
+| :--- | :--- | :---: | :--- |
+| **Create/Update/Track Jobs** | Central (Punto 1) | ✅ Implementado | - |
+| **Warranty Cards / Device Tags** | No solicitado explícitamente | ❌ Faltante | Generar PDFs de "Etiquetas" y "Certificados de Garantía". |
+
+### 🔍 Repair Tracking System
+| Feature | Relación con Cliente | Estado Actual | Acción Requerida |
+| :--- | :---: | :--- |
+| **Track by ID/QR** | Central (Punto 3) | ✅ Implementado | - |
+| **Embeddable Widget** | No solicitado | ❌ Faltante | Crear un `iframe` o script para webs externas. |
+
+### 🛍️ Sales & Buybacks
+| Feature | Relación con Cliente | Estado Actual | Acción Requerida |
+| :--- | :---: | :--- |
+| **Sell items (Serial/IMEI)** | Base del Negocio | ⚠️ Parcial | Falta validación estricta de series en Venta. |
+| **Buybacks (Comercios)** | No solicitado explícitamente | ❌ Faltante | Módulo de "Compras" de dispositivos usados. |
+
+### 🗃️ Inventory & Stock
+| Feature | Relación con Cliente | Estado Actual | Acción Requerida |
+| :--- | :---: | :--- |
+| **Multi-warehouse** | No solicitado (Implícito en Zonas?) | ❌ Faltante | Agregar tabla `Bodegas` y relación stock. |
+| **Low-stock alerts** | Base de Gestión | ⚠️ Básico | Se tiene campo `stock_minimo` pero falta sistema de notificaciones. |
+| **Product Variants / Import CSV** | Req. Tienda | ❌ Faltante | Soporte de Tallas/Colores y Carga Masiva. |
+
+### 🧾 Product & Label Management
+| Feature | Relación con Cliente | Estado Actual | Acción Requerida |
+| :--- | :---: | :--- |
+| **Label Printing (Thermal/A4)** | Operativo Taller | ❌ Faltante | Generador de etiquetas PDF/ZPL. |
+
+### 👥 Customers & Billing
+| Feature | Relación con Cliente | Estado Actual | Acción Requerida |
+| :--- | :---: | :--- |
+| **Billing History** | Req. Cobranzas (Punto 4) | ⚠️ Disperso | Centralizar en "Cuenta Corriente". |
+| **Import/Export CSV** | Útil administrativo | ❌ Faltante | Módulo de Importación de Datos. |
+
+### 🔒 User Roles & Permissions
+| Feature | Relación con Cliente | Estado Actual | Acción Requerida |
+| :--- | :---: | :--- |
+| **Role-based Access Control (RBAC)** | Req. Roles (Punto 6) | ⚠️ Rígido | Crear sistema de Roles Dinámicos y Permisos granulares. |
+
+### ⚙️ & 🌍 Advanced (Admin, Multi-lang, Backup)
+| Feature | Relación con Cliente | Estado Actual | Acción Requerida |
+| :--- | :---: | :--- |
+| **Multi-language** | No solicitado | ❌ Faltante | (Baja prioridad a menos que se expanda). |
+| **Manual Backup** | Seguridad Base | ❌ Faltante | Script de dump de base de datos desde UI. |
+| **Cash Register (Reconcile)** | Req. Flujo Caja (Punto 2) | ⚠️ Básico | Mejorar el cierre de caja con "Conteo de efectivo ciegas". |
+
