@@ -14,16 +14,18 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode
 }) {
+    const [layoutReady, setLayoutReady] = useState(false)
     const [isCollapsed, setIsCollapsed] = useState(false)
-    const [isLoading, setIsLoading] = useState(true)
     const [isMobileOpen, setIsMobileOpen] = useState(false)
     const isMobile = useMediaQuery('(max-width: 768px)')
 
-    const { user, isAuthenticated, setLoading } = useAuthStore()
+    const { user, isAuthenticated, isLoading: isAuthLoading } = useAuthStore()
     const router = useRouter()
 
     useEffect(() => {
-        // Check if user is authenticated from store (persisted)
+        // Wait for store to rehydrate (isAuthLoading becomes false)
+        if (isAuthLoading) return
+
         const checkAuth = () => {
             if (!isAuthenticated || !user) {
                 router.push('/login')
@@ -36,16 +38,13 @@ export default function DashboardLayout({
                 return
             }
 
-            setIsLoading(false)
-            setLoading(false)
+            setLayoutReady(true)
         }
 
-        // Small delay to allow hydration
-        const timer = setTimeout(checkAuth, 100)
-        return () => clearTimeout(timer)
-    }, [isAuthenticated, user, router, setLoading])
+        checkAuth()
+    }, [isAuthenticated, user, isAuthLoading, router])
 
-    if (isLoading) {
+    if (!layoutReady) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--surface-base))]">
                 <motion.div
@@ -58,7 +57,7 @@ export default function DashboardLayout({
                     </div>
                     <div className="flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
-                        <p className="text-sm text-slate-500">Cargando...</p>
+                        <p className="text-sm text-slate-500">Verificando sesión...</p>
                     </div>
                 </motion.div>
             </div>
