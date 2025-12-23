@@ -301,7 +301,7 @@ export async function POST(request: NextRequest) {
                         estado: estadoFactura.toLowerCase(),
                         xml_generado: xmlSigned,
                         ambiente: empresa.ambiente_sri
-                    }
+                    } as any
                 })
 
                 if (sriResponseMessages.length > 0) {
