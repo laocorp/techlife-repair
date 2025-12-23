@@ -181,10 +181,10 @@ export default function DashboardPage() {
             {/* Welcome Header */}
             <motion.div variants={itemVariants} className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-semibold text-white tracking-tight">
+                    <h1 className="text-2xl font-bold text-[hsl(var(--text-primary))] tracking-tight">
                         Dashboard
                     </h1>
-                    <p className="text-sm text-zinc-500 mt-1">
+                    <p className="text-sm text-[hsl(var(--text-muted))] mt-1">
                         Bienvenido, {user?.nombre?.split(' ')[0]} · {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </p>
                 </div>
@@ -206,7 +206,7 @@ export default function DashboardPage() {
                         <Link href="/pos">
                             <Button
                                 size="sm"
-                                className="h-9 gap-2 bg-cyan-500 hover:bg-cyan-400 text-zinc-900 font-semibold shadow-lg shadow-cyan-500/25"
+                                className="h-9 gap-2 bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-accent))]/90 text-white font-semibold shadow-lg shadow-blue-500/25"
                             >
                                 <Zap className="h-4 w-4" />
                                 Nueva Venta
@@ -222,16 +222,16 @@ export default function DashboardPage() {
                     const Icon = stat.icon
                     return (
                         <Link key={stat.title} href={stat.href}>
-                            <div className="stat-card-enterprise group cursor-pointer">
+                            <div className="stat-card-enterprise group cursor-pointer bg-white/60 backdrop-blur-sm border border-white/20 shadow-sm hover:shadow-md transition-all">
                                 <div className="flex items-start justify-between">
                                     <div>
-                                        <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
+                                        <p className="text-xs font-medium text-[hsl(var(--text-muted))] uppercase tracking-wider">
                                             {stat.title}
                                         </p>
                                         {isLoading ? (
-                                            <div className="skeleton h-8 w-20 mt-2" />
+                                            <div className="skeleton h-8 w-20 mt-2 bg-slate-200/50" />
                                         ) : (
-                                            <p className="text-2xl font-bold text-white mt-1 tracking-tight">
+                                            <p className="text-2xl font-bold text-[hsl(var(--text-primary))] mt-1 tracking-tight">
                                                 {stat.value}
                                             </p>
                                         )}
@@ -259,14 +259,14 @@ export default function DashboardPage() {
                 {/* Recent Orders */}
                 <PermissionGate permission="orders.view">
                     <motion.div variants={itemVariants} className="lg:col-span-2">
-                        <div className="card-enterprise">
-                            <div className="flex items-center justify-between p-5 border-b border-zinc-800/50">
+                        <div className="card-enterprise bg-white/60 backdrop-blur-sm border border-white/20 shadow-sm">
+                            <div className="flex items-center justify-between p-5 border-b border-[hsl(var(--border-subtle))]">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-                                        <Activity className="h-4 w-4 text-cyan-400" />
+                                        <Activity className="h-4 w-4 text-cyan-500" />
                                     </div>
                                     <div>
-                                        <h3 className="text-sm font-semibold text-white">Órdenes Activas</h3>
+                                        <h3 className="text-sm font-semibold text-[hsl(var(--text-primary))]">Órdenes Activas</h3>
                                         <p className="text-xs text-zinc-500">En proceso de reparación</p>
                                     </div>
                                 </div>
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="h-8 gap-1 text-xs text-zinc-500 hover:text-white"
+                                        className="h-8 gap-1 text-xs text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))]"
                                     >
                                         Ver todas <ArrowRight className="h-3 w-3" />
                                     </Button>
@@ -300,21 +300,21 @@ export default function DashboardPage() {
                                         </Link>
                                     </div>
                                 ) : (
-                                    <div className="divide-y divide-zinc-800/50">
+                                    <div className="divide-y divide-[hsl(var(--border-subtle))]">
                                         {recentOrders.map((order) => {
                                             const estado = estadoColors[order.estado] || estadoColors.recibido
                                             return (
                                                 <Link key={order.id} href={`/ordenes/${order.id}`}>
-                                                    <div className="flex items-center justify-between px-5 py-4 hover:bg-zinc-800/30 transition-colors cursor-pointer">
+                                                    <div className="flex items-center justify-between px-5 py-4 hover:bg-[hsl(var(--surface-highlight))] transition-colors cursor-pointer">
                                                         <div className="flex items-center gap-4">
                                                             <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center border border-zinc-700/50">
                                                                 <Wrench className="h-4 w-4 text-zinc-400" />
                                                             </div>
                                                             <div>
-                                                                <p className="text-sm font-medium text-white">
+                                                                <p className="text-sm font-medium text-[hsl(var(--text-primary))]">
                                                                     {order.equipo_tipo} {order.equipo_marca}
                                                                 </p>
-                                                                <p className="text-xs text-zinc-500 mt-0.5">
+                                                                <p className="text-xs text-[hsl(var(--text-muted))] mt-0.5">
                                                                     {order.cliente?.nombre || 'Sin cliente'} · {order.numero}
                                                                 </p>
                                                             </div>
@@ -341,13 +341,13 @@ export default function DashboardPage() {
                 <motion.div variants={itemVariants} className="space-y-6">
                     {/* Low Stock */}
                     <PermissionGate permission="inventory.view">
-                        <div className="card-enterprise">
-                            <div className="flex items-center gap-3 p-5 border-b border-zinc-800/50">
+                        <div className="card-enterprise bg-white/60 backdrop-blur-sm border border-white/20 shadow-sm">
+                            <div className="flex items-center gap-3 p-5 border-b border-[hsl(var(--border-subtle))]">
                                 <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                                    <AlertTriangle className="h-4 w-4 text-amber-400" />
+                                    <AlertTriangle className="h-4 w-4 text-amber-500" />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-semibold text-white">Stock Bajo</h3>
+                                    <h3 className="text-sm font-semibold text-[hsl(var(--text-primary))]">Stock Bajo</h3>
                                     <p className="text-xs text-zinc-500">Productos a reabastecer</p>
                                 </div>
                             </div>
@@ -366,8 +366,8 @@ export default function DashboardPage() {
                                 ) : (
                                     <div className="space-y-3">
                                         {lowStock.map((product) => (
-                                            <div key={product.id} className="flex items-center justify-between p-3 rounded-lg bg-zinc-800/30">
-                                                <p className="text-sm font-medium text-zinc-300 truncate flex-1">
+                                            <div key={product.id} className="flex items-center justify-between p-3 rounded-lg bg-[hsl(var(--surface-highlight))]">
+                                                <p className="text-sm font-medium text-[hsl(var(--text-primary))] truncate flex-1">
                                                     {product.nombre}
                                                 </p>
                                                 <Badge className="ml-2 bg-amber-500/10 text-amber-400 border-0 text-[10px] font-semibold">
@@ -392,14 +392,14 @@ export default function DashboardPage() {
                     </PermissionGate>
 
                     {/* Quick Actions */}
-                    <div className="card-enterprise p-5">
-                        <h3 className="text-sm font-semibold text-white mb-4">Acciones Rápidas</h3>
+                    <div className="card-enterprise p-5 bg-white/60 backdrop-blur-sm border border-white/20 shadow-sm">
+                        <h3 className="text-sm font-semibold text-[hsl(var(--text-primary))] mb-4">Acciones Rápidas</h3>
                         <div className="grid grid-cols-2 gap-2">
                             <Link href="/ordenes/nueva">
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="w-full h-20 flex-col gap-2 border-zinc-800 bg-zinc-800/30 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-cyan-500/50"
+                                    className="w-full h-20 flex-col gap-2 border-[hsl(var(--border-subtle))] bg-white/50 text-[hsl(var(--text-secondary))] hover:text-[hsl(var(--text-primary))] hover:bg-white hover:border-[hsl(var(--brand-accent))]"
                                 >
                                     <Wrench className="h-5 w-5" />
                                     <span className="text-[10px] uppercase tracking-wider">Nueva Orden</span>
@@ -409,7 +409,7 @@ export default function DashboardPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="w-full h-20 flex-col gap-2 border-zinc-800 bg-zinc-800/30 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-cyan-500/50"
+                                    className="w-full h-20 flex-col gap-2 border-[hsl(var(--border-subtle))] bg-white/50 text-[hsl(var(--text-secondary))] hover:text-[hsl(var(--text-primary))] hover:bg-white hover:border-[hsl(var(--brand-accent))]"
                                 >
                                     <ShoppingCart className="h-5 w-5" />
                                     <span className="text-[10px] uppercase tracking-wider">Venta</span>
@@ -419,7 +419,7 @@ export default function DashboardPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="w-full h-20 flex-col gap-2 border-zinc-800 bg-zinc-800/30 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-cyan-500/50"
+                                    className="w-full h-20 flex-col gap-2 border-[hsl(var(--border-subtle))] bg-white/50 text-[hsl(var(--text-secondary))] hover:text-[hsl(var(--text-primary))] hover:bg-white hover:border-[hsl(var(--brand-accent))]"
                                 >
                                     <Users className="h-5 w-5" />
                                     <span className="text-[10px] uppercase tracking-wider">Cliente</span>
@@ -429,7 +429,7 @@ export default function DashboardPage() {
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    className="w-full h-20 flex-col gap-2 border-zinc-800 bg-zinc-800/30 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-cyan-500/50"
+                                    className="w-full h-20 flex-col gap-2 border-[hsl(var(--border-subtle))] bg-white/50 text-[hsl(var(--text-secondary))] hover:text-[hsl(var(--text-primary))] hover:bg-white hover:border-[hsl(var(--brand-accent))]"
                                 >
                                     <TrendingUp className="h-5 w-5" />
                                     <span className="text-[10px] uppercase tracking-wider">Reportes</span>
