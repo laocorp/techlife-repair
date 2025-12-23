@@ -39,6 +39,8 @@ import {
     Loader2,
     DollarSign,
     ShoppingCart,
+    Trash2,
+    Plus,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -128,12 +130,19 @@ export default function OrdenDetallePage() {
     const [isQRDialogOpen, setIsQRDialogOpen] = useState(false)
     const [qrData, setQRData] = useState<{ qrDataUrl: string; trackingUrl: string } | null>(null)
 
+    // Repuestos Editing State
+    const [repuestos, setRepuestos] = useState<{ id: string; nombre: string; precio: number; cantidad: number }[]>([])
+    const [productoSearch, setProductoSearch] = useState('')
+    const [productosList, setProductosList] = useState<any[]>([])
+    const [showProductoDropdown, setShowProductoDropdown] = useState(false)
+    const [manoObra, setManoObra] = useState(0)
+
     // Edit form
     const [formData, setFormData] = useState({
         estado: '',
         diagnostico: '',
-        costo_estimado: '',
-        costo_final: '',
+        costo_estimado: '', // Will be used for fallback/manual override if needed
+        costo_final: '', // Will be calculated
     })
 
     const ordenId = params.id as string
@@ -157,6 +166,16 @@ export default function OrdenDetallePage() {
                 costo_estimado: data.costo_estimado?.toString() || '',
                 costo_final: data.costo_final?.toString() || '',
             })
+            // Populate Repuestos State
+            if (data.repuestos) {
+                setRepuestos(data.repuestos.map((r: any) => ({
+                    id: r.producto.id || r.producto_id, // Safety check
+                    nombre: r.producto.nombre,
+                    precio: Number(r.precio_unitario),
+                    cantidad: r.cantidad
+                })))
+            }
+            setManoObra(Number(data.mano_obra) || 0)
         } catch (error: any) {
             toast.error('Error al cargar orden', { description: error.message })
             router.push('/ordenes')
@@ -169,6 +188,44 @@ export default function OrdenDetallePage() {
         loadOrden()
     }, [loadOrden])
 
+    // Search Productos Logic (Adapted from Create Page)
+    useEffect(() => {
+        const searchProductos = async () => {
+            if (!user?.empresa_id || productoSearch.length < 2) {
+                setProductosList([])
+                return
+            }
+            try {
+                const response = await fetch(`/api/productos?empresa_id=${user.empresa_id}&search=${encodeURIComponent(productoSearch)}&activo=true`)
+                if (response.ok) {
+                    const data = await response.json()
+                    setProductosList(data || [])
+                }
+            } catch (error) {
+                console.error('Error searching productos:', error)
+            }
+        }
+        const debounce = setTimeout(searchProductos, 300)
+        return () => clearTimeout(debounce)
+    }, [productoSearch, user?.empresa_id])
+
+    const addRepuesto = (producto: any) => {
+        setRepuestos(prev => {
+            const exists = prev.find(p => p.id === producto.id)
+            if (exists) {
+                return prev.map(p => p.id === producto.id ? { ...p, cantidad: p.cantidad + 1 } : p)
+            }
+            return [...prev, { id: producto.id, nombre: producto.nombre, precio: Number(producto.precio_venta), cantidad: 1 }]
+        })
+        setProductoSearch('')
+        setShowProductoDropdown(false)
+        toast.success(`Agregado: ${producto.nombre}`)
+    }
+
+    const removeRepuesto = (id: string) => {
+        setRepuestos(prev => prev.filter(p => p.id !== id))
+    }
+
     const handleSave = async () => {
         if (!orden) return
 
@@ -180,8 +237,15 @@ export default function OrdenDetallePage() {
                 body: JSON.stringify({
                     estado: formData.estado,
                     diagnostico: formData.diagnostico || null,
-                    costo_estimado: formData.costo_estimado || null,
-                    costo_final: formData.costo_final || null,
+                    // Send updated costs and parts
+                    mano_obra: manoObra,
+                    repuestos: repuestos.map(r => ({
+                        producto_id: r.id,
+                        cantidad: r.cantidad,
+                        precio_unitario: r.precio
+                    })),
+                    // cost calculated in backend usually, but we can send if needed.
+                    // Backend will recalculate total based on parts + MO.
                 })
             })
 
@@ -414,29 +478,93 @@ export default function OrdenDetallePage() {
                                         />
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label className="text-gray-700">Costo Estimado ($)</Label>
-                                            <Input
-                                                type="number"
-                                                step="0.01"
-                                                value={formData.costo_estimado}
-                                                onChange={(e) => setFormData(f => ({ ...f, costo_estimado: e.target.value }))}
-                                                className="bg-white border-gray-200"
-                                                placeholder="0.00"
-                                            />
+                                    <div className="space-y-4 pt-2 border-t border-gray-100">
+                                        <h4 className="font-medium text-gray-800 flex items-center gap-2">
+                                            <DollarSign className="h-4 w-4 text-emerald-600" />
+                                            Costos y Repuestos
+                                        </h4>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-gray-700">Mano de Obra ($)</Label>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={manoObra}
+                                                    onChange={(e) => setManoObra(parseFloat(e.target.value) || 0)}
+                                                    className="bg-white border-gray-200"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-gray-700">Total Calculado</Label>
+                                                <div className="h-10 flex items-center px-3 bg-gray-50 border border-gray-200 rounded-md font-bold text-gray-800">
+                                                    ${(manoObra + repuestos.reduce((acc, r) => acc + (r.precio * r.cantidad), 0)).toFixed(2)}
+                                                </div>
+                                            </div>
                                         </div>
+
+                                        {/* Repuestos Selector */}
                                         <div className="space-y-2">
-                                            <Label className="text-gray-700">Costo Final ($)</Label>
-                                            <Input
-                                                type="number"
-                                                step="0.01"
-                                                value={formData.costo_final}
-                                                onChange={(e) => setFormData(f => ({ ...f, costo_final: e.target.value }))}
-                                                className="bg-white border-gray-200"
-                                                placeholder="0.00"
-                                            />
+                                            <Label className="text-gray-700 text-sm">Agregar Repuestos</Label>
+                                            <div className="relative">
+                                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                                                <Input
+                                                    placeholder="Buscar repuesto..."
+                                                    value={productoSearch}
+                                                    onChange={(e) => {
+                                                        setProductoSearch(e.target.value)
+                                                        setShowProductoDropdown(true)
+                                                    }}
+                                                    onFocus={() => setShowProductoDropdown(true)}
+                                                    className="pl-9 bg-white border-gray-200 h-9 text-sm"
+                                                />
+                                                {showProductoDropdown && productosList.length > 0 && (
+                                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-100 rounded-lg shadow-lg max-h-[200px] overflow-y-auto">
+                                                        {productosList.map(prod => (
+                                                            <button
+                                                                key={prod.id}
+                                                                type="button"
+                                                                className="w-full p-2.5 text-left hover:bg-emerald-50 transition-colors border-b border-gray-50 flex justify-between items-center text-sm"
+                                                                onClick={() => addRepuesto(prod)}
+                                                            >
+                                                                <span className="font-medium text-gray-800">{prod.nombre}</span>
+                                                                <span className="font-bold text-emerald-600">${prod.precio_venta}</span>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
+
+                                        {/* Lista Repuestos Editing */}
+                                        {repuestos.length > 0 && (
+                                            <div className="space-y-2 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
+                                                {repuestos.map((item) => (
+                                                    <div key={item.id} className="flex items-center justify-between text-sm p-2 bg-white shadow-sm rounded border border-gray-100">
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium text-gray-800">{item.nombre}</span>
+                                                            <div className="text-xs text-gray-500 flex gap-2">
+                                                                <span>${item.precio.toFixed(2)}</span>
+                                                                <span>x {item.cantidad}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-bold text-gray-900">${(item.cantidad * item.precio).toFixed(2)}</span>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => removeRepuesto(item.id)}
+                                                                className="text-red-400 hover:text-red-600 hover:bg-red-50 h-7 w-7 p-0"
+                                                            >
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ) : (
