@@ -48,6 +48,11 @@ export async function GET(request: NextRequest) {
                         id: true,
                         nombre: true
                     }
+                },
+                repuestos: { // Include parts
+                    include: {
+                        producto: true
+                    }
                 }
             },
             orderBy: { created_at: 'desc' },
@@ -82,7 +87,9 @@ export async function POST(request: NextRequest) {
             costo_estimado,
             fecha_promesa,
             tecnico_id,
-            creado_por_id
+            creado_por_id,
+            mano_obra,
+            repuestos // Array of { producto_id, cantidad, precio_unitario }
         } = body
 
         if (!empresa_id || !cliente_id || !equipo_tipo || !equipo_marca || !problema_reportado) {
@@ -105,28 +112,78 @@ export async function POST(request: NextRequest) {
         const suffix = Math.random().toString(36).substring(2, 8).toUpperCase()
         const numero = `${prefix}-${suffix}`
 
-        const orden = await prisma.ordenServicio.create({
-            data: {
-                numero,
-                empresa_id,
-                cliente_id,
-                equipo_tipo,
-                equipo_marca,
-                equipo_modelo,
-                equipo_serie,
-                equipo_accesorios,
-                problema_reportado,
-                prioridad: prioridad || 'normal',
-                costo_estimado: costo_estimado ? parseFloat(costo_estimado) : null,
-                fecha_promesa: fecha_promesa ? new Date(fecha_promesa) : null,
-                tecnico_id,
-                creado_por_id,
-                estado: 'recibido'
-            },
-            include: {
-                cliente: true,
-                tecnico: true
+        // Calculate Costo Final if Repuestos provided
+        let costoFinalCalc = 0
+        const moValue = mano_obra ? parseFloat(mano_obra) : 0
+        costoFinalCalc += moValue
+
+        let repuestosCreateData: any[] = []
+        if (repuestos && Array.isArray(repuestos)) {
+            repuestosCreateData = repuestos.map((r: any) => {
+                const sub = (r.cantidad || 1) * (r.precio_unitario || 0)
+                costoFinalCalc += sub
+                return {
+                    producto_id: r.producto_id,
+                    cantidad: r.cantidad || 1,
+                    precio_unitario: r.precio_unitario,
+                    subtotal: sub
+                }
+            })
+        }
+
+        const orden = await prisma.$transaction(async (tx) => {
+            // 1. Process Stock Deduction
+            if (repuestosCreateData.length > 0) {
+                for (const item of repuestosCreateData) {
+                    const producto = await tx.producto.findUnique({
+                        where: { id: item.producto_id }
+                    })
+
+                    if (!producto) {
+                        throw new Error(`Producto no encontrado: ${item.producto_id}`)
+                    }
+
+                    if (producto.stock < item.cantidad) {
+                        throw new Error(`Stock insuficiente para ${producto.nombre}. Disponible: ${producto.stock}`)
+                    }
+
+                    await tx.producto.update({
+                        where: { id: item.producto_id },
+                        data: { stock: { decrement: item.cantidad } }
+                    })
+                }
             }
+
+            // 2. Create Order
+            return await tx.ordenServicio.create({
+                data: {
+                    numero,
+                    empresa_id,
+                    cliente_id,
+                    equipo_tipo,
+                    equipo_marca,
+                    equipo_modelo,
+                    equipo_serie,
+                    equipo_accesorios,
+                    problema_reportado,
+                    prioridad: prioridad || 'normal',
+                    costo_estimado: costo_estimado ? parseFloat(costo_estimado) : null,
+                    costo_final: costoFinalCalc > 0 ? costoFinalCalc : null,
+                    mano_obra: moValue,
+                    fecha_promesa: fecha_promesa ? new Date(fecha_promesa) : null,
+                    tecnico_id,
+                    creado_por_id,
+                    estado: 'recibido',
+                    repuestos: repuestosCreateData.length > 0 ? {
+                        create: repuestosCreateData
+                    } : undefined
+                },
+                include: {
+                    cliente: true,
+                    tecnico: true,
+                    repuestos: true
+                }
+            })
         })
 
         return NextResponse.json(orden, { status: 201 })

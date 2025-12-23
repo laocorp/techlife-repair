@@ -30,6 +30,8 @@ import {
     Check,
     AlertCircle,
     Plus,
+    Trash2,
+    DollarSign,
 } from 'lucide-react'
 
 interface Cliente {
@@ -80,6 +82,17 @@ export default function NuevaOrdenPage() {
         prioridad: 'normal',
     })
 
+    // Repuestos & Costos State
+    const [repuestos, setRepuestos] = useState<{ id: string; nombre: string; precio: number; cantidad: number }[]>([])
+    const [productoSearch, setProductoSearch] = useState('')
+    const [productosList, setProductosList] = useState<any[]>([])
+    const [showProductoDropdown, setShowProductoDropdown] = useState(false)
+    const [manoObra, setManoObra] = useState(0)
+
+    // Calculate Total
+    const totalEstimado = manoObra + repuestos.reduce((acc, r) => acc + (r.precio * r.cantidad), 0)
+
+
     // Load tecnicos
     const loadTecnicos = useCallback(async () => {
         if (!user?.empresa_id) return
@@ -122,6 +135,45 @@ export default function NuevaOrdenPage() {
         return () => clearTimeout(debounce)
     }, [clienteSearch, user?.empresa_id])
 
+    // Search Productos
+    useEffect(() => {
+        const searchProductos = async () => {
+            if (!user?.empresa_id || productoSearch.length < 2) {
+                setProductosList([])
+                return
+            }
+            try {
+                const response = await fetch(`/api/productos?empresa_id=${user.empresa_id}&search=${encodeURIComponent(productoSearch)}&activo=true`)
+                if (response.ok) {
+                    const data = await response.json()
+                    setProductosList(data || [])
+                }
+            } catch (error) {
+                console.error('Error searching productos:', error)
+            }
+        }
+        const debounce = setTimeout(searchProductos, 300)
+        return () => clearTimeout(debounce)
+    }, [productoSearch, user?.empresa_id])
+
+    const addRepuesto = (producto: any) => {
+        setRepuestos(prev => {
+            const exists = prev.find(p => p.id === producto.id)
+            if (exists) {
+                return prev.map(p => p.id === producto.id ? { ...p, cantidad: p.cantidad + 1 } : p)
+            }
+            return [...prev, { id: producto.id, nombre: producto.nombre, precio: Number(producto.precio_venta), cantidad: 1 }]
+        })
+        setProductoSearch('')
+        setShowProductoDropdown(false)
+        toast.success(`Agregado: ${producto.nombre}`)
+    }
+
+    const removeRepuesto = (id: string) => {
+        setRepuestos(prev => prev.filter(p => p.id !== id))
+    }
+
+
     const handleSelectCliente = (cliente: Cliente) => {
         setFormData(f => ({ ...f, cliente_id: cliente.id, clienteNombre: cliente.nombre }))
         setClienteSearch(cliente.nombre)
@@ -153,6 +205,13 @@ export default function NuevaOrdenPage() {
                     observaciones_recepcion: formData.observaciones || null,
                     prioridad: formData.prioridad,
                     estado: 'recibido',
+                    mano_obra: manoObra,
+                    repuestos: repuestos.map(r => ({
+                        producto_id: r.id,
+                        cantidad: r.cantidad,
+                        precio_unitario: r.precio
+                    })),
+                    costo_estimado: totalEstimado > 0 ? totalEstimado : (formData.prioridad === 'urgente' ? 20 : 0) // Fallback or auto-calc
                 })
             })
 
@@ -335,6 +394,100 @@ export default function NuevaOrdenPage() {
                         </CardContent>
                     </Card>
                 </div>
+
+                {/* Costos y Repuestos (NEW) */}
+                <div className="lg:col-span-2 space-y-6">
+                    <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm hover:shadow-md transition-shadow">
+                        <CardHeader className="pb-4 border-b border-gray-100/50">
+                            <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
+                                <div className="p-2 bg-emerald-100 rounded-lg">
+                                    <DollarSign className="h-5 w-5 text-emerald-600" />
+                                </div>
+                                Costos Iniciales y Repuestos
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Mano de Obra */}
+                                <div className="space-y-2">
+                                    <Label className="text-gray-700 font-medium">Mano de Obra Estimada ($)</Label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={manoObra}
+                                        onChange={(e) => setManoObra(parseFloat(e.target.value) || 0)}
+                                        className="bg-white border-gray-200 text-lg font-semibold text-emerald-700"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-gray-700 font-medium">Total Estimado ($)</Label>
+                                    <div className="h-10 flex items-center px-4 bg-gray-50 border border-gray-200 rounded-md text-lg font-bold text-gray-900">
+                                        ${totalEstimado.toFixed(2)}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-gray-700 font-medium">Agregar Repuestos / Materiales</Label>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                    <Input
+                                        placeholder="Buscar repuesto..."
+                                        value={productoSearch}
+                                        onChange={(e) => {
+                                            setProductoSearch(e.target.value)
+                                            setShowProductoDropdown(true)
+                                        }}
+                                        onFocus={() => setShowProductoDropdown(true)}
+                                        className="pl-10 bg-white border-gray-200"
+                                    />
+                                    {showProductoDropdown && productosList.length > 0 && (
+                                        <div className="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl max-h-[200px] overflow-y-auto">
+                                            {productosList.map(prod => (
+                                                <button
+                                                    key={prod.id}
+                                                    type="button"
+                                                    className="w-full p-3 text-left hover:bg-emerald-50 transition-colors border-b border-gray-50 flex justify-between items-center"
+                                                    onClick={() => addRepuesto(prod)}
+                                                >
+                                                    <span className="font-medium text-gray-800">{prod.nombre}</span>
+                                                    <span className="text-sm font-bold text-emerald-600">${prod.precio_venta}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Lista de Repuestos Seleccionados */}
+                            {repuestos.length > 0 && (
+                                <div className="space-y-2 bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                                    {repuestos.map((item, idx) => (
+                                        <div key={idx} className="flex items-center justify-between text-sm p-2 bg-white shadow-sm rounded-lg border border-gray-100">
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-gray-800">{item.nombre}</span>
+                                                <span className="text-xs text-gray-500">{item.cantidad} x ${item.precio.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="font-bold text-gray-900">${(item.cantidad * item.precio).toFixed(2)}</span>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => removeRepuesto(item.id)}
+                                                    className="text-red-400 hover:text-red-600 hover:bg-red-50 h-8 w-8 p-0"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+
 
                 {/* Right Column (Problema & Asignación) */}
                 <div className="space-y-6">

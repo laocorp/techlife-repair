@@ -35,7 +35,10 @@ import {
     Search,
     Package,
     ExternalLink,
-    Loader2
+
+    Loader2,
+    DollarSign,
+    ShoppingCart,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
@@ -88,6 +91,17 @@ interface OrdenServicio {
         id: string
         nombre: string
     } | null
+    mano_obra: number | null
+    repuestos: {
+        id: string
+        cantidad: number
+        precio_unitario: number
+        subtotal: number
+        producto: {
+            nombre: string
+            codigo: string
+        }
+    }[]
 }
 
 const estadoConfig: Record<string, { label: string; color: string; bgColor: string; icon: any }> = {
@@ -438,35 +452,77 @@ export default function OrdenDetallePage() {
                                         )}
                                     </div>
 
-                                    {(orden.costo_estimado || orden.costo_final) && (
-                                        <>
-                                            <Separator className="bg-gray-100" />
-                                            <div className="flex gap-8 bg-gray-50/50 p-4 rounded-lg border border-gray-100">
-                                                {orden.costo_estimado && (
-                                                    <div>
-                                                        <p className="text-xs font-medium text-muted-foreground uppercase">Costo Estimado</p>
-                                                        <p className="text-2xl text-gray-600 font-light">${Number(orden.costo_estimado).toFixed(2)}</p>
-                                                    </div>
-                                                )}
-                                                {orden.costo_final && (
-                                                    <div>
-                                                        <p className="text-xs font-medium text-muted-foreground uppercase">Costo Final</p>
-                                                        <p className="text-2xl font-bold text-emerald-600">${Number(orden.costo_final).toFixed(2)}</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </>
-                                    )}
+
                                 </>
                             )}
                         </CardContent>
                     </Card>
-                </div>
+
+                    {/* Desglose de Costos (NEW) */}
+                    {(orden.repuestos.length > 0 || (orden.mano_obra && orden.mano_obra > 0)) && (
+                        <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm">
+                            <CardHeader className="pb-3 border-b border-gray-100/50">
+                                <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
+                                    <DollarSign className="h-5 w-5 text-emerald-500" />
+                                    Desglose de Costos
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="pt-4 space-y-4">
+                                <div className="space-y-3">
+                                    {/* Mano de Obra */}
+                                    {orden.mano_obra && Number(orden.mano_obra) > 0 && (
+                                        <div className="flex justify-between items-center p-3 bg-blue-50/50 rounded-lg border border-blue-100/50">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-1.5 bg-blue-100 rounded-md text-blue-600">
+                                                    <Wrench className="h-4 w-4" />
+                                                </div>
+                                                <span className="font-medium text-gray-700">Mano de Obra</span>
+                                            </div>
+                                            <span className="font-bold text-gray-900">${Number(orden.mano_obra).toFixed(2)}</span>
+                                        </div>
+                                    )}
+
+                                    {/* Repuestos */}
+                                    {orden.repuestos.length > 0 && (
+                                        <div className="space-y-2">
+                                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider pl-1">Repuestos y Materiales</p>
+                                            <div className="border border-gray-100 rounded-xl overflow-hidden">
+                                                {orden.repuestos.map((rep) => (
+                                                    <div key={rep.id} className="flex justify-between items-center p-3 bg-white border-b border-gray-50 last:border-0 hover:bg-gray-50/80 transition-colors">
+                                                        <div className="flex flex-col">
+                                                            <span className="font-medium text-gray-800">{rep.producto.nombre}</span>
+                                                            <span className="text-xs text-blue-600 font-mono tracking-tight">{rep.producto.codigo}</span>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="font-bold text-gray-900">${Number(rep.subtotal).toFixed(2)}</div>
+                                                            <div className="text-xs text-gray-500">{rep.cantidad} x ${Number(rep.precio_unitario).toFixed(2)}</div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <Separator className="bg-emerald-100/50 my-2" />
+
+                                    {/* Totales */}
+                                    <div className="flex justify-between items-center p-4 bg-emerald-50 rounded-xl border border-emerald-100 shadow-sm">
+                                        <span className="text-lg font-bold text-emerald-800">Costo Final Calculado</span>
+                                        <span className="text-2xl font-bold text-emerald-700">
+                                            ${(Number(orden.mano_obra || 0) + orden.repuestos.reduce((acc, r) => acc + Number(r.subtotal), 0)).toFixed(2)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                </div >
 
                 {/* Sidebar */}
-                <div className="space-y-6">
+                < div className="space-y-6" >
                     {/* Cliente */}
-                    <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm">
+                    < Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm" >
                         <CardHeader className="pb-3 border-b border-gray-100/50">
                             <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
                                 <User className="h-5 w-5 text-blue-500" />
@@ -510,10 +566,10 @@ export default function OrdenDetallePage() {
                                 <p className="text-muted-foreground italic">Sin cliente asignado</p>
                             )}
                         </CardContent>
-                    </Card>
+                    </Card >
 
                     {/* Técnico */}
-                    <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm">
+                    < Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm" >
                         <CardHeader className="pb-3 border-b border-gray-100/50">
                             <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
                                 <Wrench className="h-5 w-5 text-emerald-500" />
@@ -537,10 +593,10 @@ export default function OrdenDetallePage() {
                                 <p className="text-muted-foreground italic">Sin asignar</p>
                             )}
                         </CardContent>
-                    </Card>
+                    </Card >
 
                     {/* Quick Actions */}
-                    <Card className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/30 border-0">
+                    < Card className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-lg shadow-blue-500/30 border-0" >
                         <CardHeader className="pb-2">
                             <CardTitle className="text-lg text-white/90">Portal del Cliente</CardTitle>
                         </CardHeader>
@@ -562,12 +618,12 @@ export default function OrdenDetallePage() {
                                 </Button>
                             </a>
                         </CardContent>
-                    </Card>
-                </div>
-            </div>
+                    </Card >
+                </div >
+            </div >
 
             {/* QR Dialog */}
-            <Dialog open={isQRDialogOpen} onOpenChange={setIsQRDialogOpen}>
+            < Dialog open={isQRDialogOpen} onOpenChange={setIsQRDialogOpen} >
                 <DialogContent className="max-w-sm bg-white">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-gray-800">
@@ -599,7 +655,7 @@ export default function OrdenDetallePage() {
                         </Button>
                     </DialogFooter>
                 </DialogContent>
-            </Dialog>
-        </motion.div>
+            </Dialog >
+        </motion.div >
     )
 }

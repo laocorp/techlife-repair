@@ -18,6 +18,11 @@ export async function GET(
                 },
                 creado_por: {
                     select: { id: true, nombre: true }
+                },
+                repuestos: {
+                    include: {
+                        producto: true
+                    }
                 }
             }
         })
@@ -56,6 +61,7 @@ export async function PATCH(
             costo_estimado,
             costo_final,
             anticipo,
+            mano_obra, // Nuevo campo
             fecha_promesa,
             fecha_entrega,
             tecnico_id
@@ -70,6 +76,7 @@ export async function PATCH(
         if (costo_estimado !== undefined) updateData.costo_estimado = parseFloat(costo_estimado)
         if (costo_final !== undefined) updateData.costo_final = parseFloat(costo_final)
         if (anticipo !== undefined) updateData.anticipo = parseFloat(anticipo)
+        if (mano_obra !== undefined) updateData.mano_obra = parseFloat(mano_obra)
         if (fecha_promesa !== undefined) updateData.fecha_promesa = fecha_promesa ? new Date(fecha_promesa) : null
         if (fecha_entrega !== undefined) updateData.fecha_entrega = fecha_entrega ? new Date(fecha_entrega) : null
         if (tecnico_id !== undefined) updateData.tecnico_id = tecnico_id
@@ -81,6 +88,9 @@ export async function PATCH(
                 cliente: true,
                 tecnico: {
                     select: { id: true, nombre: true }
+                },
+                repuestos: {
+                    include: { producto: true }
                 }
             }
         })
