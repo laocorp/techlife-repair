@@ -163,226 +163,44 @@ model OrdenServicio {
   updated_at          DateTime  @updatedAt
 
   // Relaciones Detalladas
+// ...
   repuestos           OrdenRepuesto[]
+  pagos               Pago[]
+  estado_pago         String    @default("pendiente") // 'pendiente' | 'parcial' | 'pagado'
   
   @@unique([empresa_id, numero])
   @@map("ordenes_servicio")
 }
 
-model OrdenRepuesto {
-  id              String    @id @default(uuid())
+// ... existing OrdenRepuesto ...
+
+model Pago {
+  id              String         @id @default(uuid())
   
   orden_id        String
-  orden           OrdenServicio @relation(fields: [orden_id], references: [id], onDelete: Cascade)
+  orden           OrdenServicio  @relation(fields: [orden_id], references: [id], onDelete: Cascade)
   
-  producto_id     String
-  producto        Producto  @relation(fields: [producto_id], references: [id])
+  monto           Decimal        @db.Decimal(10, 2)
+  metodo          String         @default("efectivo") // 'efectivo' | 'tarjeta' | 'transferencia' | 'cheque' | 'otro'
+  referencia      String?        // Nro comprobante, voucher, etc.
+  nota            String?
+  fecha           DateTime       @default(now())
   
-  cantidad        Int       @default(1)
-  precio_unitario Decimal   @db.Decimal(10, 2)
-  subtotal        Decimal   @db.Decimal(10, 2) // cantidad * precio_unitario
+  registrado_por_id String?
+  registrado_por    Usuario?     @relation(fields: [registrado_por_id], references: [id])
   
-  created_at      DateTime  @default(now())
-  
-  @@map("ordenes_repuestos")
-}
+  caja_movimiento_id String?     @unique
+  caja_movimiento    CajaMovimiento? @relation(fields: [caja_movimiento_id], references: [id])
 
-// ============ INVENTARIO ============
-
-model Producto {
-  id              String    @id @default(uuid())
-  codigo          String
-  nombre          String
-  descripcion     String?
-  categoria       String?
-  marca           String?
-  
-  precio_compra   Decimal   @db.Decimal(10, 2)
-  precio_venta    Decimal   @db.Decimal(10, 2)
-  stock           Int       @default(0)
-  stock_minimo    Int       @default(5)
-  
-  activo          Boolean   @default(true)
-  
   empresa_id      String
-  empresa         Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
+  empresa         Empresa        @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
+
+  created_at      DateTime       @default(now())
   
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  
-  // Relaciones
-  detalles_venta  VentaDetalle[]
-  ordenes         OrdenRepuesto[]
-  
-  @@unique([empresa_id, codigo])
-  @@map("productos")
+  @@map("pagos")
 }
 
-// ============ VENTAS / POS ============
-
-model Venta {
-  id              String    @id @default(uuid())
-  numero          String    // Ej: "VTA-001-0001"
-  
-  cliente_id      String?
-  cliente         Cliente?  @relation(fields: [cliente_id], references: [id])
-  
-  subtotal        Decimal   @db.Decimal(10, 2)
-  iva             Decimal   @db.Decimal(10, 2)
-  descuento       Decimal   @default(0) @db.Decimal(10, 2)
-  total           Decimal   @db.Decimal(10, 2)
-  
-  metodo_pago     String    @default("efectivo") // 'efectivo' | 'tarjeta' | 'transferencia'
-  estado          String    @default("completada") // 'pendiente' | 'completada' | 'anulada'
-  
-  empresa_id      String
-  empresa         Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
-  
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  
-  // Relaciones
-  detalles        VentaDetalle[]
-  factura         FacturacionElectronica?
-  
-  @@unique([empresa_id, numero])
-  @@map("ventas")
-}
-
-model VentaDetalle {
-  id              String    @id @default(uuid())
-  
-  venta_id        String
-  venta           Venta     @relation(fields: [venta_id], references: [id], onDelete: Cascade)
-  
-  producto_id     String
-  producto        Producto  @relation(fields: [producto_id], references: [id])
-  
-  cantidad        Int
-  precio_unitario Decimal   @db.Decimal(10, 2)
-  subtotal        Decimal   @db.Decimal(10, 2)
-  
-  @@map("ventas_detalle")
-}
-
-// ============ NOTIFICACIONES ============
-
-model Notificacion {
-  id          String    @id @default(uuid())
-  tipo        String    // 'orden' | 'pago' | 'sistema' | 'completada'
-  titulo      String
-  mensaje     String
-  leida       Boolean   @default(false)
-  link        String?
-  
-  empresa_id  String
-  empresa     Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
-  
-  created_at  DateTime  @default(now())
-  
-  @@map("notificaciones")
-}
-
-// ============ SECUENCIALES ============
-
-model Secuencial {
-  id              String    @id @default(uuid())
-  tipo_documento  String    // 'factura' | 'nota_credito' | 'orden' | 'venta'
-  establecimiento String
-  punto_emision   String
-  secuencial      Int       @default(1)
-  
-  empresa_id      String
-  empresa         Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
-  
-  @@unique([empresa_id, tipo_documento, establecimiento, punto_emision])
-  @@map("secuenciales")
-}
-
-// ============ SRI CONFIGURACIÓN ============
-
-model SriConfiguracion {
-  id                          String    @id @default(uuid())
-  empresa_id                  String    @unique
-  
-  razon_social                String?
-  nombre_comercial            String?
-  direccion_matriz            String?
-  establecimiento             String    @default("001")
-  punto_emision               String    @default("001")
-  direccion_establecimiento   String?
-  ambiente                    String    @default("pruebas")
-  obligado_contabilidad       Boolean   @default(false)
-  contribuyente_especial      String?
-  tipo_emision                String    @default("1")
-  
-  firma_electronica_configurada Boolean @default(false)
-  firma_electronica_vence     DateTime?
-  
-  created_at                  DateTime  @default(now())
-  updated_at                  DateTime  @updatedAt
-  
-  @@map("sri_configuracion")
-}
-
-// ============ MARCAS Y MODELOS ============
-
-model Marca {
-  id          String    @id @default(uuid())
-  nombre      String
-  pais        String?
-  activo      Boolean   @default(true)
-  
-  empresa_id  String
-  empresa     Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
-  
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  
-  modelos     Modelo[]
-  
-  @@map("marcas")
-}
-
-model Modelo {
-  id              String    @id @default(uuid())
-  nombre          String
-  tipo_equipo     String?
-  activo          Boolean   @default(true)
-  
-  marca_id        String
-  marca           Marca     @relation(fields: [marca_id], references: [id], onDelete: Cascade)
-  
-  empresa_id      String
-  empresa         Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
-  
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  
-  @@map("modelos")
-}
-
-// ============ CAJA ============
-
-model Caja {
-  id              String    @id @default(uuid())
-  monto_apertura  Decimal   @db.Decimal(10, 2)
-  monto_cierre    Decimal?  @db.Decimal(10, 2)
-  estado          String    @default("abierta") // 'abierta' | 'cerrada'
-  
-  empresa_id      String
-  empresa         Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
-  
-  usuario_id      String?
-  usuario         Usuario?  @relation(fields: [usuario_id], references: [id])
-  
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  
-  movimientos     CajaMovimiento[]
-  
-  @@map("cajas")
-}
+// ... existing models ...
 
 model CajaMovimiento {
   id          String    @id @default(uuid())
@@ -393,10 +211,14 @@ model CajaMovimiento {
   caja_id     String
   caja        Caja      @relation(fields: [caja_id], references: [id], onDelete: Cascade)
   
+  // Relacion con Pago (opcional)
+  pago        Pago?
+  
   created_at  DateTime  @default(now())
   
   @@map("caja_movimientos")
 }
+// ...
 
 // ============ CONTABILIDAD ============
 

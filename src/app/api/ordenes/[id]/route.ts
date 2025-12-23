@@ -23,6 +23,16 @@ export async function GET(
                     include: {
                         producto: true
                     }
+                },
+                pagos: {
+                    include: {
+                        registrado_por: {
+                            select: { nombre: true }
+                        }
+                    },
+                    orderBy: {
+                        created_at: 'desc'
+                    }
                 }
             }
         })

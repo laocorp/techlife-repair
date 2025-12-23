@@ -104,6 +104,16 @@ interface OrdenServicio {
             codigo: string
         }
     }[]
+    pagos: {
+        id: string
+        monto: number
+        metodo: string
+        fecha: string
+        nota: string | null
+        referencia: string | null
+        registrado_por: { nombre: string } | null
+    }[]
+    estado_pago?: string
 }
 
 const estadoConfig: Record<string, { label: string; color: string; bgColor: string; icon: any }> = {
@@ -129,6 +139,11 @@ export default function OrdenDetallePage() {
     const [isSaving, setIsSaving] = useState(false)
     const [isQRDialogOpen, setIsQRDialogOpen] = useState(false)
     const [qrData, setQRData] = useState<{ qrDataUrl: string; trackingUrl: string } | null>(null)
+
+    // Payments State
+    const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false)
+    const [paymentForm, setPaymentForm] = useState({ monto: '', metodo: 'efectivo', nota: '', referencia: '' })
+    const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
 
     // Repuestos Editing State
     const [repuestos, setRepuestos] = useState<{ id: string; nombre: string; precio: number; cantidad: number }[]>([])
@@ -274,6 +289,51 @@ export default function OrdenDetallePage() {
             toast.error('Error al generar QR')
         }
     }
+
+    const handleRegistrarPago = async () => {
+        if (!orden || !paymentForm.monto) {
+            toast.error('Ingrese un monto')
+            return
+        }
+
+        setIsSubmittingPayment(true)
+        try {
+            const response = await fetch('/api/pagos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    empresa_id: empresa?.id, // Should come from user store or tenant hook
+                    orden_id: orden.id,
+                    monto: paymentForm.monto,
+                    metodo: paymentForm.metodo,
+                    nota: paymentForm.nota,
+                    referencia: paymentForm.referencia,
+                    registrado_por_id: user?.id
+                })
+            })
+
+            if (!response.ok) {
+                const err = await response.json()
+                throw new Error(err.error || 'Error al registrar pago')
+            }
+
+            toast.success('Pago registrado exitosamente')
+            setIsPaymentDialogOpen(false)
+            setPaymentForm({ monto: '', metodo: 'efectivo', nota: '', referencia: '' }) // Reset
+            loadOrden() // Reload to see update
+        } catch (error: any) {
+            toast.error(error.message)
+        } finally {
+            setIsSubmittingPayment(false)
+        }
+    }
+
+    // Calculations
+    const totalPagado = orden?.pagos?.reduce((acc, p) => acc + Number(p.monto), 0) || 0
+    const costoFinalCalc = (Number(orden?.mano_obra || 0) + (orden?.repuestos?.reduce((acc, r) => acc + Number(r.subtotal), 0) || 0))
+    // Use stored costo_final if available, else calculated
+    const finalAmount = Number(orden?.costo_final) > 0 ? Number(orden?.costo_final) : costoFinalCalc
+    const saldoPendiente = finalAmount - totalPagado
 
     if (isLoading) {
         return (
@@ -647,7 +707,74 @@ export default function OrdenDetallePage() {
 
                 </div >
 
-                {/* Sidebar */}
+                {/* Historial de Pagos y Saldo */}
+                {orden.costo_final && Number(orden.costo_final) > 0 && (
+                    <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm">
+                        <CardHeader className="pb-3 border-b border-gray-100/50 flex flex-row items-center justify-between">
+                            <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
+                                <div className="p-2 bg-green-100 rounded-lg">
+                                    <DollarSign className="h-5 w-5 text-green-600" />
+                                </div>
+                                Pagos y Abonos
+                            </CardTitle>
+                            {saldoPendiente > 0.01 && (
+                                <Button size="sm" onClick={() => setIsPaymentDialogOpen(true)} className="bg-green-600 hover:bg-green-700 text-white gap-2">
+                                    <Plus className="h-4 w-4" />
+                                    Registrar Pago
+                                </Button>
+                            )}
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-6">
+                            {/* Resumen Saldo */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                    <p className="text-sm text-gray-500 mb-1">Costo Total</p>
+                                    <p className="text-2xl font-bold text-gray-900">${finalAmount.toFixed(2)}</p>
+                                </div>
+                                <div className="p-4 bg-green-50 rounded-xl border border-green-100">
+                                    <p className="text-sm text-green-600 mb-1">Abonado</p>
+                                    <p className="text-2xl font-bold text-green-700">${totalPagado.toFixed(2)}</p>
+                                </div>
+                                <div className={`p-4 rounded-xl border ${saldoPendiente > 0.01 ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}`}>
+                                    <p className={`text-sm mb-1 ${saldoPendiente > 0.01 ? 'text-red-500' : 'text-emerald-600'}`}>
+                                        {saldoPendiente > 0.01 ? 'Saldo Pendiente' : 'Estado'}
+                                    </p>
+                                    <p className={`text-2xl font-bold ${saldoPendiente > 0.01 ? 'text-red-600' : 'text-emerald-700'}`}>
+                                        {saldoPendiente > 0.01 ? `$${saldoPendiente.toFixed(2)}` : '¡Pagado!'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Lista de Pagos */}
+                            <div className="space-y-4">
+                                <h4 className="font-medium text-gray-800 text-sm uppercase tracking-wide">Historial</h4>
+                                {orden.pagos && orden.pagos.length > 0 ? (
+                                    <div className="border border-gray-100 rounded-xl overflow-hidden bg-white">
+                                        {orden.pagos.map((pago: any) => (
+                                            <div key={pago.id} className="p-3 border-b border-gray-50 last:border-0 flex justify-between items-center hover:bg-gray-50 transition-colors">
+                                                <div>
+                                                    <p className="font-bold text-gray-800">${Number(pago.monto).toFixed(2)} <span className="text-xs font-normal text-gray-500">via {pago.metodo}</span></p>
+                                                    <p className="text-xs text-gray-400">
+                                                        {format(new Date(pago.fecha), "dd MMM yyyy HH:mm", { locale: es })}
+                                                        {pago.registrado_por && ` • por ${pago.registrado_por.nombre}`}
+                                                    </p>
+                                                    {pago.nota && <p className="text-xs text-blue-500 mt-0.5">Nota: {pago.nota}</p>}
+                                                </div>
+                                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                                    Completado
+                                                </Badge>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-6 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                                        <p className="text-muted-foreground text-sm">No hay pagos registrados aún.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
                 < div className="space-y-6" >
                     {/* Cliente */}
                     < Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm" >
@@ -784,6 +911,67 @@ export default function OrdenDetallePage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog >
+
+            {/* Payment Dialog */}
+            <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+                <DialogContent className="max-w-md bg-white">
+                    <DialogHeader>
+                        <DialogTitle>Registrar Pago / Abono</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Monto a Abonar ($)</Label>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                max={saldoPendiente}
+                                value={paymentForm.monto}
+                                onChange={e => setPaymentForm(prev => ({ ...prev, monto: e.target.value }))}
+                                className="text-2xl font-bold text-green-700 placeholder:text-green-700/50"
+                                autoFocus
+                            />
+                            <p className="text-xs text-gray-500 text-right">Saldo pendiente: ${saldoPendiente.toFixed(2)}</p>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Método de Pago</Label>
+                            <Select value={paymentForm.metodo} onValueChange={v => setPaymentForm(prev => ({ ...prev, metodo: v }))}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="efectivo">Efectivo</SelectItem>
+                                    <SelectItem value="transferencia">Transferencia Bancaria</SelectItem>
+                                    <SelectItem value="tarjeta">Tarjeta de Crédito/Débito</SelectItem>
+                                    <SelectItem value="cheque">Cheque</SelectItem>
+                                    <SelectItem value="otro">Otro</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Referencia / Comprobante (Opcional)</Label>
+                            <Input
+                                value={paymentForm.referencia}
+                                onChange={e => setPaymentForm(prev => ({ ...prev, referencia: e.target.value }))}
+                                placeholder="Ej: N° Transacción 123456"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Nota Interna</Label>
+                            <Input
+                                value={paymentForm.nota}
+                                onChange={e => setPaymentForm(prev => ({ ...prev, nota: e.target.value }))}
+                                placeholder="Ej: Pago parcial acordado..."
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsPaymentDialogOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleRegistrarPago} disabled={isSubmittingPayment} className="bg-green-600 hover:bg-green-700 text-white">
+                            {isSubmittingPayment ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirmar Pago'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </motion.div >
     )
 }

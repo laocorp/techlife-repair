@@ -14,9 +14,9 @@ Este archivo rastrea el progreso de las 5 Fases del Plan de Acción para cumplir
 
 ## 💳 Fase 2: Finanzas y Cobranzas
 **Objetivo:** Gestión de abonos y cuentas por cobrar.
-- [ ] **Schema:** Crear modelo `Abono` vinculado a Órdenes/Ventas.
-- [ ] **Backend:** API para registrar abonos parciales.
-- [ ] **Frontend:** Vista "Cuenta Corriente" por Cliente (Deuda Total vs Pagado).
+- [x] **Schema:** Crear modelo `Abono` (imp. como `Pago`) vinculado a Órdenes/Ventas.
+- [x] **Backend:** API para registrar abonos parciales.
+- [/] **Frontend:** Vista "Cuenta Corriente" por Cliente (Deuda Total vs Pagado). (Parcial: Pagos por Orden)
 - [ ] **Frontend:** Indicadores visuales de morosidad (>30 días).
 
 ## 🛡️ Fase 3: Seguridad y Roles (RBAC)
