@@ -92,11 +92,18 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Generar número de orden
-        const count = await prisma.ordenServicio.count({
-            where: { empresa_id }
+        // Generar número de orden único
+        // 1. Obtener datos de empresa para el prefijo
+        const empresa = await prisma.empresa.findUnique({
+            where: { id: empresa_id },
+            select: { nombre: true }
         })
-        const numero = `ORD-${String(count + 1).padStart(6, '0')}`
+
+        const nombreClean = empresa?.nombre?.replace(/[^a-zA-Z]/g, '').toUpperCase() || 'REP'
+        const prefix = nombreClean.substring(0, 3)
+        // 2. Generar sufijo aleatorio
+        const suffix = Math.random().toString(36).substring(2, 8).toUpperCase()
+        const numero = `${prefix}-${suffix}`
 
         const orden = await prisma.ordenServicio.create({
             data: {
