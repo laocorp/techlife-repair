@@ -83,7 +83,7 @@ export async function PATCH(
             if (repuestos !== undefined && Array.isArray(repuestos)) {
                 // A. Revert Stock for EXISTING items (Return to shelf)
                 const currentItems = await tx.ordenRepuesto.findMany({
-                    where: { orden_servicio_id: id }
+                    where: { orden_id: id }
                 })
 
                 for (const item of currentItems) {
@@ -95,7 +95,7 @@ export async function PATCH(
 
                 // B. Delete existing relation entries
                 await tx.ordenRepuesto.deleteMany({
-                    where: { orden_servicio_id: id }
+                    where: { orden_id: id }
                 })
 
                 // C. Process NEW items (Check & Deduct Stock)
@@ -121,7 +121,7 @@ export async function PATCH(
                     // Create new relation entry
                     await tx.ordenRepuesto.create({
                         data: {
-                            orden_servicio_id: id,
+                            orden_id: id,
                             producto_id: r.producto_id,
                             cantidad: r.cantidad,
                             precio_unitario: r.precio_unitario,
