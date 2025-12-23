@@ -1,7 +1,3 @@
-// src/app/(dashboard)/configuracion/page.tsx
-// Business settings and configuration
-// NOTE: Storage features (logo/certificate upload) need separate migration
-
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
@@ -32,7 +28,7 @@ import {
     EyeOff,
     ShieldCheck,
     Trash2,
-    Image,
+    Image as ImageIcon,
 } from 'lucide-react'
 import { validateP12Certificate, type P12Info } from '@/lib/sri/xml-signer'
 
@@ -47,17 +43,6 @@ interface EmpresaData {
     ambiente_sri: 'pruebas' | 'produccion'
     establecimiento: string
     punto_emision: string
-}
-
-interface SriConfigData {
-    establecimiento: string
-    punto_emision: string
-    ambiente: 'pruebas' | 'produccion'
-    obligado_contabilidad: boolean
-    contribuyente_especial: string
-    firma_electronica_configurada: boolean
-    firma_electronica_vence: string | null
-    tipo_emision: string
 }
 
 interface FacturacionFormData {
@@ -90,8 +75,6 @@ export default function ConfiguracionPage() {
     const [isSaving, setIsSaving] = useState(false)
     const [isSavingFacturacion, setIsSavingFacturacion] = useState(false)
     const [activeTab, setActiveTab] = useState('empresa')
-    const [sriConfigExists, setSriConfigExists] = useState(false)
-    // Note: Storage features (logo/certificate upload) temporarily disabled - needs local filesystem implementation
 
     // Form states
     const [formData, setFormData] = useState({
@@ -176,6 +159,11 @@ export default function ConfiguracionPage() {
                 punto_emision: data.punto_emision || '001',
                 ambiente: data.ambiente_sri || 'pruebas',
             }))
+            setFirmaStatus({
+                configurada: !!data.certificado_p12_url,
+                vence: data.certificado_vence,
+                commonName: data.razon_social // Fallback as we don't store commonName separately yet
+            })
         } catch (error) {
             console.error('Error loading empresa:', error)
         } finally {
@@ -189,7 +177,6 @@ export default function ConfiguracionPage() {
 
     useEffect(() => {
         if (empresa?.id) {
-            loadSriConfig()
             // Load notification preferences from localStorage
             const saved = localStorage.getItem(`notif_prefs_${empresa.id}`)
             if (saved) {
@@ -201,18 +188,6 @@ export default function ConfiguracionPage() {
             }
         }
     }, [empresa?.id])
-
-    const loadSriConfig = async () => {
-        if (!empresa?.id) return
-
-        try {
-            // SRI config loading - simplified for now
-            // TODO: Create /api/sri-config endpoint
-            setSriConfigExists(false)
-        } catch (error) {
-            console.error('Error loading SRI config:', error)
-        }
-    }
 
     const handleSave = async () => {
         if (!user?.empresa_id) return
@@ -287,16 +262,70 @@ export default function ConfiguracionPage() {
     }
 
     const handleUploadCertificate = async () => {
-        // Storage features temporarily disabled - needs local filesystem implementation
-        toast.info('Función de certificados temporalmente deshabilitada. Próximamente disponible.')
+        if (!p12File || !p12Password || !user?.empresa_id) return
+
+        setIsUploadingCert(true)
+        try {
+            const formData = new FormData()
+            formData.append('file', p12File)
+            formData.append('password', p12Password)
+
+            const response = await fetch(`/api/empresas/${user.empresa_id}/certificate`, {
+                method: 'POST',
+                body: formData,
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Error al subir certificado')
+            }
+
+            toast.success('Certificado guardado exitosamente')
+
+            // Update UI
+            setFirmaStatus({
+                configurada: true,
+                vence: data.info.validTo,
+                commonName: data.info.commonName
+            })
+
+            // Clear form
+            setP12File(null)
+            setP12Password('')
+            setCertValidation(null)
+            if (fileInputRef.current) fileInputRef.current.value = ''
+
+        } catch (error: any) {
+            console.error('Error uploading certificate:', error)
+            toast.error(error.message)
+        } finally {
+            setIsUploadingCert(false)
+        }
     }
 
     const handleRemoveCertificate = async () => {
-        // Storage features temporarily disabled
-        toast.info('Función de certificados temporalmente deshabilitada.')
+        if (!user?.empresa_id) return
+
+        if (!confirm('¿Estás seguro de eliminar el certificado? No podrás firmar facturas.')) return
+
+        try {
+            const response = await fetch(`/api/empresas/${user.empresa_id}/certificate`, {
+                method: 'DELETE',
+            })
+
+            if (!response.ok) throw new Error('Error al eliminar certificado')
+
+            setFirmaStatus({
+                configurada: false,
+                vence: null
+            })
+            toast.success('Certificado eliminado')
+        } catch (error: any) {
+            toast.error('Error al eliminar certificado')
+        }
     }
 
-    // Logo upload handlers
     const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
@@ -314,12 +343,10 @@ export default function ConfiguracionPage() {
     }
 
     const handleUploadLogo = async () => {
-        // Storage features temporarily disabled
         toast.info('Función de logo temporalmente deshabilitada. Próximamente disponible.')
     }
 
     const handleRemoveLogo = async () => {
-        // Storage features temporarily disabled
         toast.info('Función de logo temporalmente deshabilitada.')
     }
 
@@ -330,7 +357,6 @@ export default function ConfiguracionPage() {
     const handleSaveFacturacion = async () => {
         if (!user?.empresa_id || !empresa?.id) return
 
-        // Validate codes
         if (!validateSriCode(facturacionData.establecimiento)) {
             toast.error('El código de establecimiento debe ser de 3 dígitos (ej: 001)')
             return
@@ -342,7 +368,6 @@ export default function ConfiguracionPage() {
 
         setIsSavingFacturacion(true)
         try {
-            // Update empresa table via API
             const response = await fetch(`/api/empresas/${empresa.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -357,7 +382,6 @@ export default function ConfiguracionPage() {
 
             if (!response.ok) throw new Error('Error saving facturacion')
 
-            // Update form data for empresa tab too
             setFormData(f => ({
                 ...f,
                 nombre: facturacionData.razon_social,
@@ -378,51 +402,59 @@ export default function ConfiguracionPage() {
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="space-y-6"
+            className="space-y-8"
         >
             {/* Header */}
-            <motion.div variants={itemVariants}>
-                <h1 className="text-xl font-semibold text-[hsl(var(--text-primary))]">
+            <motion.div variants={itemVariants} className="flex flex-col gap-2">
+                <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
                     Configuración
                 </h1>
-                <p className="text-sm text-[hsl(var(--text-muted))] mt-0.5">
-                    Administra la configuración de tu negocio
+                <p className="text-muted-foreground">
+                    Administra la configuración de tu negocio y facturación
                 </p>
             </motion.div>
 
             <motion.div variants={itemVariants}>
-                <Tabs value={activeTab} onValueChange={setActiveTab}>
-                    <TabsList className="bg-[hsl(var(--surface-highlight))] border border-[hsl(var(--border-subtle))]">
-                        <TabsTrigger value="empresa" className="gap-2 data-[state=active]:bg-[hsl(var(--surface-elevated))]">
-                            <Building2 className="h-4 w-4" />
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                    <TabsList className="bg-white/40 backdrop-blur-md border border-white/20 p-1 rounded-xl shadow-sm">
+                        <TabsTrigger
+                            value="empresa"
+                            className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all font-medium"
+                        >
+                            <Building2 className="h-4 w-4 mr-2" />
                             Empresa
                         </TabsTrigger>
-                        <TabsTrigger value="notificaciones" className="gap-2 data-[state=active]:bg-[hsl(var(--surface-elevated))]">
-                            <Bell className="h-4 w-4" />
+                        <TabsTrigger
+                            value="notificaciones"
+                            className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all font-medium"
+                        >
+                            <Bell className="h-4 w-4 mr-2" />
                             Notificaciones
                         </TabsTrigger>
-                        <TabsTrigger value="facturacion" className="gap-2 data-[state=active]:bg-[hsl(var(--surface-elevated))]">
-                            <Receipt className="h-4 w-4" />
+                        <TabsTrigger
+                            value="facturacion"
+                            className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 transition-all font-medium"
+                        >
+                            <Receipt className="h-4 w-4 mr-2" />
                             Facturación
                         </TabsTrigger>
                     </TabsList>
 
                     {/* Empresa Tab */}
-                    <TabsContent value="empresa" className="mt-6">
-                        <Card className="card-linear">
+                    <TabsContent value="empresa">
+                        <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-lg">
                             <CardHeader>
-                                <CardTitle className="text-lg text-[hsl(var(--text-primary))]">
+                                <CardTitle className="text-lg text-gray-800">
                                     Datos de la Empresa
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 {/* Logo Section */}
                                 <div className="space-y-4">
-                                    <Label>Logo de la Empresa</Label>
+                                    <Label className="text-gray-700">Logo de la Empresa</Label>
                                     <div className="flex items-start gap-6">
-                                        {/* Logo Preview */}
                                         <div className="relative">
-                                            <div className="w-24 h-24 rounded-xl border-2 border-dashed border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-highlight))] flex items-center justify-center overflow-hidden">
+                                            <div className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-200 bg-white/50 flex items-center justify-center overflow-hidden">
                                                 {logoPreview || empresa?.logo_url ? (
                                                     <img
                                                         src={logoPreview || empresa?.logo_url || ''}
@@ -430,21 +462,20 @@ export default function ConfiguracionPage() {
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
-                                                    <Image className="w-8 h-8 text-[hsl(var(--text-muted))]" />
+                                                    <ImageIcon className="w-8 h-8 text-gray-400" />
                                                 )}
                                             </div>
                                             {(logoPreview || empresa?.logo_url) && (
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="absolute -top-2 -right-2 h-6 w-6 bg-[hsl(var(--status-error))] text-white hover:bg-[hsl(var(--status-error))]/90 rounded-full"
+                                                    className="absolute -top-2 -right-2 h-6 w-6 bg-red-100 text-red-600 hover:bg-red-200 rounded-full"
                                                     onClick={handleRemoveLogo}
                                                 >
                                                     <Trash2 className="h-3 w-3" />
                                                 </Button>
                                             )}
                                         </div>
-                                        {/* Upload Controls */}
                                         <div className="flex-1 space-y-3">
                                             <input
                                                 ref={logoInputRef}
@@ -453,14 +484,14 @@ export default function ConfiguracionPage() {
                                                 onChange={handleLogoSelect}
                                                 className="hidden"
                                             />
-                                            <p className="text-sm text-[hsl(var(--text-muted))]">
+                                            <p className="text-sm text-muted-foreground">
                                                 Sube el logo de tu empresa. Formatos: PNG, JPG, WebP. Máximo 2MB.
                                             </p>
                                             <div className="flex gap-2">
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    className="gap-2"
+                                                    className="gap-2 bg-white hover:bg-gray-50 text-gray-700"
                                                     onClick={() => logoInputRef.current?.click()}
                                                 >
                                                     <Upload className="h-4 w-4" />
@@ -469,7 +500,7 @@ export default function ConfiguracionPage() {
                                                 {logoFile && (
                                                     <Button
                                                         size="sm"
-                                                        className="gap-2 bg-[hsl(var(--brand-accent))]"
+                                                        className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
                                                         onClick={handleUploadLogo}
                                                         disabled={isUploadingLogo}
                                                     >
@@ -486,50 +517,50 @@ export default function ConfiguracionPage() {
                                     </div>
                                 </div>
 
-                                <div className="h-px bg-[hsl(var(--border-subtle))]" />
+                                <div className="h-px bg-gray-200" />
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label>Nombre de la Empresa</Label>
+                                        <Label className="text-gray-700">Nombre de la Empresa</Label>
                                         <Input
                                             value={formData.nombre}
                                             onChange={(e) => setFormData(f => ({ ...f, nombre: e.target.value }))}
-                                            className="input-linear"
+                                            className="bg-white border-gray-200 focus:ring-blue-500/20 text-gray-800"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>RUC</Label>
+                                        <Label className="text-gray-700">RUC</Label>
                                         <Input
                                             value={formData.ruc}
                                             onChange={(e) => setFormData(f => ({ ...f, ruc: e.target.value }))}
-                                            className="input-linear"
+                                            className="bg-white border-gray-200 focus:ring-blue-500/20 text-gray-800 font-mono"
                                             maxLength={13}
                                         />
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
-                                        <Label>Dirección</Label>
+                                        <Label className="text-gray-700">Dirección</Label>
                                         <Textarea
                                             value={formData.direccion}
                                             onChange={(e) => setFormData(f => ({ ...f, direccion: e.target.value }))}
-                                            className="input-linear resize-none"
+                                            className="bg-white border-gray-200 focus:ring-blue-500/20 text-gray-800 resize-none"
                                             rows={2}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Teléfono</Label>
+                                        <Label className="text-gray-700">Teléfono</Label>
                                         <Input
                                             value={formData.telefono}
                                             onChange={(e) => setFormData(f => ({ ...f, telefono: e.target.value }))}
-                                            className="input-linear"
+                                            className="bg-white border-gray-200 focus:ring-blue-500/20 text-gray-800"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Email</Label>
+                                        <Label className="text-gray-700">Email</Label>
                                         <Input
                                             type="email"
                                             value={formData.email}
                                             onChange={(e) => setFormData(f => ({ ...f, email: e.target.value }))}
-                                            className="input-linear"
+                                            className="bg-white border-gray-200 focus:ring-blue-500/20 text-gray-800"
                                         />
                                     </div>
                                 </div>
@@ -538,7 +569,7 @@ export default function ConfiguracionPage() {
                                     <Button
                                         onClick={handleSave}
                                         disabled={isSaving}
-                                        className="gap-2 bg-[hsl(var(--brand-accent))]"
+                                        className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] transition-all"
                                     >
                                         {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                                         Guardar Cambios
@@ -549,39 +580,39 @@ export default function ConfiguracionPage() {
                     </TabsContent>
 
                     {/* Notificaciones Tab */}
-                    <TabsContent value="notificaciones" className="mt-6">
-                        <Card className="card-linear">
+                    <TabsContent value="notificaciones">
+                        <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-lg">
                             <CardHeader>
-                                <CardTitle className="text-lg text-[hsl(var(--text-primary))]">
+                                <CardTitle className="text-lg text-gray-800">
                                     Preferencias de Notificaciones
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-4 bg-[hsl(var(--surface-highlight))] rounded-lg">
+                                    <div className="flex items-center justify-between p-4 bg-white/50 rounded-xl border border-gray-100">
                                         <div>
-                                            <p className="font-medium text-[hsl(var(--text-primary))]">Notificaciones de órdenes por email</p>
-                                            <p className="text-sm text-[hsl(var(--text-muted))]">Recibir emails cuando hay cambios en órdenes</p>
+                                            <p className="font-medium text-gray-900">Notificaciones de órdenes por email</p>
+                                            <p className="text-sm text-muted-foreground">Recibir emails cuando hay cambios en órdenes</p>
                                         </div>
                                         <Switch
                                             checked={notificaciones.email_ordenes}
                                             onCheckedChange={(v) => setNotificaciones(n => ({ ...n, email_ordenes: v }))}
                                         />
                                     </div>
-                                    <div className="flex items-center justify-between p-4 bg-[hsl(var(--surface-highlight))] rounded-lg">
+                                    <div className="flex items-center justify-between p-4 bg-white/50 rounded-xl border border-gray-100">
                                         <div>
-                                            <p className="font-medium text-[hsl(var(--text-primary))]">Notificaciones de pagos por email</p>
-                                            <p className="text-sm text-[hsl(var(--text-muted))]">Recibir emails sobre pagos recibidos</p>
+                                            <p className="font-medium text-gray-900">Notificaciones de pagos por email</p>
+                                            <p className="text-sm text-muted-foreground">Recibir emails sobre pagos recibidos</p>
                                         </div>
                                         <Switch
                                             checked={notificaciones.email_pagos}
                                             onCheckedChange={(v) => setNotificaciones(n => ({ ...n, email_pagos: v }))}
                                         />
                                     </div>
-                                    <div className="flex items-center justify-between p-4 bg-[hsl(var(--surface-highlight))] rounded-lg">
+                                    <div className="flex items-center justify-between p-4 bg-white/50 rounded-xl border border-gray-100">
                                         <div>
-                                            <p className="font-medium text-[hsl(var(--text-primary))]">Notificaciones por WhatsApp</p>
-                                            <p className="text-sm text-[hsl(var(--text-muted))]">Enviar actualizaciones a clientes por WhatsApp</p>
+                                            <p className="font-medium text-gray-900">Notificaciones por WhatsApp</p>
+                                            <p className="text-sm text-muted-foreground">Enviar actualizaciones a clientes por WhatsApp</p>
                                         </div>
                                         <Switch
                                             checked={notificaciones.whatsapp_ordenes}
@@ -602,7 +633,7 @@ export default function ConfiguracionPage() {
                                             }, 500)
                                         }}
                                         disabled={isSavingNotificaciones}
-                                        className="gap-2 bg-[hsl(var(--brand-accent))]"
+                                        className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20"
                                     >
                                         {isSavingNotificaciones ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                                         Guardar Preferencias
@@ -613,56 +644,58 @@ export default function ConfiguracionPage() {
                     </TabsContent>
 
                     {/* Facturación Tab */}
-                    <TabsContent value="facturacion" className="mt-6 space-y-6">
+                    <TabsContent value="facturacion" className="space-y-6">
                         {/* Section 1: Datos del Emisor */}
-                        <Card className="card-linear">
+                        <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-lg">
                             <CardHeader>
                                 <div className="flex items-center gap-2">
-                                    <Landmark className="h-5 w-5 text-[hsl(var(--brand-accent))]" />
-                                    <CardTitle className="text-lg text-[hsl(var(--text-primary))]">
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                        <Landmark className="h-5 w-5 text-blue-600" />
+                                    </div>
+                                    <CardTitle className="text-lg text-gray-800">
                                         Datos del Emisor
                                     </CardTitle>
                                 </div>
-                                <CardDescription className="text-[hsl(var(--text-muted))]">
+                                <CardDescription>
                                     Información requerida para la facturación electrónica SRI
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label>Razón Social *</Label>
+                                        <Label className="text-gray-700">Razón Social *</Label>
                                         <Input
                                             value={facturacionData.razon_social}
                                             onChange={(e) => setFacturacionData(f => ({ ...f, razon_social: e.target.value }))}
-                                            className="input-linear"
+                                            className="bg-white border-gray-200"
                                             placeholder="Nombre legal de la empresa"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Nombre Comercial</Label>
+                                        <Label className="text-gray-700">Nombre Comercial</Label>
                                         <Input
                                             value={facturacionData.nombre_comercial}
                                             onChange={(e) => setFacturacionData(f => ({ ...f, nombre_comercial: e.target.value }))}
-                                            className="input-linear"
+                                            className="bg-white border-gray-200"
                                             placeholder="Nombre comercial (opcional)"
                                         />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Dirección Matriz *</Label>
+                                    <Label className="text-gray-700">Dirección Matriz *</Label>
                                     <Textarea
                                         value={facturacionData.direccion_matriz}
                                         onChange={(e) => setFacturacionData(f => ({ ...f, direccion_matriz: e.target.value }))}
-                                        className="input-linear resize-none"
+                                        className="bg-white border-gray-200 resize-none"
                                         rows={2}
                                         placeholder="Dirección completa de la matriz"
                                     />
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="flex items-center justify-between p-4 bg-[hsl(var(--surface-highlight))] rounded-lg">
+                                    <div className="flex items-center justify-between p-4 bg-white/50 rounded-xl border border-gray-100">
                                         <div>
-                                            <p className="font-medium text-[hsl(var(--text-primary))]">Obligado a llevar contabilidad</p>
-                                            <p className="text-sm text-[hsl(var(--text-muted))]">Aparecerá en sus facturas</p>
+                                            <p className="font-medium text-gray-900">Obligado a llevar contabilidad</p>
+                                            <p className="text-sm text-muted-foreground">Aparecerá en sus facturas</p>
                                         </div>
                                         <Switch
                                             checked={facturacionData.obligado_contabilidad}
@@ -670,11 +703,11 @@ export default function ConfiguracionPage() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Contribuyente Especial</Label>
+                                        <Label className="text-gray-700">Contribuyente Especial</Label>
                                         <Input
                                             value={facturacionData.contribuyente_especial}
                                             onChange={(e) => setFacturacionData(f => ({ ...f, contribuyente_especial: e.target.value }))}
-                                            className="input-linear"
+                                            className="bg-white border-gray-200"
                                             placeholder="Nro. Resolución (si aplica)"
                                         />
                                     </div>
@@ -683,64 +716,66 @@ export default function ConfiguracionPage() {
                         </Card>
 
                         {/* Section 2: Establecimiento */}
-                        <Card className="card-linear">
+                        <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-lg">
                             <CardHeader>
                                 <div className="flex items-center gap-2">
-                                    <MapPin className="h-5 w-5 text-[hsl(var(--brand-accent))]" />
-                                    <CardTitle className="text-lg text-[hsl(var(--text-primary))]">
+                                    <div className="p-2 bg-indigo-100 rounded-lg">
+                                        <MapPin className="h-5 w-5 text-indigo-600" />
+                                    </div>
+                                    <CardTitle className="text-lg text-gray-800">
                                         Establecimiento
                                     </CardTitle>
                                 </div>
-                                <CardDescription className="text-[hsl(var(--text-muted))]">
+                                <CardDescription>
                                     Códigos de establecimiento y punto de emisión según SRI
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="space-y-2">
-                                        <Label>Código Establecimiento *</Label>
+                                        <Label className="text-gray-700">Código Establecimiento *</Label>
                                         <Input
                                             value={facturacionData.establecimiento}
                                             onChange={(e) => {
                                                 const value = e.target.value.replace(/\D/g, '').slice(0, 3)
                                                 setFacturacionData(f => ({ ...f, establecimiento: value }))
                                             }}
-                                            className="input-linear font-mono"
+                                            className="bg-white border-gray-200 font-mono"
                                             placeholder="001"
                                             maxLength={3}
                                         />
-                                        <p className="text-xs text-[hsl(var(--text-muted))]">3 dígitos (ej: 001)</p>
+                                        <p className="text-xs text-muted-foreground">3 dígitos (ej: 001)</p>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Punto de Emisión *</Label>
+                                        <Label className="text-gray-700">Punto de Emisión *</Label>
                                         <Input
                                             value={facturacionData.punto_emision}
                                             onChange={(e) => {
                                                 const value = e.target.value.replace(/\D/g, '').slice(0, 3)
                                                 setFacturacionData(f => ({ ...f, punto_emision: value }))
                                             }}
-                                            className="input-linear font-mono"
+                                            className="bg-white border-gray-200 font-mono"
                                             placeholder="001"
                                             maxLength={3}
                                         />
-                                        <p className="text-xs text-[hsl(var(--text-muted))]">3 dígitos (ej: 001)</p>
+                                        <p className="text-xs text-muted-foreground">3 dígitos (ej: 001)</p>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Secuencial Actual</Label>
-                                        <div className="flex items-center h-10 px-3 bg-[hsl(var(--surface-highlight))] rounded-lg border border-[hsl(var(--border-subtle))]">
-                                            <span className="font-mono text-[hsl(var(--text-secondary))]">
+                                        <Label className="text-gray-700">Secuencial Actual</Label>
+                                        <div className="flex items-center h-10 px-3 bg-gray-50 rounded-lg border border-gray-200">
+                                            <span className="font-mono text-gray-600">
                                                 {facturacionData.establecimiento.padStart(3, '0')}-{facturacionData.punto_emision.padStart(3, '0')}-XXXXXXXXX
                                             </span>
                                         </div>
-                                        <p className="text-xs text-[hsl(var(--text-muted))]">Formato de numeración</p>
+                                        <p className="text-xs text-muted-foreground">Formato de numeración</p>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Dirección del Establecimiento</Label>
+                                    <Label className="text-gray-700">Dirección del Establecimiento</Label>
                                     <Textarea
                                         value={facturacionData.direccion_establecimiento}
                                         onChange={(e) => setFacturacionData(f => ({ ...f, direccion_establecimiento: e.target.value }))}
-                                        className="input-linear resize-none"
+                                        className="bg-white border-gray-200 resize-none"
                                         rows={2}
                                         placeholder="Dirección de este establecimiento (si es diferente a la matriz)"
                                     />
@@ -749,91 +784,93 @@ export default function ConfiguracionPage() {
                         </Card>
 
                         {/* Section 3: Ambiente SRI */}
-                        <Card className="card-linear">
+                        <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-lg">
                             <CardHeader>
                                 <div className="flex items-center gap-2">
-                                    <Receipt className="h-5 w-5 text-[hsl(var(--brand-accent))]" />
-                                    <CardTitle className="text-lg text-[hsl(var(--text-primary))]">
+                                    <div className="p-2 bg-purple-100 rounded-lg">
+                                        <Receipt className="h-5 w-5 text-purple-600" />
+                                    </div>
+                                    <CardTitle className="text-lg text-gray-800">
                                         Ambiente SRI
                                     </CardTitle>
                                 </div>
-                                <CardDescription className="text-[hsl(var(--text-muted))]">
+                                <CardDescription>
                                     Configuración del ambiente de facturación electrónica
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-3">
-                                        <Label>Ambiente</Label>
+                                        <Label className="text-gray-700">Ambiente</Label>
                                         <div className="flex gap-3">
                                             <button
                                                 type="button"
                                                 onClick={() => setFacturacionData(f => ({ ...f, ambiente: 'pruebas' }))}
-                                                className={`flex-1 p-4 rounded-lg border-2 transition-all ${facturacionData.ambiente === 'pruebas'
-                                                    ? 'border-amber-500 bg-amber-500/10'
-                                                    : 'border-[hsl(var(--border-subtle))] hover:border-[hsl(var(--border-default))]'
+                                                className={`flex-1 p-4 rounded-xl border-2 transition-all ${facturacionData.ambiente === 'pruebas'
+                                                    ? 'border-amber-400 bg-amber-50'
+                                                    : 'border-gray-100 bg-white hover:border-gray-200'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <AlertCircle className={`h-4 w-4 ${facturacionData.ambiente === 'pruebas' ? 'text-amber-500' : 'text-[hsl(var(--text-muted))]'}`} />
-                                                    <span className={`font-medium ${facturacionData.ambiente === 'pruebas' ? 'text-amber-600' : 'text-[hsl(var(--text-secondary))]'}`}>
+                                                    <AlertCircle className={`h-4 w-4 ${facturacionData.ambiente === 'pruebas' ? 'text-amber-600' : 'text-gray-400'}`} />
+                                                    <span className={`font-medium ${facturacionData.ambiente === 'pruebas' ? 'text-amber-700' : 'text-gray-600'}`}>
                                                         Pruebas
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-[hsl(var(--text-muted))] text-left">
+                                                <p className="text-xs text-muted-foreground text-left">
                                                     Para testing y desarrollo
                                                 </p>
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => setFacturacionData(f => ({ ...f, ambiente: 'produccion' }))}
-                                                className={`flex-1 p-4 rounded-lg border-2 transition-all ${facturacionData.ambiente === 'produccion'
-                                                    ? 'border-green-500 bg-green-500/10'
-                                                    : 'border-[hsl(var(--border-subtle))] hover:border-[hsl(var(--border-default))]'
+                                                className={`flex-1 p-4 rounded-xl border-2 transition-all ${facturacionData.ambiente === 'produccion'
+                                                    ? 'border-green-500 bg-green-50'
+                                                    : 'border-gray-100 bg-white hover:border-gray-200'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <CheckCircle2 className={`h-4 w-4 ${facturacionData.ambiente === 'produccion' ? 'text-green-500' : 'text-[hsl(var(--text-muted))]'}`} />
-                                                    <span className={`font-medium ${facturacionData.ambiente === 'produccion' ? 'text-green-600' : 'text-[hsl(var(--text-secondary))]'}`}>
+                                                    <CheckCircle2 className={`h-4 w-4 ${facturacionData.ambiente === 'produccion' ? 'text-green-600' : 'text-gray-400'}`} />
+                                                    <span className={`font-medium ${facturacionData.ambiente === 'produccion' ? 'text-green-700' : 'text-gray-600'}`}>
                                                         Producción
                                                     </span>
                                                 </div>
-                                                <p className="text-xs text-[hsl(var(--text-muted))] text-left">
+                                                <p className="text-xs text-muted-foreground text-left">
                                                     Facturas reales con validez legal
                                                 </p>
                                             </button>
                                         </div>
                                     </div>
                                     <div className="space-y-3">
-                                        <Label>Tipo de Emisión</Label>
+                                        <Label className="text-gray-700">Tipo de Emisión</Label>
                                         <div className="flex gap-3">
                                             <button
                                                 type="button"
                                                 onClick={() => setFacturacionData(f => ({ ...f, tipo_emision: '1' }))}
-                                                className={`flex-1 p-4 rounded-lg border-2 transition-all ${facturacionData.tipo_emision === '1'
-                                                    ? 'border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-accent))]/10'
-                                                    : 'border-[hsl(var(--border-subtle))] hover:border-[hsl(var(--border-default))]'
+                                                className={`flex-1 p-4 rounded-xl border-2 transition-all ${facturacionData.tipo_emision === '1'
+                                                    ? 'border-blue-500 bg-blue-50'
+                                                    : 'border-gray-100 bg-white hover:border-gray-200'
                                                     }`}
                                             >
-                                                <span className={`font-medium ${facturacionData.tipo_emision === '1' ? 'text-[hsl(var(--brand-accent))]' : 'text-[hsl(var(--text-secondary))]'}`}>
+                                                <span className={`font-medium ${facturacionData.tipo_emision === '1' ? 'text-blue-700' : 'text-gray-600'}`}>
                                                     Normal
                                                 </span>
-                                                <p className="text-xs text-[hsl(var(--text-muted))]">
+                                                <p className="text-xs text-muted-foreground">
                                                     Emisión estándar
                                                 </p>
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => setFacturacionData(f => ({ ...f, tipo_emision: '2' }))}
-                                                className={`flex-1 p-4 rounded-lg border-2 transition-all ${facturacionData.tipo_emision === '2'
-                                                    ? 'border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-accent))]/10'
-                                                    : 'border-[hsl(var(--border-subtle))] hover:border-[hsl(var(--border-default))]'
+                                                className={`flex-1 p-4 rounded-xl border-2 transition-all ${facturacionData.tipo_emision === '2'
+                                                    ? 'border-blue-500 bg-blue-50'
+                                                    : 'border-gray-100 bg-white hover:border-gray-200'
                                                     }`}
                                             >
-                                                <span className={`font-medium ${facturacionData.tipo_emision === '2' ? 'text-[hsl(var(--brand-accent))]' : 'text-[hsl(var(--text-secondary))]'}`}>
+                                                <span className={`font-medium ${facturacionData.tipo_emision === '2' ? 'text-blue-700' : 'text-gray-600'}`}>
                                                     Contingencia
                                                 </span>
-                                                <p className="text-xs text-[hsl(var(--text-muted))]">
+                                                <p className="text-xs text-muted-foreground">
                                                     Sistema SRI no disponible
                                                 </p>
                                             </button>
@@ -844,35 +881,37 @@ export default function ConfiguracionPage() {
                         </Card>
 
                         {/* Section 4: Certificado Digital */}
-                        <Card className="card-linear">
+                        <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-lg">
                             <CardHeader>
                                 <div className="flex items-center gap-2">
-                                    <FileKey className="h-5 w-5 text-[hsl(var(--brand-accent))]" />
-                                    <CardTitle className="text-lg text-[hsl(var(--text-primary))]">
+                                    <div className="p-2 bg-emerald-100 rounded-lg">
+                                        <FileKey className="h-5 w-5 text-emerald-600" />
+                                    </div>
+                                    <CardTitle className="text-lg text-gray-800">
                                         Certificado Digital (.p12)
                                     </CardTitle>
                                 </div>
-                                <CardDescription className="text-[hsl(var(--text-muted))]">
+                                <CardDescription>
                                     Firma electrónica para validar comprobantes con el SRI
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 {/* Current Status */}
-                                <div className="flex items-center gap-4 p-4 bg-[hsl(var(--surface-highlight))] rounded-lg border border-[hsl(var(--border-subtle))]">
+                                <div className="flex items-center gap-4 p-4 bg-white/50 rounded-xl border border-gray-100">
                                     {firmaStatus.configurada ? (
                                         <>
-                                            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-green-500/10">
-                                                <ShieldCheck className="h-6 w-6 text-green-500" />
+                                            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                                                <ShieldCheck className="h-6 w-6 text-green-600" />
                                             </div>
                                             <div className="flex-1">
-                                                <p className="font-medium text-[hsl(var(--text-primary))]">
+                                                <p className="font-medium text-gray-900">
                                                     Certificado configurado
                                                     {firmaStatus.commonName && (
-                                                        <span className="font-normal text-[hsl(var(--text-secondary))]"> - {firmaStatus.commonName}</span>
+                                                        <span className="font-normal text-gray-600"> - {firmaStatus.commonName}</span>
                                                     )}
                                                 </p>
                                                 {firmaStatus.vence && (
-                                                    <p className="text-sm text-[hsl(var(--text-muted))]">
+                                                    <p className="text-sm text-muted-foreground">
                                                         Vence: {new Date(firmaStatus.vence).toLocaleDateString('es-EC', {
                                                             year: 'numeric',
                                                             month: 'long',
@@ -884,7 +923,7 @@ export default function ConfiguracionPage() {
                                             <Button
                                                 variant="outline"
                                                 size="sm"
-                                                className="border-red-300 text-red-600 hover:bg-red-50"
+                                                className="border-red-200 text-red-600 hover:bg-red-50"
                                                 onClick={handleRemoveCertificate}
                                             >
                                                 <Trash2 className="h-4 w-4 mr-1" />
@@ -893,12 +932,12 @@ export default function ConfiguracionPage() {
                                         </>
                                     ) : (
                                         <>
-                                            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-amber-500/10">
-                                                <Info className="h-6 w-6 text-amber-500" />
+                                            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-amber-100">
+                                                <Info className="h-6 w-6 text-amber-600" />
                                             </div>
                                             <div className="flex-1">
-                                                <p className="font-medium text-[hsl(var(--text-primary))]">Sin certificado configurado</p>
-                                                <p className="text-sm text-[hsl(var(--text-muted))]">
+                                                <p className="font-medium text-gray-900">Sin certificado configurado</p>
+                                                <p className="text-sm text-muted-foreground">
                                                     Suba su certificado .p12 para firmar facturas electrónicas
                                                 </p>
                                             </div>
@@ -908,9 +947,9 @@ export default function ConfiguracionPage() {
 
                                 {/* Upload Form */}
                                 {!firmaStatus.configurada && (
-                                    <div className="space-y-4 p-4 border border-dashed border-[hsl(var(--border-default))] rounded-lg">
+                                    <div className="space-y-4 p-4 border border-dashed border-gray-300 rounded-xl bg-white/30">
                                         <div className="space-y-2">
-                                            <Label>Archivo de Certificado (.p12 / .pfx)</Label>
+                                            <Label className="text-gray-700">Archivo de Certificado (.p12 / .pfx)</Label>
                                             <div className="flex gap-2">
                                                 <input
                                                     ref={fileInputRef}
@@ -923,7 +962,7 @@ export default function ConfiguracionPage() {
                                                 <Button
                                                     type="button"
                                                     variant="outline"
-                                                    className="flex-1 border-[hsl(var(--border-subtle))]"
+                                                    className="flex-1 border-gray-200 bg-white"
                                                     onClick={() => fileInputRef.current?.click()}
                                                 >
                                                     <Upload className="h-4 w-4 mr-2" />
@@ -940,7 +979,7 @@ export default function ConfiguracionPage() {
                                                             if (fileInputRef.current) fileInputRef.current.value = ''
                                                         }}
                                                     >
-                                                        <Trash2 className="h-4 w-4" />
+                                                        <Trash2 className="h-4 w-4 text-red-500" />
                                                     </Button>
                                                 )}
                                             </div>
@@ -949,19 +988,19 @@ export default function ConfiguracionPage() {
                                         {p12File && (
                                             <>
                                                 <div className="space-y-2">
-                                                    <Label>Contraseña del Certificado</Label>
+                                                    <Label className="text-gray-700">Contraseña del Certificado</Label>
                                                     <div className="relative">
                                                         <Input
                                                             type={showPassword ? 'text' : 'password'}
                                                             value={p12Password}
                                                             onChange={(e) => setP12Password(e.target.value)}
-                                                            className="input-linear pr-10"
+                                                            className="bg-white border-gray-200 pr-10"
                                                             placeholder="Ingrese la contraseña"
                                                         />
                                                         <button
                                                             type="button"
                                                             onClick={() => setShowPassword(!showPassword)}
-                                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))]"
+                                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                                         >
                                                             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                                         </button>
@@ -970,21 +1009,21 @@ export default function ConfiguracionPage() {
 
                                                 {/* Validation Result */}
                                                 {certValidation && (
-                                                    <div className={`p-3 rounded-lg ${certValidation.validated ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+                                                    <div className={`p-3 rounded-lg ${certValidation.validated ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
                                                         {certValidation.validated && certValidation.info ? (
                                                             <div className="space-y-1">
-                                                                <p className="font-medium text-green-600 flex items-center gap-2">
+                                                                <p className="font-medium text-green-700 flex items-center gap-2">
                                                                     <CheckCircle2 className="h-4 w-4" />
                                                                     Certificado Válido
                                                                 </p>
-                                                                <p className="text-sm text-[hsl(var(--text-secondary))]">Titular: {certValidation.info.commonName}</p>
-                                                                <p className="text-sm text-[hsl(var(--text-secondary))]">Emisor: {certValidation.info.issuer}</p>
-                                                                <p className="text-sm text-[hsl(var(--text-secondary))]">
+                                                                <p className="text-sm text-green-800">Titular: {certValidation.info.commonName}</p>
+                                                                <p className="text-sm text-green-800">Emisor: {certValidation.info.issuer}</p>
+                                                                <p className="text-sm text-green-800">
                                                                     Válido hasta: {certValidation.info.validTo.toLocaleDateString('es-EC')}
                                                                 </p>
                                                             </div>
                                                         ) : (
-                                                            <p className="text-red-600 flex items-center gap-2">
+                                                            <p className="text-red-700 flex items-center gap-2">
                                                                 <AlertCircle className="h-4 w-4" />
                                                                 {certValidation.error}
                                                             </p>
@@ -1000,7 +1039,7 @@ export default function ConfiguracionPage() {
                                                             variant="outline"
                                                             onClick={handleValidateCertificate}
                                                             disabled={!p12Password}
-                                                            className="border-[hsl(var(--border-subtle))]"
+                                                            className="border-gray-200 bg-white"
                                                         >
                                                             <ShieldCheck className="h-4 w-4 mr-2" />
                                                             Validar Certificado
@@ -1010,7 +1049,7 @@ export default function ConfiguracionPage() {
                                                             type="button"
                                                             onClick={handleUploadCertificate}
                                                             disabled={isUploadingCert}
-                                                            className="bg-green-600 hover:bg-green-700"
+                                                            className="bg-emerald-600 hover:bg-emerald-700 text-white"
                                                         >
                                                             {isUploadingCert ? (
                                                                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -1026,7 +1065,7 @@ export default function ConfiguracionPage() {
                                     </div>
                                 )}
 
-                                <p className="text-xs text-[hsl(var(--text-muted))] flex items-center gap-1">
+                                <p className="text-xs text-muted-foreground flex items-center gap-1">
                                     <Info className="h-3 w-3" />
                                     El certificado se almacena de forma segura y encriptada
                                 </p>
@@ -1038,7 +1077,7 @@ export default function ConfiguracionPage() {
                             <Button
                                 onClick={handleSaveFacturacion}
                                 disabled={isSavingFacturacion}
-                                className="gap-2 bg-[hsl(var(--brand-accent))]"
+                                className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] transition-all"
                             >
                                 {isSavingFacturacion ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                                 Guardar Configuración de Facturación
@@ -1050,4 +1089,3 @@ export default function ConfiguracionPage() {
         </motion.div>
     )
 }
-

@@ -69,6 +69,14 @@ interface OrderData {
         telefono: string
         email: string
     } | null
+    equipo_serie?: string | null
+    equipo_accesorios?: string | null
+    solucion?: string | null
+    fecha_promesa?: string | null
+    fecha_entrega?: string | null
+    tecnico?: {
+        nombre: string
+    } | null
     empresa?: {
         nombre: string
         telefono: string
@@ -269,7 +277,7 @@ function TrackingContent() {
                         <div className="relative flex-1">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                             <Input
-                                placeholder="Ej: ORD-2024-0001"
+                                placeholder="Ej: TEC-X8K9L2"
                                 value={searchCode}
                                 onChange={(e) => setSearchCode(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -347,26 +355,98 @@ function TrackingContent() {
                             </div>
                             <CardContent className="p-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div>
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <AlertCircle className="w-4 h-4 text-slate-400" />
-                                            <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Problema Reportado</p>
-                                        </div>
-                                        <p className="text-base text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                            {order.problema_reportado}
-                                        </p>
-                                    </div>
-                                    {order.diagnostico && (
+                                    {/* Column 1 */}
+                                    <div className="space-y-6">
                                         <div>
-                                            <div className="flex items-center gap-2 mb-3">
-                                                <Wrench className="w-4 h-4 text-slate-400" />
-                                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Diagnóstico Técnico</p>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <AlertCircle className="w-4 h-4 text-slate-400" />
+                                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Problema Reportado</p>
                                             </div>
                                             <p className="text-base text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                                {order.diagnostico}
+                                                {order.problema_reportado}
                                             </p>
                                         </div>
-                                    )}
+
+                                        {/* Show Solution if available */}
+                                        {order.solucion && (
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                                    <p className="text-xs text-emerald-600 uppercase font-bold tracking-wider">Solución / Trabajo Realizado</p>
+                                                </div>
+                                                <p className="text-base text-slate-700 leading-relaxed bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/50">
+                                                    {order.solucion}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {order.equipo_serie && (
+                                                <div>
+                                                    <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Serie / IMEI</p>
+                                                    <p className="text-sm font-medium text-slate-700 font-mono">{order.equipo_serie}</p>
+                                                </div>
+                                            )}
+                                            {order.tecnico && (
+                                                <div>
+                                                    <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Técnico A cargo</p>
+                                                    <p className="text-sm font-medium text-slate-700">{order.tecnico.nombre}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Column 2 */}
+                                    <div className="space-y-6">
+                                        {order.diagnostico && (
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Wrench className="w-4 h-4 text-slate-400" />
+                                                    <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">Diagnóstico Técnico</p>
+                                                </div>
+                                                <p className="text-base text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                                    {order.diagnostico}
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {order.equipo_accesorios && (
+                                            <div>
+                                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-2">Accesorios Recibidos</p>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {order.equipo_accesorios.split(',').map((acc, i) => (
+                                                        <Badge key={i} variant="secondary" className="bg-slate-100 text-slate-600 font-medium">
+                                                            {acc.trim()}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Dates */}
+                                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                                            <div>
+                                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Fecha Recepción</p>
+                                                <p className="text-sm font-medium text-slate-700">{formatDate(order.created_at)}</p>
+                                            </div>
+                                            {/* Show Promise Date only if active and not delivered */}
+                                            {order.fecha_entrega ? (
+                                                <div>
+                                                    <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Fecha Entrega</p>
+                                                    <p className="text-sm font-medium text-slate-700">{formatDate(order.fecha_entrega)}</p>
+                                                </div>
+                                            ) : (
+                                                // Assuming fecha_promesa exists on order object (we need to check interface)
+                                                // I'll assume I add it to interface below
+                                                (order as any).fecha_promesa && (
+                                                    <div>
+                                                        <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Fecha Promesa</p>
+                                                        <p className="text-sm font-medium text-slate-700">{formatDate((order as any).fecha_promesa)}</p>
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>

@@ -29,6 +29,11 @@ export async function GET(request: NextRequest) {
                         nombre: true,
                         telefono: true
                     }
+                },
+                tecnico: {
+                    select: {
+                        nombre: true
+                    }
                 }
             }
         })

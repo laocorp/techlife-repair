@@ -29,6 +29,7 @@ import {
     Loader2,
     Check,
     AlertCircle,
+    Plus,
 } from 'lucide-react'
 
 interface Cliente {
@@ -47,10 +48,10 @@ interface Usuario {
 
 const marcas = ['Bosch', 'Emtop', 'Total', 'Sweiss', 'Esii', 'Growan', 'Dewalt', 'Makita', 'Otra']
 const prioridades = [
-    { value: 'baja', label: 'Baja', color: 'border-slate-500' },
-    { value: 'normal', label: 'Normal', color: 'border-blue-500' },
-    { value: 'alta', label: 'Alta', color: 'border-amber-500' },
-    { value: 'urgente', label: 'Urgente', color: 'border-red-500' },
+    { value: 'baja', label: 'Baja', color: 'bg-gray-100 text-gray-700' },
+    { value: 'normal', label: 'Normal', color: 'bg-blue-100 text-blue-700' },
+    { value: 'alta', label: 'Alta', color: 'bg-amber-100 text-amber-700' },
+    { value: 'urgente', label: 'Urgente', color: 'bg-red-100 text-red-700' },
 ]
 
 export default function NuevaOrdenPage() {
@@ -176,198 +177,222 @@ export default function NuevaOrdenPage() {
 
     return (
         <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="max-w-4xl mx-auto space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-5xl mx-auto space-y-8 pb-10"
         >
             {/* Header */}
             <div className="flex items-center gap-4">
                 <Link href="/ordenes">
-                    <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:bg-gray-100 rounded-full">
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Nueva Orden de Servicio</h1>
-                    <p className="text-slate-400 mt-1">Registra un nuevo equipo para reparación</p>
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
+                        Nueva Orden
+                    </h1>
+                    <p className="text-muted-foreground mt-1">Registra un nuevo servicio de reparación</p>
                 </div>
             </div>
 
             {/* Form */}
-            <div className="grid gap-6">
-                {/* Cliente */}
-                <Card className="bg-white/5 border-white/10">
-                    <CardHeader className="pb-4">
-                        <CardTitle className="text-lg text-white flex items-center gap-2">
-                            <User className="h-5 w-5 text-blue-400" />
-                            Cliente
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                            <Input
-                                placeholder="Buscar cliente por nombre o cédula..."
-                                value={clienteSearch}
-                                onChange={(e) => {
-                                    setClienteSearch(e.target.value)
-                                    setShowClienteDropdown(true)
-                                    if (formData.cliente_id) {
-                                        setFormData(f => ({ ...f, cliente_id: '', clienteNombre: '' }))
-                                    }
-                                }}
-                                onFocus={() => setShowClienteDropdown(true)}
-                                className="pl-10 bg-white/5 border-white/10 text-white"
-                            />
-                            {formData.cliente_id && (
-                                <Check className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400" />
-                            )}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                            {/* Dropdown */}
-                            {showClienteDropdown && clientes.length > 0 && (
-                                <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-white/10 rounded-lg shadow-xl">
-                                    {clientes.map(cliente => (
-                                        <button
-                                            key={cliente.id}
-                                            className="w-full p-3 text-left hover:bg-white/10 first:rounded-t-lg last:rounded-b-lg"
-                                            onClick={() => handleSelectCliente(cliente)}
-                                        >
-                                            <p className="font-medium text-white">{cliente.nombre}</p>
-                                            <p className="text-sm text-slate-400">{cliente.identificacion} · {cliente.telefono}</p>
-                                        </button>
-                                    ))}
+                {/* Left Column (Cliente & Equipo) */}
+                <div className="lg:col-span-2 space-y-6">
+                    {/* Cliente */}
+                    <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm hover:shadow-md transition-shadow">
+                        <CardHeader className="pb-4 border-b border-gray-100/50">
+                            <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
+                                <div className="p-2 bg-blue-100 rounded-lg">
+                                    <User className="h-5 w-5 text-blue-600" />
                                 </div>
-                            )}
-                        </div>
-                        <p className="text-sm text-slate-500">
-                            <AlertCircle className="inline h-3 w-3 mr-1" />
-                            Si el cliente no existe, déjalo vacío y créalo después
-                        </p>
-                    </CardContent>
-                </Card>
+                                Cliente
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-4">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Input
+                                    placeholder="Buscar cliente por nombre o cédula..."
+                                    value={clienteSearch}
+                                    onChange={(e) => {
+                                        setClienteSearch(e.target.value)
+                                        setShowClienteDropdown(true)
+                                        if (formData.cliente_id) {
+                                            setFormData(f => ({ ...f, cliente_id: '', clienteNombre: '' }))
+                                        }
+                                    }}
+                                    onFocus={() => setShowClienteDropdown(true)}
+                                    className="pl-10 bg-white border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 py-6 text-lg"
+                                />
+                                {formData.cliente_id && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-green-100 text-green-700 px-2 py-1 rounded-md flex items-center gap-1 text-sm font-medium">
+                                        <Check className="h-3 w-3" />
+                                        Seleccionado
+                                    </div>
+                                )}
 
-                {/* Equipo */}
-                <Card className="bg-white/5 border-white/10">
-                    <CardHeader className="pb-4">
-                        <CardTitle className="text-lg text-white flex items-center gap-2">
-                            <Package className="h-5 w-5 text-purple-400" />
-                            Datos del Equipo
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label className="text-slate-300">Equipo / Herramienta *</Label>
-                            <Input
-                                value={formData.equipo_tipo}
-                                onChange={(e) => setFormData(f => ({ ...f, equipo_tipo: e.target.value }))}
-                                className="bg-white/5 border-white/10 text-white"
-                                placeholder="Ej: Taladro percutor, Amoladora 9 pulgadas"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="space-y-2">
-                                <Label className="text-slate-300">Marca</Label>
-                                <Select
-                                    value={formData.equipo_marca}
-                                    onValueChange={(v) => setFormData(f => ({ ...f, equipo_marca: v }))}
-                                >
-                                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                                        <SelectValue placeholder="Seleccionar" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-slate-800 border-white/10">
-                                        {marcas.map(marca => (
-                                            <SelectItem key={marca} value={marca} className="text-white">
-                                                {marca}
-                                            </SelectItem>
+                                {/* Dropdown */}
+                                {showClienteDropdown && clientes.length > 0 && (
+                                    <div className="absolute z-10 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl max-h-[300px] overflow-y-auto">
+                                        {clientes.map(cliente => (
+                                            <button
+                                                key={cliente.id}
+                                                className="w-full p-4 text-left hover:bg-blue-50 transition-colors border-b border-gray-50 last:border-0 flex items-center justify-between group"
+                                                onClick={() => handleSelectCliente(cliente)}
+                                            >
+                                                <div>
+                                                    <p className="font-semibold text-gray-900 group-hover:text-blue-700">{cliente.nombre}</p>
+                                                    <p className="text-sm text-gray-500">{cliente.identificacion}</p>
+                                                </div>
+                                                {cliente.telefono && <span className="text-xs text-gray-400">{cliente.telefono}</span>}
+                                            </button>
                                         ))}
-                                    </SelectContent>
-                                </Select>
+                                    </div>
+                                )}
                             </div>
+
+                            {!formData.cliente_id && (
+                                <p className="text-sm text-muted-foreground flex items-center gap-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                                    Si el cliente no existe, busca para verificar y si no aparece, puedes dejarlo vacío (Consumidor Final) o crearlo desde Clientes.
+                                </p>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Equipo */}
+                    <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm hover:shadow-md transition-shadow">
+                        <CardHeader className="pb-4 border-b border-gray-100/50">
+                            <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
+                                <div className="p-2 bg-purple-100 rounded-lg">
+                                    <Package className="h-5 w-5 text-purple-600" />
+                                </div>
+                                Datos del Equipo
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-6">
                             <div className="space-y-2">
-                                <Label className="text-slate-300">Modelo</Label>
+                                <Label className="text-gray-700 font-medium">Equipo / Herramienta <span className="text-red-500">*</span></Label>
                                 <Input
-                                    value={formData.equipo_modelo}
-                                    onChange={(e) => setFormData(f => ({ ...f, equipo_modelo: e.target.value }))}
-                                    className="bg-white/5 border-white/10 text-white"
-                                    placeholder="GBH 2-26"
+                                    value={formData.equipo_tipo}
+                                    onChange={(e) => setFormData(f => ({ ...f, equipo_tipo: e.target.value }))}
+                                    className="bg-white border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
+                                    placeholder="Ej: Taladro percutor, Amoladora 9 pulgadas"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                                <div className="space-y-2">
+                                    <Label className="text-gray-700">Marca</Label>
+                                    <Select
+                                        value={formData.equipo_marca}
+                                        onValueChange={(v) => setFormData(f => ({ ...f, equipo_marca: v }))}
+                                    >
+                                        <SelectTrigger className="bg-white border-gray-200">
+                                            <SelectValue placeholder="Seleccionar" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {marcas.map(marca => (
+                                                <SelectItem key={marca} value={marca}>
+                                                    {marca}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-gray-700">Modelo</Label>
+                                    <Input
+                                        value={formData.equipo_modelo}
+                                        onChange={(e) => setFormData(f => ({ ...f, equipo_modelo: e.target.value }))}
+                                        className="bg-white border-gray-200"
+                                        placeholder="Ej: GBH 2-26"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-gray-700">N° Serie</Label>
+                                    <Input
+                                        value={formData.equipo_serie}
+                                        onChange={(e) => setFormData(f => ({ ...f, equipo_serie: e.target.value }))}
+                                        className="bg-white border-gray-200 font-mono"
+                                        placeholder="Ej: ABC123456"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-gray-700">Accesorios que deja</Label>
+                                <Input
+                                    value={formData.accesorios}
+                                    onChange={(e) => setFormData(f => ({ ...f, accesorios: e.target.value }))}
+                                    className="bg-white border-gray-200"
+                                    placeholder="Ej: Estuche original, 2 brocas, llave Allen"
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Right Column (Problema & Asignación) */}
+                <div className="space-y-6">
+                    {/* Problema */}
+                    <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm hover:shadow-md transition-shadow">
+                        <CardHeader className="pb-4 border-b border-gray-100/50">
+                            <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
+                                <div className="p-2 bg-amber-100 rounded-lg">
+                                    <FileText className="h-5 w-5 text-amber-600" />
+                                </div>
+                                Detalle del Problema
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-4">
+                            <div className="space-y-2">
+                                <Label className="text-gray-700 font-medium">Problema Reportado</Label>
+                                <Textarea
+                                    value={formData.problema_reportado}
+                                    onChange={(e) => setFormData(f => ({ ...f, problema_reportado: e.target.value }))}
+                                    className="bg-white border-gray-200 min-h-[120px] focus:border-amber-500 focus:ring-amber-500/20"
+                                    placeholder="Describe detalladamente el fallo reportado por el cliente..."
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-slate-300">N° Serie</Label>
-                                <Input
-                                    value={formData.equipo_serie}
-                                    onChange={(e) => setFormData(f => ({ ...f, equipo_serie: e.target.value }))}
-                                    className="bg-white/5 border-white/10 text-white"
-                                    placeholder="ABC123456"
+                                <Label className="text-gray-700">Observaciones (Recepción)</Label>
+                                <Textarea
+                                    value={formData.observaciones}
+                                    onChange={(e) => setFormData(f => ({ ...f, observaciones: e.target.value }))}
+                                    className="bg-white border-gray-200"
+                                    placeholder="Estado físico, golpes previos, rayones..."
                                 />
                             </div>
-                        </div>
+                        </CardContent>
+                    </Card>
 
-                        <div className="space-y-2">
-                            <Label className="text-slate-300">Accesorios que deja</Label>
-                            <Input
-                                value={formData.accesorios}
-                                onChange={(e) => setFormData(f => ({ ...f, accesorios: e.target.value }))}
-                                className="bg-white/5 border-white/10 text-white"
-                                placeholder="Ej: Estuche original, 2 brocas, llave Allen"
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Problema */}
-                <Card className="bg-white/5 border-white/10">
-                    <CardHeader className="pb-4">
-                        <CardTitle className="text-lg text-white flex items-center gap-2">
-                            <FileText className="h-5 w-5 text-amber-400" />
-                            Problema Reportado
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label className="text-slate-300">Descripción del problema</Label>
-                            <Textarea
-                                value={formData.problema_reportado}
-                                onChange={(e) => setFormData(f => ({ ...f, problema_reportado: e.target.value }))}
-                                className="bg-white/5 border-white/10 text-white min-h-[100px]"
-                                placeholder="Describe el problema que reporta el cliente..."
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-slate-300">Observaciones de recepción</Label>
-                            <Textarea
-                                value={formData.observaciones}
-                                onChange={(e) => setFormData(f => ({ ...f, observaciones: e.target.value }))}
-                                className="bg-white/5 border-white/10 text-white"
-                                placeholder="Estado físico, golpes, daños visibles..."
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Asignación */}
-                <Card className="bg-white/5 border-white/10">
-                    <CardHeader className="pb-4">
-                        <CardTitle className="text-lg text-white flex items-center gap-2">
-                            <Wrench className="h-5 w-5 text-emerald-400" />
-                            Asignación
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                    {/* Asignación */}
+                    <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm hover:shadow-md transition-shadow">
+                        <CardHeader className="pb-4 border-b border-gray-100/50">
+                            <CardTitle className="text-lg text-gray-800 flex items-center gap-2">
+                                <div className="p-2 bg-emerald-100 rounded-lg">
+                                    <Wrench className="h-5 w-5 text-emerald-600" />
+                                </div>
+                                Asignación Inicial
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-4">
                             <div className="space-y-2">
-                                <Label className="text-slate-300">Técnico asignado</Label>
+                                <Label className="text-gray-700">Técnico Asignado</Label>
                                 <Select
                                     value={formData.tecnico_id}
                                     onValueChange={(v) => setFormData(f => ({ ...f, tecnico_id: v }))}
                                 >
-                                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                                        <SelectValue placeholder="Sin asignar" />
+                                    <SelectTrigger className="bg-white border-gray-200">
+                                        <SelectValue placeholder="Sin asignar (Pendiente)" />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-slate-800 border-white/10">
+                                    <SelectContent>
                                         {tecnicos.map(tecnico => (
-                                            <SelectItem key={tecnico.id} value={tecnico.id} className="text-white">
+                                            <SelectItem key={tecnico.id} value={tecnico.id}>
                                                 {tecnico.nombre}
                                             </SelectItem>
                                         ))}
@@ -375,51 +400,54 @@ export default function NuevaOrdenPage() {
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-slate-300">Prioridad</Label>
-                                <Select
-                                    value={formData.prioridad}
-                                    onValueChange={(v) => setFormData(f => ({ ...f, prioridad: v }))}
-                                >
-                                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-slate-800 border-white/10">
-                                        {prioridades.map(p => (
-                                            <SelectItem key={p.value} value={p.value} className="text-white">
-                                                {p.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <Label className="text-gray-700">Prioridad</Label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {prioridades.map(p => (
+                                        <button
+                                            key={p.value}
+                                            type="button"
+                                            onClick={() => setFormData(f => ({ ...f, prioridad: p.value }))}
+                                            className={`
+                                                px-3 py-2 rounded-lg text-sm font-medium border transition-all
+                                                ${formData.prioridad === p.value
+                                                    ? `${p.color} border-current ring-1 ring-current shadow-sm`
+                                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                                                }
+                                            `}
+                                        >
+                                            {p.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
 
-                {/* Actions */}
-                <div className="flex gap-3 justify-end">
-                    <Link href="/ordenes">
-                        <Button variant="outline" className="border-white/10 text-white hover:bg-white/5">
-                            Cancelar
+                    {/* Actions */}
+                    <div className="flex gap-3 justify-end pt-4">
+                        <Link href="/ordenes" className="w-full sm:w-auto">
+                            <Button variant="outline" className="w-full border-gray-200 bg-white hover:bg-gray-50 text-gray-700">
+                                Cancelar
+                            </Button>
+                        </Link>
+                        <Button
+                            onClick={handleSubmit}
+                            disabled={isLoading}
+                            className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    Creando...
+                                </>
+                            ) : (
+                                <>
+                                    <Check className="h-4 w-4 mr-2" />
+                                    Crear Orden
+                                </>
+                            )}
                         </Button>
-                    </Link>
-                    <Button
-                        onClick={handleSubmit}
-                        disabled={isLoading}
-                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 gap-2"
-                    >
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Creando...
-                            </>
-                        ) : (
-                            <>
-                                <Check className="h-4 w-4" />
-                                Crear Orden
-                            </>
-                        )}
-                    </Button>
+                    </div>
                 </div>
             </div>
         </motion.div>

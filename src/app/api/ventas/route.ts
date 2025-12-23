@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { generateFacturaXML, getIVACodigoPorcentaje, validateRUC, validateCedula, DatosEmisor, DatosComprador, InfoFactura, DetalleFactura, FacturaXMLOptions } from '@/lib/sri/xml-generator'
 import { signXML } from '@/lib/sri/xml-signer'
+import { SriService } from '@/lib/sri/sri-service'
 
 export async function POST(request: NextRequest) {
     try {
@@ -224,25 +225,68 @@ export async function POST(request: NextRequest) {
 
                 const xmlUnsigned = generateFacturaXML(datosEmisor, datosComprador, infoFactura, detalles, xmlOptions)
 
-                // Sign XML - Need to fetch P12 file from URL (simulated fetch or FS)
-                // In a real app with S3/Storage, we download it. 
-                // For this MVP, if it's a file path we read it, if it's external URL we fetch.
-                // Assuming it might be stored locally or we skip real signing if file not found to prevent crash.
-                /* 
-                   NOTE: Loading P12 from URL/Path is complex here without knowing storage backend.
-                   If it's just a demo path, we might fail.
-                   We'll store the UNsigned XML if signing fails, or just the XML.
-                */
+                // Sign XML
+                let xmlSigned = xmlUnsigned
+                let estadoFactura = 'GENERADO'
+                let numeroAutorizacion = null
+                let fechaAutorizacion = null
+                let sriResponseMessages: any[] = []
 
-                // Saving the record regardless of signing success for now
+                try {
+                    // 1. Sign
+                    console.log('Signing invoice...')
+                    // Ensure path is correct. If it was stored relative to project root, simple join might work.
+                    // But if it's absolute (as stored in certificate route), verify access.
+                    // route.ts stored it as `path.join(uploadDir, fileName)` which is absolute process.cwd()/...
+                    xmlSigned = await SriService.signInvoice(
+                        xmlUnsigned,
+                        empresa.certificado_p12_url,
+                        empresa.certificado_password
+                    )
+                    estadoFactura = 'FIRMADO'
+
+                    // 2. Send to SRI (Recepcion)
+                    console.log('Sending to SRI Recepcion...')
+                    const recepcionParam = empresa.ambiente_sri === 'produccion' ? 'produccion' : 'pruebas'
+                    const recepcionResponse = await SriService.enviarComprobante(xmlSigned, recepcionParam)
+
+                    if (recepcionResponse.estado === 'RECIBIDA') {
+                        estadoFactura = 'EN_PROCESO'
+
+                        // 3. Authorize (Autorizacion)
+                        // SRI usually needs a small delay or retry, but for MVP request immediately
+                        console.log('Requesting Authorization...')
+                        // Small delay to ensure SRI processed it
+                        await new Promise(resolve => setTimeout(resolve, 3000))
+
+                        const claveAcceso = xmlUnsigned.match(/<claveAcceso>(.*?)<\/claveAcceso>/)?.[1] || ''
+                        const authResponse = await SriService.autorizarComprobante(claveAcceso, recepcionParam)
+
+                        if (authResponse.estado === 'AUTORIZADO') {
+                            estadoFactura = 'AUTORIZADO'
+                            numeroAutorizacion = authResponse.numeroAutorizacion
+                            // fechaAutorizacion = authResponse.fechaAutorizacion // Handle format if needed
+                        } else {
+                            estadoFactura = authResponse.estado // RECHAZADO, NO AUTORIZADO
+                            sriResponseMessages = authResponse.mensajes
+                        }
+                    } else {
+                        estadoFactura = recepcionResponse.estado // DEVUELTA
+                        sriResponseMessages = recepcionResponse.mensajes
+                    }
+
+                } catch (signingError) {
+                    console.error('Error signing/sending invoice:', signingError)
+                    // Keep generated but not signed/sent
+                    estadoFactura = 'ERROR_ENVIO'
+                }
+
+                // Saving the record
                 await prisma.facturacionElectronica.create({
                     data: {
                         empresa_id: empresa.id,
                         venta_id: venta.id,
-                        numero: venta.numero, // Using Sale Number, or SRI Sequential? Usually SRI Sequential: secuencialData... but let's use Sale Number for correlation for now as they are 1:1 in this logic. 
-                        // Actually, 'numero' in FE table usually refers to the 15-digit access key or the 001-001-XXXX sequence.
-                        // Let's use the formatted sequence: `${secuencialData.establecimiento}-${secuencialData.punto_emision}-${secuencialData.secuencial.toString().padStart(9, '0')}`
-                        // Which IS `venta.numero` in this logic (lines 48).
+                        numero: venta.numero, // Using Sale Number
                         tipo_comprobante: '01', // Factura
 
                         cliente_nombre: datosComprador.razonSocial,
@@ -253,18 +297,21 @@ export async function POST(request: NextRequest) {
                         total: venta.total,
 
                         clave_acceso: xmlUnsigned.match(/<claveAcceso>(.*?)<\/claveAcceso>/)?.[1] || '',
-                        numero_autorizacion: null,
-                        estado: 'GENERADO',
-                        xml_generado: xmlUnsigned,
+                        numero_autorizacion: numeroAutorizacion,
+                        estado: estadoFactura.toLowerCase(),
+                        xml_generado: xmlSigned,
                         ambiente: empresa.ambiente_sri
                     }
                 })
+
+                if (sriResponseMessages.length > 0) {
+                    console.log('SRI Messages:', sriResponseMessages)
+                }
             }
 
         } catch (sriError) {
-            console.error('Error generating SRI invoice:', sriError)
-            // We do NOT fail the sale if SRI fails, we just log it. 
-            // The sale is valid, the invoice can be retried later.
+            console.error('Error in SRI workflow:', sriError)
+            // We do NOT fail the sale if SRI fails.
         }
 
         return NextResponse.json(venta)

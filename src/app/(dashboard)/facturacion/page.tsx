@@ -1,13 +1,11 @@
-// src/app/(dashboard)/facturacion/page.tsx
-// Electronic invoicing module for Ecuador SRI
-
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import { InvoiceDownloadButton } from '@/components/pdf/invoice-download-wrapper'
 import { useAuthStore } from '@/stores'
 import { PermissionGate } from '@/hooks/use-permissions'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,7 +26,6 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { toast } from 'sonner'
 import {
     FileText,
     Plus,
@@ -77,10 +74,10 @@ interface ConfiguracionSRI {
 }
 
 const estadoConfig = {
-    pendiente: { label: 'Pendiente', color: 'text-amber-400', bgColor: 'bg-amber-500/10', icon: Clock },
-    autorizado: { label: 'Autorizado', color: 'text-emerald-400', bgColor: 'bg-emerald-500/10', icon: CheckCircle },
-    rechazado: { label: 'Rechazado', color: 'text-red-400', bgColor: 'bg-red-500/10', icon: XCircle },
-    anulado: { label: 'Anulado', color: 'text-slate-400', bgColor: 'bg-slate-500/10', icon: AlertTriangle },
+    pendiente: { label: 'Pendiente', color: 'text-amber-700', bgColor: 'bg-amber-100', borderColor: 'border-amber-200', icon: Clock },
+    autorizado: { label: 'Autorizado', color: 'text-emerald-700', bgColor: 'bg-emerald-100', borderColor: 'border-emerald-200', icon: CheckCircle },
+    rechazado: { label: 'Rechazado', color: 'text-red-700', bgColor: 'bg-red-100', borderColor: 'border-red-200', icon: XCircle },
+    anulado: { label: 'Anulado', color: 'text-gray-700', bgColor: 'bg-gray-100', borderColor: 'border-gray-200', icon: AlertTriangle },
 }
 
 const containerVariants = {
@@ -165,32 +162,30 @@ export default function FacturacionPage() {
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="space-y-6"
+            className="space-y-8"
         >
             {/* Header */}
-            <motion.div variants={itemVariants} className="flex items-center justify-between">
+            <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-xl font-semibold text-[hsl(var(--text-primary))]">
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600">
                         Facturación Electrónica
                     </h1>
-                    <p className="text-sm text-[hsl(var(--text-muted))] mt-0.5">
-                        Emisión de comprobantes electrónicos SRI
+                    <p className="text-muted-foreground mt-1">
+                        Emisión y control de comprobantes SRI
                     </p>
                 </div>
                 <div className="flex gap-2">
                     <Button
                         variant="outline"
-                        size="sm"
                         onClick={() => setIsConfigOpen(true)}
-                        className="gap-2 border-[hsl(var(--border-subtle))]"
+                        className="gap-2 bg-white hover:bg-gray-50 text-gray-700 border-gray-200 shadow-sm"
                     >
                         <Settings className="h-4 w-4" />
                         Configuración
                     </Button>
                     <PermissionGate permission="facturacion.crear">
                         <Button
-                            size="sm"
-                            className="gap-2 bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-accent))]/90"
+                            className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 hover:scale-105 transition-all"
                         >
                             <Plus className="h-4 w-4" />
                             Nueva Factura
@@ -200,56 +195,48 @@ export default function FacturacionPage() {
             </motion.div>
 
             {/* Stats */}
-            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card className="stat-card">
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-blue-500/10">
-                                <FileText className="h-5 w-5 text-blue-400" />
-                            </div>
-                            <div>
-                                <p className="stat-label">Total Facturas</p>
-                                <p className="text-xl font-bold text-[hsl(var(--text-primary))]">{facturas.length}</p>
-                            </div>
+            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm hover:shadow-md transition-all">
+                    <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-muted-foreground text-sm font-medium">Total Facturas</p>
+                            <p className="text-2xl font-bold text-gray-800">{facturas.length}</p>
+                        </div>
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                            <FileText className="h-6 w-6 text-blue-600" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="stat-card border-emerald-500/20">
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-emerald-500/10">
-                                <CheckCircle className="h-5 w-5 text-emerald-400" />
-                            </div>
-                            <div>
-                                <p className="stat-label">Autorizadas</p>
-                                <p className="text-xl font-bold text-emerald-400">{autorizadas}</p>
-                            </div>
+                <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm hover:shadow-md transition-all">
+                    <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-muted-foreground text-sm font-medium">Autorizadas</p>
+                            <p className="text-2xl font-bold text-emerald-600">{autorizadas}</p>
+                        </div>
+                        <div className="p-2 bg-emerald-100 rounded-lg">
+                            <CheckCircle className="h-6 w-6 text-emerald-600" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="stat-card border-amber-500/20">
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-amber-500/10">
-                                <Clock className="h-5 w-5 text-amber-400" />
-                            </div>
-                            <div>
-                                <p className="stat-label">Pendientes</p>
-                                <p className="text-xl font-bold text-amber-400">{pendientes}</p>
-                            </div>
+                <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm hover:shadow-md transition-all">
+                    <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-muted-foreground text-sm font-medium">Pendientes</p>
+                            <p className="text-2xl font-bold text-amber-500">{pendientes}</p>
+                        </div>
+                        <div className="p-2 bg-amber-100 rounded-lg">
+                            <Clock className="h-6 w-6 text-amber-500" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="stat-card">
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-violet-500/10">
-                                <Receipt className="h-5 w-5 text-violet-400" />
-                            </div>
-                            <div>
-                                <p className="stat-label">Total Facturado</p>
-                                <p className="text-xl font-bold text-violet-400">${totalFacturado.toFixed(2)}</p>
-                            </div>
+                <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-sm hover:shadow-md transition-all">
+                    <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-muted-foreground text-sm font-medium">Total Facturado</p>
+                            <p className="text-2xl font-bold text-indigo-600">${totalFacturado.toFixed(2)}</p>
+                        </div>
+                        <div className="p-2 bg-indigo-100 rounded-lg">
+                            <Receipt className="h-6 w-6 text-indigo-600" />
                         </div>
                     </CardContent>
                 </Card>
@@ -257,16 +244,18 @@ export default function FacturacionPage() {
 
             {/* Ambiente Badge */}
             <motion.div variants={itemVariants}>
-                <Card className={`card-linear ${config.ambiente === 'pruebas' ? 'border-amber-500/30' : 'border-emerald-500/30'}`}>
+                <Card className={`bg-white/60 backdrop-blur-xl border shadow-sm ${config.ambiente === 'pruebas' ? 'border-amber-200' : 'border-emerald-200'}`}>
                     <CardContent className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <Building2 className="h-5 w-5 text-[hsl(var(--text-muted))]" />
+                            <div className="p-2 bg-gray-100 rounded-lg">
+                                <Building2 className="h-5 w-5 text-gray-600" />
+                            </div>
                             <div>
-                                <p className="font-medium text-[hsl(var(--text-primary))]">{config.razon_social || 'Configurar Empresa'}</p>
-                                <p className="text-sm text-[hsl(var(--text-muted))]">RUC: {config.ruc || 'No configurado'}</p>
+                                <p className="font-medium text-gray-900">{config.razon_social || 'Configurar Empresa'}</p>
+                                <p className="text-sm text-muted-foreground">RUC: {config.ruc || 'No configurado'}</p>
                             </div>
                         </div>
-                        <Badge className={config.ambiente === 'pruebas' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}>
+                        <Badge className={`${config.ambiente === 'pruebas' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'} px-3 py-1 text-sm font-medium border-0`}>
                             {config.ambiente === 'pruebas' ? '🧪 Ambiente Pruebas' : '✅ Producción'}
                         </Badge>
                     </CardContent>
@@ -275,23 +264,23 @@ export default function FacturacionPage() {
 
             {/* Search & Tabs */}
             <motion.div variants={itemVariants}>
-                <Card className="card-linear">
-                    <CardHeader className="pb-3">
+                <Card className="bg-white/60 backdrop-blur-xl border-white/20 shadow-lg overflow-hidden">
+                    <CardHeader className="pb-3 border-b border-gray-100">
                         <div className="flex items-center justify-between gap-4">
                             <div className="relative flex-1 max-w-sm">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--text-muted))]" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Buscar por número, cliente o RUC..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 input-linear"
+                                    className="pl-10 bg-white border-gray-200 focus:bg-white focus:ring-blue-500/20 transition-all"
                                 />
                             </div>
                             <Button
-                                variant="outline"
+                                variant="ghost"
                                 size="icon"
                                 onClick={loadData}
-                                className="border-[hsl(var(--border-subtle))]"
+                                className="hover:bg-gray-100 text-gray-500"
                             >
                                 <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                             </Button>
@@ -299,22 +288,22 @@ export default function FacturacionPage() {
                     </CardHeader>
                     <CardContent className="p-0">
                         <Tabs value={activeTab} onValueChange={setActiveTab}>
-                            <TabsList className="w-full justify-start border-b border-[hsl(var(--border-subtle))] rounded-none bg-transparent p-0 h-auto">
+                            <TabsList className="w-full justify-start border-b border-gray-100 rounded-none bg-transparent p-0 h-auto">
                                 <TabsTrigger
                                     value="facturas"
-                                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-[hsl(var(--brand-accent))] data-[state=active]:bg-transparent px-4 py-3"
+                                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 text-gray-500 px-6 py-3 font-medium transition-all"
                                 >
                                     Facturas
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="notas-credito"
-                                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-[hsl(var(--brand-accent))] data-[state=active]:bg-transparent px-4 py-3"
+                                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 text-gray-500 px-6 py-3 font-medium transition-all"
                                 >
                                     Notas de Crédito
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="retenciones"
-                                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-[hsl(var(--brand-accent))] data-[state=active]:bg-transparent px-4 py-3"
+                                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 data-[state=active]:bg-transparent data-[state=active]:text-blue-600 text-gray-500 px-6 py-3 font-medium transition-all"
                                 >
                                     Retenciones
                                 </TabsTrigger>
@@ -322,60 +311,67 @@ export default function FacturacionPage() {
 
                             <TabsContent value="facturas" className="m-0">
                                 {isLoading ? (
-                                    <div className="p-4 space-y-3">
+                                    <div className="p-6 space-y-4">
                                         {[...Array(5)].map((_, i) => (
-                                            <Skeleton key={i} className="h-16 w-full bg-[hsl(var(--surface-highlight))]" />
+                                            <Skeleton key={i} className="h-16 w-full bg-gray-100 rounded-lg" />
                                         ))}
                                     </div>
                                 ) : filteredFacturas.length === 0 ? (
-                                    <div className="p-8 text-center">
-                                        <FileText className="h-12 w-12 text-[hsl(var(--text-muted))] mx-auto mb-3 opacity-50" />
-                                        <p className="text-[hsl(var(--text-secondary))]">No hay facturas</p>
-                                        <p className="text-sm text-[hsl(var(--text-muted))] mt-1">
-                                            Crea tu primera factura electrónica
+                                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                            <FileText className="h-8 w-8 text-gray-400" />
+                                        </div>
+                                        <h3 className="text-lg font-semibold text-gray-900">No hay facturas</h3>
+                                        <p className="text-muted-foreground mt-1 mb-6 max-w-sm">
+                                            Aún no has emitido ninguna factura electrónica.
                                         </p>
+                                        <PermissionGate permission="facturacion.crear">
+                                            <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                                                Crear primera factura
+                                            </Button>
+                                        </PermissionGate>
                                     </div>
                                 ) : (
-                                    <div className="divide-y divide-[hsl(var(--border-subtle))]">
+                                    <div className="divide-y divide-gray-100">
                                         {filteredFacturas.map((factura) => {
                                             const estado = estadoConfig[factura.estado]
                                             const Icon = estado.icon
                                             return (
-                                                <div key={factura.id} className="p-4 flex items-center justify-between hover:bg-[hsl(var(--interactive-hover))] transition-colors">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-10 h-10 rounded-lg ${estado.bgColor} flex items-center justify-center`}>
-                                                            <Icon className={`h-5 w-5 ${estado.color}`} />
+                                                <div key={factura.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between hover:bg-blue-50/50 transition-colors gap-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className={`w-12 h-12 rounded-xl ${estado.bgColor} flex items-center justify-center flex-shrink-0`}>
+                                                            <Icon className={`h-6 w-6 ${estado.color}`} />
                                                         </div>
                                                         <div>
-                                                            <p className="font-medium text-[hsl(var(--text-primary))]">
+                                                            <p className="font-bold text-gray-900 text-lg">
                                                                 {factura.numero}
                                                             </p>
-                                                            <p className="text-xs text-[hsl(var(--text-muted))]">
-                                                                {factura.cliente_nombre} · {factura.cliente_identificacion}
-                                                            </p>
+                                                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                                                <span className="font-medium">{factura.cliente_nombre}</span>
+                                                                <span>•</span>
+                                                                <span className="font-mono">{factura.cliente_identificacion}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-4">
+                                                    <div className="flex items-center gap-6 justify-between md:justify-end">
                                                         <div className="text-right">
-                                                            <p className="font-bold text-[hsl(var(--text-primary))]">
+                                                            <p className="font-bold text-gray-900 text-lg">
                                                                 ${factura.total.toFixed(2)}
                                                             </p>
-                                                            <p className="text-xs text-[hsl(var(--text-muted))]">
+                                                            <p className="text-xs text-gray-500">
                                                                 {format(new Date(factura.created_at), "d MMM yyyy", { locale: es })}
                                                             </p>
                                                         </div>
-                                                        <Badge className={`${estado.bgColor} ${estado.color} border-0`}>
+                                                        <Badge className={`${estado.bgColor} ${estado.color} border ${estado.borderColor} px-3 py-1 shadow-sm`}>
                                                             {estado.label}
                                                         </Badge>
                                                         <div className="flex gap-1">
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                            <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-500 hover:text-blue-600 hover:bg-blue-50">
                                                                 <Eye className="h-4 w-4" />
                                                             </Button>
-                                                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                <Download className="h-4 w-4" />
-                                                            </Button>
+                                                            <InvoiceDownloadButton facturaId={factura.id} />
                                                             {factura.estado === 'pendiente' && (
-                                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-400">
+                                                                <Button variant="ghost" size="icon" className="h-9 w-9 text-blue-600 hover:bg-blue-50">
                                                                     <Send className="h-4 w-4" />
                                                                 </Button>
                                                             )}
@@ -388,20 +384,20 @@ export default function FacturacionPage() {
                                 )}
                             </TabsContent>
 
-                            <TabsContent value="notas-credito" className="m-0 p-8 text-center">
-                                <FileCheck className="h-12 w-12 text-[hsl(var(--text-muted))] mx-auto mb-3 opacity-50" />
-                                <p className="text-[hsl(var(--text-secondary))]">Notas de Crédito</p>
-                                <p className="text-sm text-[hsl(var(--text-muted))] mt-1">
-                                    Próximamente disponible
-                                </p>
+                            <TabsContent value="notas-credito" className="m-0 py-16 text-center">
+                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <FileCheck className="h-8 w-8 text-gray-400" />
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-900">Notas de Crédito</h3>
+                                <p className="text-muted-foreground mt-1">Próximamente disponible</p>
                             </TabsContent>
 
-                            <TabsContent value="retenciones" className="m-0 p-8 text-center">
-                                <Receipt className="h-12 w-12 text-[hsl(var(--text-muted))] mx-auto mb-3 opacity-50" />
-                                <p className="text-[hsl(var(--text-secondary))]">Retenciones</p>
-                                <p className="text-sm text-[hsl(var(--text-muted))] mt-1">
-                                    Próximamente disponible
-                                </p>
+                            <TabsContent value="retenciones" className="m-0 py-16 text-center">
+                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Receipt className="h-8 w-8 text-gray-400" />
+                                </div>
+                                <h3 className="text-lg font-semibold text-gray-900">Retenciones</h3>
+                                <p className="text-muted-foreground mt-1">Próximamente disponible</p>
                             </TabsContent>
                         </Tabs>
                     </CardContent>
@@ -410,76 +406,76 @@ export default function FacturacionPage() {
 
             {/* Configuration Dialog */}
             <Dialog open={isConfigOpen} onOpenChange={setIsConfigOpen}>
-                <DialogContent className="bg-[hsl(var(--surface-elevated))] border-[hsl(var(--border-subtle))] max-w-2xl">
+                <DialogContent className="bg-white max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle className="text-[hsl(var(--text-primary))]">
+                        <DialogTitle className="text-xl font-bold text-gray-900">
                             Configuración SRI
                         </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>RUC</Label>
+                                <Label className="text-gray-700">RUC</Label>
                                 <Input
                                     value={config.ruc}
                                     onChange={(e) => setConfig(c => ({ ...c, ruc: e.target.value }))}
-                                    className="input-linear"
+                                    className="bg-white border-gray-200"
                                     maxLength={13}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Razón Social</Label>
+                                <Label className="text-gray-700">Razón Social</Label>
                                 <Input
                                     value={config.razon_social}
                                     onChange={(e) => setConfig(c => ({ ...c, razon_social: e.target.value }))}
-                                    className="input-linear"
+                                    className="bg-white border-gray-200"
                                 />
                             </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Nombre Comercial</Label>
+                                <Label className="text-gray-700">Nombre Comercial</Label>
                                 <Input
                                     value={config.nombre_comercial}
                                     onChange={(e) => setConfig(c => ({ ...c, nombre_comercial: e.target.value }))}
-                                    className="input-linear"
+                                    className="bg-white border-gray-200"
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Dirección Matriz</Label>
+                                <Label className="text-gray-700">Dirección Matriz</Label>
                                 <Input
                                     value={config.direccion_matriz}
                                     onChange={(e) => setConfig(c => ({ ...c, direccion_matriz: e.target.value }))}
-                                    className="input-linear"
+                                    className="bg-white border-gray-200"
                                 />
                             </div>
                         </div>
                         <div className="grid grid-cols-3 gap-4">
                             <div className="space-y-2">
-                                <Label>Establecimiento</Label>
+                                <Label className="text-gray-700">Establecimiento</Label>
                                 <Input
                                     value={config.establecimiento}
                                     onChange={(e) => setConfig(c => ({ ...c, establecimiento: e.target.value }))}
-                                    className="input-linear"
+                                    className="bg-white border-gray-200 font-mono"
                                     maxLength={3}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Punto de Emisión</Label>
+                                <Label className="text-gray-700">Punto de Emisión</Label>
                                 <Input
                                     value={config.punto_emision}
                                     onChange={(e) => setConfig(c => ({ ...c, punto_emision: e.target.value }))}
-                                    className="input-linear"
+                                    className="bg-white border-gray-200 font-mono"
                                     maxLength={3}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Ambiente</Label>
+                                <Label className="text-gray-700">Ambiente</Label>
                                 <Select value={config.ambiente} onValueChange={(v: any) => setConfig(c => ({ ...c, ambiente: v }))}>
-                                    <SelectTrigger className="input-linear">
+                                    <SelectTrigger className="bg-white border-gray-200">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-[hsl(var(--surface-elevated))] border-[hsl(var(--border-subtle))]">
+                                    <SelectContent>
                                         <SelectItem value="pruebas">🧪 Pruebas</SelectItem>
                                         <SelectItem value="produccion">✅ Producción</SelectItem>
                                     </SelectContent>
@@ -488,7 +484,7 @@ export default function FacturacionPage() {
                         </div>
 
                         <div className="p-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                            <p className="text-sm text-amber-400">
+                            <p className="text-sm text-amber-600">
                                 <AlertTriangle className="inline h-4 w-4 mr-1" />
                                 <strong>Firma Electrónica:</strong> Para emitir comprobantes en producción,
                                 necesitas configurar tu certificado .p12 en la sección de seguridad.
@@ -496,10 +492,10 @@ export default function FacturacionPage() {
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsConfigOpen(false)}>
+                        <Button variant="outline" onClick={() => setIsConfigOpen(false)} className="border-gray-200 bg-white">
                             Cancelar
                         </Button>
-                        <Button className="bg-[hsl(var(--brand-accent))]">
+                        <Button className="bg-blue-600 text-white hover:bg-blue-700">
                             Guardar Configuración
                         </Button>
                     </DialogFooter>
