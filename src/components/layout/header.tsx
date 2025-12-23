@@ -113,7 +113,7 @@ export function Header({ isSidebarCollapsed, onMenuClick }: HeaderProps) {
                 width: `calc(100% - ${isSidebarCollapsed ? 64 : 240}px)`
             }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="header-linear fixed top-0 right-0 z-40 md:ml-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))]"
+            className="header-linear fixed top-0 right-0 z-40 md:ml-[var(--sidebar-width)] md:w-[calc(100%-var(--sidebar-width))] bg-white/40 backdrop-blur-xl border-b border-white/20"
             style={{
                 // Override framer motion styles on mobile via standard CSS class overrides if needed,
                 // but since we render via JS logic in layout, we might just conditionalize the animate prop

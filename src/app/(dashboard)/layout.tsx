@@ -8,6 +8,7 @@ import { Header } from '@/components/layout/header'
 import { useAuthStore } from '@/stores'
 import { TenantProvider, useMediaQuery } from '@/hooks'
 import { Loader2, Wrench } from 'lucide-react'
+import { PremiumBackground } from '@/components/ui/premium-background'
 
 export default function DashboardLayout({
     children,
@@ -66,39 +67,47 @@ export default function DashboardLayout({
 
     return (
         <TenantProvider>
-            <div className="min-h-screen bg-[hsl(var(--surface-base))]">
-                <Sidebar
-                    isCollapsed={isMobile ? false : isCollapsed}
-                    onToggle={() => setIsCollapsed(!isCollapsed)}
-                    isMobile={isMobile}
-                    isOpenMobile={isMobileOpen}
-                    onCloseMobile={() => setIsMobileOpen(false)}
-                />
+            <div className="min-h-screen relative overflow-x-hidden">
+                {/* Global Premium Background */}
+                <div className="fixed inset-0 z-0">
+                    <PremiumBackground />
+                </div>
 
-                <Header
-                    isSidebarCollapsed={isMobile ? true : isCollapsed}
-                    onMenuClick={() => setIsMobileOpen(true)}
-                />
+                {/* Content Overlay */}
+                <div className="relative z-10 flex min-h-screen">
+                    <Sidebar
+                        isCollapsed={isMobile ? false : isCollapsed}
+                        onToggle={() => setIsCollapsed(!isCollapsed)}
+                        isMobile={isMobile}
+                        isOpenMobile={isMobileOpen}
+                        onCloseMobile={() => setIsMobileOpen(false)}
+                    />
 
-                <motion.main
-                    initial={false}
-                    animate={{
-                        marginLeft: isMobile ? 0 : (isCollapsed ? 64 : 240),
-                        paddingTop: 56 // header-height
-                    }}
-                    transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                    className="min-h-screen"
-                >
-                    <div className="p-6">
-                        <motion.div
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                    <div className="flex-1 flex flex-col min-w-0">
+                        <Header
+                            isSidebarCollapsed={isMobile ? true : isCollapsed}
+                            onMenuClick={() => setIsMobileOpen(true)}
+                        />
+
+                        <motion.main
+                            initial={false}
+                            animate={{
+                                paddingLeft: isMobile ? 0 : (isCollapsed ? 64 : 240),
+                                paddingTop: 64
+                            }}
+                            className="flex-1 p-6"
                         >
-                            {children}
-                        </motion.div>
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, ease: "easeOut" }}
+                                className="w-full max-w-7xl mx-auto"
+                            >
+                                {children}
+                            </motion.div>
+                        </motion.main>
                     </div>
-                </motion.main>
+                </div>
             </div>
         </TenantProvider>
     )

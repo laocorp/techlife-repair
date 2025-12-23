@@ -83,7 +83,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobile, isOpenMobile, onClose
     if (isMobile) {
         return (
             <Sheet open={isOpenMobile} onOpenChange={onCloseMobile}>
-                <SheetContent side="left" className="p-0 w-[240px] border-r border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-base))]">
+                <SheetContent side="left" className="p-0 w-[240px] border-r border-white/20 bg-white/60 backdrop-blur-xl">
                     <SidebarInner isCollapsed={false} onToggle={() => { }} isMobile={true} onCloseMobile={onCloseMobile} />
                 </SheetContent>
             </Sheet>
@@ -96,7 +96,7 @@ export function Sidebar({ isCollapsed, onToggle, isMobile, isOpenMobile, onClose
                 initial={false}
                 animate={{ width: isCollapsed ? 64 : 240 }}
                 transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                className="sidebar-linear fixed left-0 top-0 h-screen z-50 flex flex-col border-r border-[hsl(var(--border-subtle))] bg-[hsl(var(--surface-base))]"
+                className="sidebar-linear fixed left-0 top-0 h-screen z-50 flex flex-col border-r border-white/20 bg-white/40 backdrop-blur-xl shadow-[4px_0_24px_-4px_rgba(0,0,0,0.1)]"
             >
                 <SidebarInner isCollapsed={isCollapsed} onToggle={onToggle} isMobile={false} />
             </motion.aside>
