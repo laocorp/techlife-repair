@@ -452,6 +452,9 @@ model FacturacionElectronica {
   estado                  String    @default("pendiente") // 'pendiente' | 'autorizado' | 'rechazado' | 'anulado'
   clave_acceso            String?
   numero_autorizacion     String?
+  ambiente                String?   // '1' pruebas | '2' produccion
+  xml_generado            String?   @db.Text
+
   
   empresa_id              String
   empresa                 Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)

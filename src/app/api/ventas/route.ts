@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 1. Transaction: Create Sale + Update Stock
-        const result = await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx: any) => {
             // A. Get Sequential Number for Invoice
             const secuencialDoc = await tx.secuencial.findFirst({
                 where: {
@@ -238,10 +238,23 @@ export async function POST(request: NextRequest) {
                 await prisma.facturacionElectronica.create({
                     data: {
                         empresa_id: empresa.id,
-                        venta_id: venta.id, // Need to add relation to schema if not exists, or just link by ID
+                        venta_id: venta.id,
+                        numero: venta.numero, // Using Sale Number, or SRI Sequential? Usually SRI Sequential: secuencialData... but let's use Sale Number for correlation for now as they are 1:1 in this logic. 
+                        // Actually, 'numero' in FE table usually refers to the 15-digit access key or the 001-001-XXXX sequence.
+                        // Let's use the formatted sequence: `${secuencialData.establecimiento}-${secuencialData.punto_emision}-${secuencialData.secuencial.toString().padStart(9, '0')}`
+                        // Which IS `venta.numero` in this logic (lines 48).
+                        tipo_comprobante: '01', // Factura
+
+                        cliente_nombre: datosComprador.razonSocial,
+                        cliente_identificacion: datosComprador.identificacion,
+
+                        subtotal: venta.subtotal,
+                        iva: venta.iva,
+                        total: venta.total,
+
                         clave_acceso: xmlUnsigned.match(/<claveAcceso>(.*?)<\/claveAcceso>/)?.[1] || '',
                         numero_autorizacion: null,
-                        estado: 'GENERADO', // Not sent yet
+                        estado: 'GENERADO',
                         xml_generado: xmlUnsigned,
                         ambiente: empresa.ambiente_sri
                     }
