@@ -220,6 +220,7 @@ model Venta {
   
   // Relaciones
   detalles        VentaDetalle[]
+  factura         FacturacionElectronica?
   
   @@unique([empresa_id, numero])
   @@map("ventas")
@@ -454,6 +455,9 @@ model FacturacionElectronica {
   
   empresa_id              String
   empresa                 Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
+
+  venta_id                String?   @unique
+  venta                   Venta?    @relation(fields: [venta_id], references: [id])
   
   created_at              DateTime  @default(now())
   updated_at              DateTime  @updatedAt

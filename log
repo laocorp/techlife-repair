@@ -1,486 +1,1290 @@
 Initializing deployment
 Cloning Repo github.com/laocorp/techlife-repair.git to /etc/dokploy/applications/techliferepair-repairapp-5z3xud/code: ✅
 Cloning into '/etc/dokploy/applications/techliferepair-repairapp-5z3xud/code'...
-remote: Enumerating objects: 264, done.
-remote: Counting objects:   0% (1/264)        
-remote: Counting objects:   1% (3/264)        
-remote: Counting objects:   2% (6/264)        
-remote: Counting objects:   3% (8/264)        
-remote: Counting objects:   4% (11/264)        
-remote: Counting objects:   5% (14/264)        
-remote: Counting objects:   6% (16/264)        
-remote: Counting objects:   7% (19/264)        
-remote: Counting objects:   8% (22/264)        
-remote: Counting objects:   9% (24/264)        
-remote: Counting objects:  10% (27/264)        
-remote: Counting objects:  11% (30/264)        
-remote: Counting objects:  12% (32/264)        
-remote: Counting objects:  13% (35/264)        
-remote: Counting objects:  14% (37/264)        
-remote: Counting objects:  15% (40/264)        
-remote: Counting objects:  16% (43/264)        
-remote: Counting objects:  17% (45/264)        
-remote: Counting objects:  18% (48/264)        
-remote: Counting objects:  19% (51/264)        
-remote: Counting objects:  20% (53/264)        
-remote: Counting objects:  21% (56/264)        
-remote: Counting objects:  22% (59/264)        
-remote: Counting objects:  23% (61/264)        
-remote: Counting objects:  24% (64/264)        
-remote: Counting objects:  25% (66/264)        
-remote: Counting objects:  26% (69/264)        
-remote: Counting objects:  27% (72/264)        
-remote: Counting objects:  28% (74/264)        
-remote: Counting objects:  29% (77/264)        
-remote: Counting objects:  30% (80/264)        
-remote: Counting objects:  31% (82/264)        
-remote: Counting objects:  32% (85/264)        
-remote: Counting objects:  33% (88/264)        
-remote: Counting objects:  34% (90/264)        
-remote: Counting objects:  35% (93/264)        
-remote: Counting objects:  36% (96/264)        
-remote: Counting objects:  37% (98/264)        
-remote: Counting objects:  38% (101/264)        
-remote: Counting objects:  39% (103/264)        
-remote: Counting objects:  40% (106/264)        
-remote: Counting objects:  41% (109/264)        
-remote: Counting objects:  42% (111/264)        
-remote: Counting objects:  43% (114/264)        
-remote: Counting objects:  44% (117/264)        
-remote: Counting objects:  45% (119/264)        
-remote: Counting objects:  46% (122/264)        
-remote: Counting objects:  47% (125/264)        
-remote: Counting objects:  48% (127/264)        
-remote: Counting objects:  49% (130/264)        
-remote: Counting objects:  50% (132/264)        
-remote: Counting objects:  51% (135/264)        
-remote: Counting objects:  52% (138/264)        
-remote: Counting objects:  53% (140/264)        
-remote: Counting objects:  54% (143/264)        
-remote: Counting objects:  55% (146/264)        
-remote: Counting objects:  56% (148/264)        
-remote: Counting objects:  57% (151/264)        
-remote: Counting objects:  58% (154/264)        
-remote: Counting objects:  59% (156/264)        
-remote: Counting objects:  60% (159/264)        
-remote: Counting objects:  61% (162/264)        
-remote: Counting objects:  62% (164/264)        
-remote: Counting objects:  63% (167/264)        
-remote: Counting objects:  64% (169/264)        
-remote: Counting objects:  65% (172/264)        
-remote: Counting objects:  66% (175/264)        
-remote: Counting objects:  67% (177/264)        
-remote: Counting objects:  68% (180/264)        
-remote: Counting objects:  69% (183/264)        
-remote: Counting objects:  70% (185/264)        
-remote: Counting objects:  71% (188/264)        
-remote: Counting objects:  72% (191/264)        
-remote: Counting objects:  73% (193/264)        
-remote: Counting objects:  74% (196/264)        
-remote: Counting objects:  75% (198/264)        
-remote: Counting objects:  76% (201/264)        
-remote: Counting objects:  77% (204/264)        
-remote: Counting objects:  78% (206/264)        
-remote: Counting objects:  79% (209/264)        
-remote: Counting objects:  80% (212/264)        
-remote: Counting objects:  81% (214/264)        
-remote: Counting objects:  82% (217/264)        
-remote: Counting objects:  83% (220/264)        
-remote: Counting objects:  84% (222/264)        
-remote: Counting objects:  85% (225/264)        
-remote: Counting objects:  86% (228/264)        
-remote: Counting objects:  87% (230/264)        
-remote: Counting objects:  88% (233/264)        
-remote: Counting objects:  89% (235/264)        
-remote: Counting objects:  90% (238/264)        
-remote: Counting objects:  91% (241/264)        
-remote: Counting objects:  92% (243/264)        
-remote: Counting objects:  93% (246/264)        
-remote: Counting objects:  94% (249/264)        
-remote: Counting objects:  95% (251/264)        
-remote: Counting objects:  96% (254/264)        
-remote: Counting objects:  97% (257/264)        
-remote: Counting objects:  98% (259/264)        
-remote: Counting objects:  99% (262/264)        
-remote: Counting objects: 100% (264/264)        
-remote: Counting objects: 100% (264/264), done.
-remote: Compressing objects:   0% (1/193)        
-remote: Compressing objects:   1% (2/193)        
-remote: Compressing objects:   2% (4/193)        
-remote: Compressing objects:   3% (6/193)        
-remote: Compressing objects:   4% (8/193)        
-remote: Compressing objects:   5% (10/193)        
-remote: Compressing objects:   6% (12/193)        
-remote: Compressing objects:   7% (14/193)        
-remote: Compressing objects:   8% (16/193)        
-remote: Compressing objects:   9% (18/193)        
-remote: Compressing objects:  10% (20/193)        
-remote: Compressing objects:  11% (22/193)        
-remote: Compressing objects:  12% (24/193)        
-remote: Compressing objects:  13% (26/193)        
-remote: Compressing objects:  14% (28/193)        
-remote: Compressing objects:  15% (29/193)        
-remote: Compressing objects:  16% (31/193)        
-remote: Compressing objects:  17% (33/193)        
-remote: Compressing objects:  18% (35/193)        
-remote: Compressing objects:  19% (37/193)        
-remote: Compressing objects:  20% (39/193)        
-remote: Compressing objects:  21% (41/193)        
-remote: Compressing objects:  22% (43/193)        
-remote: Compressing objects:  23% (45/193)        
-remote: Compressing objects:  24% (47/193)        
-remote: Compressing objects:  25% (49/193)        
-remote: Compressing objects:  26% (51/193)        
-remote: Compressing objects:  27% (53/193)        
-remote: Compressing objects:  28% (55/193)        
-remote: Compressing objects:  29% (56/193)        
-remote: Compressing objects:  30% (58/193)        
-remote: Compressing objects:  31% (60/193)        
-remote: Compressing objects:  32% (62/193)        
-remote: Compressing objects:  33% (64/193)        
-remote: Compressing objects:  34% (66/193)        
-remote: Compressing objects:  35% (68/193)        
-remote: Compressing objects:  36% (70/193)        
-remote: Compressing objects:  37% (72/193)        
-remote: Compressing objects:  38% (74/193)        
-remote: Compressing objects:  39% (76/193)        
-remote: Compressing objects:  40% (78/193)        
-remote: Compressing objects:  41% (80/193)        
-remote: Compressing objects:  42% (82/193)        
-remote: Compressing objects:  43% (83/193)        
-remote: Compressing objects:  44% (85/193)        
-remote: Compressing objects:  45% (87/193)        
-remote: Compressing objects:  46% (89/193)        
-remote: Compressing objects:  47% (91/193)        
-remote: Compressing objects:  48% (93/193)        
-remote: Compressing objects:  49% (95/193)        
-remote: Compressing objects:  50% (97/193)        
-remote: Compressing objects:  51% (99/193)        
-remote: Compressing objects:  52% (101/193)        
-remote: Compressing objects:  53% (103/193)        
-remote: Compressing objects:  54% (105/193)        
-remote: Compressing objects:  55% (107/193)        
-remote: Compressing objects:  56% (109/193)        
-remote: Compressing objects:  57% (111/193)        
-remote: Compressing objects:  58% (112/193)        
-remote: Compressing objects:  59% (114/193)        
-remote: Compressing objects:  60% (116/193)        
-remote: Compressing objects:  61% (118/193)        
-remote: Compressing objects:  62% (120/193)        
-remote: Compressing objects:  63% (122/193)        
-remote: Compressing objects:  64% (124/193)        
-remote: Compressing objects:  65% (126/193)        
-remote: Compressing objects:  66% (128/193)        
-remote: Compressing objects:  67% (130/193)        
-remote: Compressing objects:  68% (132/193)        
-remote: Compressing objects:  69% (134/193)        
-remote: Compressing objects:  70% (136/193)        
-remote: Compressing objects:  71% (138/193)        
-remote: Compressing objects:  72% (139/193)        
-remote: Compressing objects:  73% (141/193)        
-remote: Compressing objects:  74% (143/193)        
-remote: Compressing objects:  75% (145/193)        
-remote: Compressing objects:  76% (147/193)        
-remote: Compressing objects:  77% (149/193)        
-remote: Compressing objects:  78% (151/193)        
-remote: Compressing objects:  79% (153/193)        
-remote: Compressing objects:  80% (155/193)        
-remote: Compressing objects:  81% (157/193)        
-remote: Compressing objects:  82% (159/193)        
-remote: Compressing objects:  83% (161/193)        
-remote: Compressing objects:  84% (163/193)        
-remote: Compressing objects:  85% (165/193)        
-remote: Compressing objects:  86% (166/193)        
-remote: Compressing objects:  87% (168/193)        
-remote: Compressing objects:  88% (170/193)        
-remote: Compressing objects:  89% (172/193)        
-remote: Compressing objects:  90% (174/193)        
-remote: Compressing objects:  91% (176/193)        
-remote: Compressing objects:  92% (178/193)        
-remote: Compressing objects:  93% (180/193)        
-remote: Compressing objects:  94% (182/193)        
-remote: Compressing objects:  95% (184/193)        
-remote: Compressing objects:  96% (186/193)        
-remote: Compressing objects:  97% (188/193)        
-remote: Compressing objects:  98% (190/193)        
-remote: Compressing objects:  99% (192/193)        
-remote: Compressing objects: 100% (193/193)        
-remote: Compressing objects: 100% (193/193), done.
-Receiving objects:   0% (1/264)
-Receiving objects:   1% (3/264)
-Receiving objects:   2% (6/264)
-Receiving objects:   3% (8/264)
-Receiving objects:   4% (11/264)
-Receiving objects:   5% (14/264)
-Receiving objects:   6% (16/264)
-Receiving objects:   7% (19/264)
-Receiving objects:   8% (22/264)
-Receiving objects:   9% (24/264)
-Receiving objects:  10% (27/264)
-Receiving objects:  11% (30/264)
-Receiving objects:  12% (32/264)
-Receiving objects:  13% (35/264)
-Receiving objects:  14% (37/264)
-Receiving objects:  15% (40/264)
-Receiving objects:  16% (43/264)
-Receiving objects:  17% (45/264)
-Receiving objects:  18% (48/264)
-Receiving objects:  19% (51/264)
-Receiving objects:  20% (53/264)
-Receiving objects:  21% (56/264)
-Receiving objects:  22% (59/264)
-Receiving objects:  23% (61/264)
-Receiving objects:  24% (64/264)
-Receiving objects:  25% (66/264)
-Receiving objects:  26% (69/264)
-Receiving objects:  27% (72/264)
-Receiving objects:  28% (74/264)
-Receiving objects:  29% (77/264)
-Receiving objects:  30% (80/264)
-Receiving objects:  31% (82/264)
-Receiving objects:  32% (85/264)
-Receiving objects:  33% (88/264)
-Receiving objects:  34% (90/264)
-Receiving objects:  35% (93/264)
-Receiving objects:  36% (96/264)
-Receiving objects:  37% (98/264)
-Receiving objects:  38% (101/264)
-Receiving objects:  39% (103/264)
-Receiving objects:  40% (106/264)
-Receiving objects:  41% (109/264)
-Receiving objects:  42% (111/264)
-Receiving objects:  43% (114/264)
-Receiving objects:  44% (117/264)
-Receiving objects:  45% (119/264)
-Receiving objects:  46% (122/264)
-Receiving objects:  47% (125/264)
-Receiving objects:  48% (127/264)
-Receiving objects:  49% (130/264)
-Receiving objects:  50% (132/264)
-Receiving objects:  51% (135/264)
-Receiving objects:  52% (138/264)
-Receiving objects:  53% (140/264)
-Receiving objects:  54% (143/264)
-Receiving objects:  55% (146/264)
-Receiving objects:  56% (148/264)
-Receiving objects:  57% (151/264)
-Receiving objects:  58% (154/264)
-Receiving objects:  59% (156/264)
-Receiving objects:  60% (159/264)
-Receiving objects:  61% (162/264)
-Receiving objects:  62% (164/264)
-Receiving objects:  63% (167/264)
-Receiving objects:  64% (169/264)
-Receiving objects:  65% (172/264)
-Receiving objects:  66% (175/264)
-Receiving objects:  67% (177/264)
-Receiving objects:  68% (180/264)
-Receiving objects:  69% (183/264)
-Receiving objects:  70% (185/264)
-Receiving objects:  71% (188/264)
-remote: Total 264 (delta 51), reused 190 (delta 16), pack-reused 0 (from 0)
-Receiving objects:  72% (191/264)
-Receiving objects:  73% (193/264)
-Receiving objects:  74% (196/264)
-Receiving objects:  75% (198/264)
-Receiving objects:  76% (201/264)
-Receiving objects:  77% (204/264)
-Receiving objects:  78% (206/264)
-Receiving objects:  79% (209/264)
-Receiving objects:  80% (212/264)
-Receiving objects:  81% (214/264)
-Receiving objects:  82% (217/264)
-Receiving objects:  83% (220/264)
-Receiving objects:  84% (222/264)
-Receiving objects:  85% (225/264)
-Receiving objects:  86% (228/264)
-Receiving objects:  87% (230/264)
-Receiving objects:  88% (233/264)
-Receiving objects:  89% (235/264)
-Receiving objects:  90% (238/264)
-Receiving objects:  91% (241/264)
-Receiving objects:  92% (243/264)
-Receiving objects:  93% (246/264)
-Receiving objects:  94% (249/264)
-Receiving objects:  95% (251/264)
-Receiving objects:  96% (254/264)
-Receiving objects:  97% (257/264)
-Receiving objects:  98% (259/264)
-Receiving objects:  99% (262/264)
-Receiving objects: 100% (264/264)
-Receiving objects: 100% (264/264), 1.15 MiB | 19.00 MiB/s, done.
-Resolving deltas:   0% (0/51)
-Resolving deltas:   1% (1/51)
-Resolving deltas:   3% (2/51)
-Resolving deltas:   5% (3/51)
-Resolving deltas:   7% (4/51)
-Resolving deltas:  11% (6/51)
-Resolving deltas:  13% (7/51)
-Resolving deltas:  15% (8/51)
-Resolving deltas:  17% (9/51)
-Resolving deltas:  19% (10/51)
-Resolving deltas:  21% (11/51)
-Resolving deltas:  23% (12/51)
-Resolving deltas:  25% (13/51)
-Resolving deltas:  27% (14/51)
-Resolving deltas:  29% (15/51)
-Resolving deltas:  31% (16/51)
-Resolving deltas:  33% (17/51)
-Resolving deltas:  37% (19/51)
-Resolving deltas:  39% (20/51)
-Resolving deltas:  41% (21/51)
-Resolving deltas:  43% (22/51)
-Resolving deltas:  45% (23/51)
-Resolving deltas:  47% (24/51)
-Resolving deltas:  49% (25/51)
-Resolving deltas:  50% (26/51)
-Resolving deltas:  52% (27/51)
-Resolving deltas:  54% (28/51)
-Resolving deltas:  56% (29/51)
-Resolving deltas:  58% (30/51)
-Resolving deltas:  60% (31/51)
-Resolving deltas:  62% (32/51)
-Resolving deltas:  64% (33/51)
-Resolving deltas:  66% (34/51)
-Resolving deltas:  68% (35/51)
-Resolving deltas:  70% (36/51)
-Resolving deltas:  72% (37/51)
-Resolving deltas:  74% (38/51)
-Resolving deltas:  76% (39/51)
-Resolving deltas:  78% (40/51)
-Resolving deltas:  80% (41/51)
-Resolving deltas:  82% (42/51)
-Resolving deltas:  84% (43/51)
-Resolving deltas:  88% (45/51)
-Resolving deltas:  90% (46/51)
-Resolving deltas:  92% (47/51)
-Resolving deltas:  94% (48/51)
-Resolving deltas:  96% (49/51)
-Resolving deltas:  98% (50/51)
-Resolving deltas: 100% (51/51)
-Resolving deltas: 100% (51/51), done.
+remote: Enumerating objects: 271, done.
+remote: Counting objects:   0% (1/271)        
+remote: Counting objects:   1% (3/271)        
+remote: Counting objects:   2% (6/271)        
+remote: Counting objects:   3% (9/271)        
+remote: Counting objects:   4% (11/271)        
+remote: Counting objects:   5% (14/271)        
+remote: Counting objects:   6% (17/271)        
+remote: Counting objects:   7% (19/271)        
+remote: Counting objects:   8% (22/271)        
+remote: Counting objects:   9% (25/271)        
+remote: Counting objects:  10% (28/271)        
+remote: Counting objects:  11% (30/271)        
+remote: Counting objects:  12% (33/271)        
+remote: Counting objects:  13% (36/271)        
+remote: Counting objects:  14% (38/271)        
+remote: Counting objects:  15% (41/271)        
+remote: Counting objects:  16% (44/271)        
+remote: Counting objects:  17% (47/271)        
+remote: Counting objects:  18% (49/271)        
+remote: Counting objects:  19% (52/271)        
+remote: Counting objects:  20% (55/271)        
+remote: Counting objects:  21% (57/271)        
+remote: Counting objects:  22% (60/271)        
+remote: Counting objects:  23% (63/271)        
+remote: Counting objects:  24% (66/271)        
+remote: Counting objects:  25% (68/271)        
+remote: Counting objects:  26% (71/271)        
+remote: Counting objects:  27% (74/271)        
+remote: Counting objects:  28% (76/271)        
+remote: Counting objects:  29% (79/271)        
+remote: Counting objects:  30% (82/271)        
+remote: Counting objects:  31% (85/271)        
+remote: Counting objects:  32% (87/271)        
+remote: Counting objects:  33% (90/271)        
+remote: Counting objects:  34% (93/271)        
+remote: Counting objects:  35% (95/271)        
+remote: Counting objects:  36% (98/271)        
+remote: Counting objects:  37% (101/271)        
+remote: Counting objects:  38% (103/271)        
+remote: Counting objects:  39% (106/271)        
+remote: Counting objects:  40% (109/271)        
+remote: Counting objects:  41% (112/271)        
+remote: Counting objects:  42% (114/271)        
+remote: Counting objects:  43% (117/271)        
+remote: Counting objects:  44% (120/271)        
+remote: Counting objects:  45% (122/271)        
+remote: Counting objects:  46% (125/271)        
+remote: Counting objects:  47% (128/271)        
+remote: Counting objects:  48% (131/271)        
+remote: Counting objects:  49% (133/271)        
+remote: Counting objects:  50% (136/271)        
+remote: Counting objects:  51% (139/271)        
+remote: Counting objects:  52% (141/271)        
+remote: Counting objects:  53% (144/271)        
+remote: Counting objects:  54% (147/271)        
+remote: Counting objects:  55% (150/271)        
+remote: Counting objects:  56% (152/271)        
+remote: Counting objects:  57% (155/271)        
+remote: Counting objects:  58% (158/271)        
+remote: Counting objects:  59% (160/271)        
+remote: Counting objects:  60% (163/271)        
+remote: Counting objects:  61% (166/271)        
+remote: Counting objects:  62% (169/271)        
+remote: Counting objects:  63% (171/271)        
+remote: Counting objects:  64% (174/271)        
+remote: Counting objects:  65% (177/271)        
+remote: Counting objects:  66% (179/271)        
+remote: Counting objects:  67% (182/271)        
+remote: Counting objects:  68% (185/271)        
+remote: Counting objects:  69% (187/271)        
+remote: Counting objects:  70% (190/271)        
+remote: Counting objects:  71% (193/271)        
+remote: Counting objects:  72% (196/271)        
+remote: Counting objects:  73% (198/271)        
+remote: Counting objects:  74% (201/271)        
+remote: Counting objects:  75% (204/271)        
+remote: Counting objects:  76% (206/271)        
+remote: Counting objects:  77% (209/271)        
+remote: Counting objects:  78% (212/271)        
+remote: Counting objects:  79% (215/271)        
+remote: Counting objects:  80% (217/271)        
+remote: Counting objects:  81% (220/271)        
+remote: Counting objects:  82% (223/271)        
+remote: Counting objects:  83% (225/271)        
+remote: Counting objects:  84% (228/271)        
+remote: Counting objects:  85% (231/271)        
+remote: Counting objects:  86% (234/271)        
+remote: Counting objects:  87% (236/271)        
+remote: Counting objects:  88% (239/271)        
+remote: Counting objects:  89% (242/271)        
+remote: Counting objects:  90% (244/271)        
+remote: Counting objects:  91% (247/271)        
+remote: Counting objects:  92% (250/271)        
+remote: Counting objects:  93% (253/271)        
+remote: Counting objects:  94% (255/271)        
+remote: Counting objects:  95% (258/271)        
+remote: Counting objects:  96% (261/271)        
+remote: Counting objects:  97% (263/271)        
+remote: Counting objects:  98% (266/271)        
+remote: Counting objects:  99% (269/271)        
+remote: Counting objects: 100% (271/271)        
+remote: Counting objects: 100% (271/271), done.
+remote: Compressing objects:   0% (1/198)        
+remote: Compressing objects:   1% (2/198)        
+remote: Compressing objects:   2% (4/198)        
+remote: Compressing objects:   3% (6/198)        
+remote: Compressing objects:   4% (8/198)        
+remote: Compressing objects:   5% (10/198)        
+remote: Compressing objects:   6% (12/198)        
+remote: Compressing objects:   7% (14/198)        
+remote: Compressing objects:   8% (16/198)        
+remote: Compressing objects:   9% (18/198)        
+remote: Compressing objects:  10% (20/198)        
+remote: Compressing objects:  11% (22/198)        
+remote: Compressing objects:  12% (24/198)        
+remote: Compressing objects:  13% (26/198)        
+remote: Compressing objects:  14% (28/198)        
+remote: Compressing objects:  15% (30/198)        
+remote: Compressing objects:  16% (32/198)        
+remote: Compressing objects:  17% (34/198)        
+remote: Compressing objects:  18% (36/198)        
+remote: Compressing objects:  19% (38/198)        
+remote: Compressing objects:  20% (40/198)        
+remote: Compressing objects:  21% (42/198)        
+remote: Compressing objects:  22% (44/198)        
+remote: Compressing objects:  23% (46/198)        
+remote: Compressing objects:  24% (48/198)        
+remote: Compressing objects:  25% (50/198)        
+remote: Compressing objects:  26% (52/198)        
+remote: Compressing objects:  27% (54/198)        
+remote: Compressing objects:  28% (56/198)        
+remote: Compressing objects:  29% (58/198)        
+remote: Compressing objects:  30% (60/198)        
+remote: Compressing objects:  31% (62/198)        
+remote: Compressing objects:  32% (64/198)        
+remote: Compressing objects:  33% (66/198)        
+remote: Compressing objects:  34% (68/198)        
+remote: Compressing objects:  35% (70/198)        
+remote: Compressing objects:  36% (72/198)        
+remote: Compressing objects:  37% (74/198)        
+remote: Compressing objects:  38% (76/198)        
+remote: Compressing objects:  39% (78/198)        
+remote: Compressing objects:  40% (80/198)        
+remote: Compressing objects:  41% (82/198)        
+remote: Compressing objects:  42% (84/198)        
+remote: Compressing objects:  43% (86/198)        
+remote: Compressing objects:  44% (88/198)        
+remote: Compressing objects:  45% (90/198)        
+remote: Compressing objects:  46% (92/198)        
+remote: Compressing objects:  47% (94/198)        
+remote: Compressing objects:  48% (96/198)        
+remote: Compressing objects:  49% (98/198)        
+remote: Compressing objects:  50% (99/198)        
+remote: Compressing objects:  51% (101/198)        
+remote: Compressing objects:  52% (103/198)        
+remote: Compressing objects:  53% (105/198)        
+remote: Compressing objects:  54% (107/198)        
+remote: Compressing objects:  55% (109/198)        
+remote: Compressing objects:  56% (111/198)        
+remote: Compressing objects:  57% (113/198)        
+remote: Compressing objects:  58% (115/198)        
+remote: Compressing objects:  59% (117/198)        
+remote: Compressing objects:  60% (119/198)        
+remote: Compressing objects:  61% (121/198)        
+remote: Compressing objects:  62% (123/198)        
+remote: Compressing objects:  63% (125/198)        
+remote: Compressing objects:  64% (127/198)        
+remote: Compressing objects:  65% (129/198)        
+remote: Compressing objects:  66% (131/198)        
+remote: Compressing objects:  67% (133/198)        
+remote: Compressing objects:  68% (135/198)        
+remote: Compressing objects:  69% (137/198)        
+remote: Compressing objects:  70% (139/198)        
+remote: Compressing objects:  71% (141/198)        
+remote: Compressing objects:  72% (143/198)        
+remote: Compressing objects:  73% (145/198)        
+remote: Compressing objects:  74% (147/198)        
+remote: Compressing objects:  75% (149/198)        
+remote: Compressing objects:  76% (151/198)        
+remote: Compressing objects:  77% (153/198)        
+remote: Compressing objects:  78% (155/198)        
+remote: Compressing objects:  79% (157/198)        
+remote: Compressing objects:  80% (159/198)        
+remote: Compressing objects:  81% (161/198)        
+remote: Compressing objects:  82% (163/198)        
+remote: Compressing objects:  83% (165/198)        
+remote: Compressing objects:  84% (167/198)        
+remote: Compressing objects:  85% (169/198)        
+remote: Compressing objects:  86% (171/198)        
+remote: Compressing objects:  87% (173/198)        
+remote: Compressing objects:  88% (175/198)        
+remote: Compressing objects:  89% (177/198)        
+remote: Compressing objects:  90% (179/198)        
+remote: Compressing objects:  91% (181/198)        
+remote: Compressing objects:  92% (183/198)        
+remote: Compressing objects:  93% (185/198)        
+remote: Compressing objects:  94% (187/198)        
+remote: Compressing objects:  95% (189/198)        
+remote: Compressing objects:  96% (191/198)        
+remote: Compressing objects:  97% (193/198)        
+remote: Compressing objects:  98% (195/198)        
+remote: Compressing objects:  99% (197/198)        
+remote: Compressing objects: 100% (198/198)        
+remote: Compressing objects: 100% (198/198), done.
+Receiving objects:   0% (1/271)
+Receiving objects:   1% (3/271)
+Receiving objects:   2% (6/271)
+Receiving objects:   3% (9/271)
+Receiving objects:   4% (11/271)
+Receiving objects:   5% (14/271)
+Receiving objects:   6% (17/271)
+Receiving objects:   7% (19/271)
+Receiving objects:   8% (22/271)
+Receiving objects:   9% (25/271)
+Receiving objects:  10% (28/271)
+Receiving objects:  11% (30/271)
+Receiving objects:  12% (33/271)
+Receiving objects:  13% (36/271)
+Receiving objects:  14% (38/271)
+Receiving objects:  15% (41/271)
+Receiving objects:  16% (44/271)
+Receiving objects:  17% (47/271)
+Receiving objects:  18% (49/271)
+Receiving objects:  19% (52/271)
+Receiving objects:  20% (55/271)
+Receiving objects:  21% (57/271)
+Receiving objects:  22% (60/271)
+Receiving objects:  23% (63/271)
+Receiving objects:  24% (66/271)
+Receiving objects:  25% (68/271)
+Receiving objects:  26% (71/271)
+Receiving objects:  27% (74/271)
+Receiving objects:  28% (76/271)
+Receiving objects:  29% (79/271)
+Receiving objects:  30% (82/271)
+Receiving objects:  31% (85/271)
+Receiving objects:  32% (87/271)
+Receiving objects:  33% (90/271)
+Receiving objects:  34% (93/271)
+Receiving objects:  35% (95/271)
+Receiving objects:  36% (98/271)
+Receiving objects:  37% (101/271)
+Receiving objects:  38% (103/271)
+Receiving objects:  39% (106/271)
+Receiving objects:  40% (109/271)
+Receiving objects:  41% (112/271)
+Receiving objects:  42% (114/271)
+Receiving objects:  43% (117/271)
+Receiving objects:  44% (120/271)
+Receiving objects:  45% (122/271)
+Receiving objects:  46% (125/271)
+Receiving objects:  47% (128/271)
+Receiving objects:  48% (131/271)
+Receiving objects:  49% (133/271)
+Receiving objects:  50% (136/271)
+Receiving objects:  51% (139/271)
+Receiving objects:  52% (141/271)
+Receiving objects:  53% (144/271)
+Receiving objects:  54% (147/271)
+Receiving objects:  55% (150/271)
+Receiving objects:  56% (152/271)
+Receiving objects:  57% (155/271)
+Receiving objects:  58% (158/271)
+Receiving objects:  59% (160/271)
+Receiving objects:  60% (163/271)
+Receiving objects:  61% (166/271)
+Receiving objects:  62% (169/271)
+Receiving objects:  63% (171/271)
+Receiving objects:  64% (174/271)
+Receiving objects:  65% (177/271)
+Receiving objects:  66% (179/271)
+Receiving objects:  67% (182/271)
+Receiving objects:  68% (185/271)
+Receiving objects:  69% (187/271)
+Receiving objects:  70% (190/271)
+Receiving objects:  71% (193/271)
+remote: Total 271 (delta 52), reused 194 (delta 16), pack-reused 0 (from 0)
+Receiving objects:  72% (196/271)
+Receiving objects:  73% (198/271)
+Receiving objects:  74% (201/271)
+Receiving objects:  75% (204/271)
+Receiving objects:  76% (206/271)
+Receiving objects:  77% (209/271)
+Receiving objects:  78% (212/271)
+Receiving objects:  79% (215/271)
+Receiving objects:  80% (217/271)
+Receiving objects:  81% (220/271)
+Receiving objects:  82% (223/271)
+Receiving objects:  83% (225/271)
+Receiving objects:  84% (228/271)
+Receiving objects:  85% (231/271)
+Receiving objects:  86% (234/271)
+Receiving objects:  87% (236/271)
+Receiving objects:  88% (239/271)
+Receiving objects:  89% (242/271)
+Receiving objects:  90% (244/271)
+Receiving objects:  91% (247/271)
+Receiving objects:  92% (250/271)
+Receiving objects:  93% (253/271)
+Receiving objects:  94% (255/271)
+Receiving objects:  95% (258/271)
+Receiving objects:  96% (261/271)
+Receiving objects:  97% (263/271)
+Receiving objects:  98% (266/271)
+Receiving objects:  99% (269/271)
+Receiving objects: 100% (271/271)
+Receiving objects: 100% (271/271), 416.11 KiB | 6.40 MiB/s, done.
+Resolving deltas:   0% (0/52)
+Resolving deltas:   1% (1/52)
+Resolving deltas:   3% (2/52)
+Resolving deltas:   5% (3/52)
+Resolving deltas:   7% (4/52)
+Resolving deltas:   9% (5/52)
+Resolving deltas:  11% (6/52)
+Resolving deltas:  13% (7/52)
+Resolving deltas:  15% (8/52)
+Resolving deltas:  17% (9/52)
+Resolving deltas:  19% (10/52)
+Resolving deltas:  21% (11/52)
+Resolving deltas:  23% (12/52)
+Resolving deltas:  25% (13/52)
+Resolving deltas:  26% (14/52)
+Resolving deltas:  28% (15/52)
+Resolving deltas:  30% (16/52)
+Resolving deltas:  32% (17/52)
+Resolving deltas:  34% (18/52)
+Resolving deltas:  36% (19/52)
+Resolving deltas:  38% (20/52)
+Resolving deltas:  40% (21/52)
+Resolving deltas:  42% (22/52)
+Resolving deltas:  44% (23/52)
+Resolving deltas:  46% (24/52)
+Resolving deltas:  48% (25/52)
+Resolving deltas:  50% (26/52)
+Resolving deltas:  51% (27/52)
+Resolving deltas:  53% (28/52)
+Resolving deltas:  55% (29/52)
+Resolving deltas:  57% (30/52)
+Resolving deltas:  59% (31/52)
+Resolving deltas:  61% (32/52)
+Resolving deltas:  63% (33/52)
+Resolving deltas:  65% (34/52)
+Resolving deltas:  67% (35/52)
+Resolving deltas:  69% (36/52)
+Resolving deltas:  71% (37/52)
+Resolving deltas:  73% (38/52)
+Resolving deltas:  75% (39/52)
+Resolving deltas:  76% (40/52)
+Resolving deltas:  78% (41/52)
+Resolving deltas:  80% (42/52)
+Resolving deltas:  82% (43/52)
+Resolving deltas:  84% (44/52)
+Resolving deltas:  86% (45/52)
+Resolving deltas:  88% (46/52)
+Resolving deltas:  90% (47/52)
+Resolving deltas:  92% (48/52)
+Resolving deltas:  94% (49/52)
+Resolving deltas:  96% (50/52)
+Resolving deltas:  98% (51/52)
+Resolving deltas: 100% (52/52)
+Resolving deltas: 100% (52/52), done.
 Building techliferepair-repairapp-5z3xud
 #0 building with "default" instance using docker driver
 #1 [internal] load build definition from Dockerfile
 #1 transferring dockerfile: 2.14kB done
 #1 DONE 0.0s
 #2 [internal] load metadata for docker.io/library/node:20-slim
-#2 DONE 0.4s
+#2 DONE 0.7s
 #3 [internal] load .dockerignore
 #3 transferring context: 451B done
 #3 DONE 0.0s
 #4 [builder  1/11] FROM docker.io/library/node:20-slim@sha256:1b38aaddff63cd0d3a9b5b03863a71fd33ee62047dd2e915f494d96b4b9c18cc
 #4 DONE 0.0s
-#5 [internal] load build context
-#5 transferring context: 2.47MB 0.1s done
-#5 DONE 0.1s
-#6 [builder  7/11] RUN npm install --legacy-peer-deps
-#6 CACHED
-#7 [builder  8/11] RUN npm install lightningcss-linux-x64-gnu --save-optional || true
-#7 CACHED
-#8 [builder  4/11] COPY package*.json ./
-#8 CACHED
-#9 [builder  3/11] RUN apt-get update && apt-get install -y     openssl     python3     make     g++     && rm -rf /var/lib/apt/lists/*
-#9 CACHED
-#10 [builder  2/11] WORKDIR /app
-#10 CACHED
-#11 [builder  5/11] COPY prisma ./prisma/
-#11 CACHED
-#12 [builder  6/11] RUN rm -f package-lock.json
-#12 CACHED
-#13 [builder  9/11] RUN npx prisma generate
-#13 CACHED
-#14 [builder 10/11] COPY . .
-#14 DONE 0.1s
-#15 [builder 11/11] RUN npm run build
-#15 0.533
-#15 0.533 > repairappv2@0.1.0 build
-#15 0.533 > next build
-#15 0.533
-#15 1.695 ▲ Next.js 16.1.0 (Turbopack)
-#15 1.696 - Experiments (use with caution):
-#15 1.697   · serverActions
-#15 1.697
-#15 1.702 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-#15 1.793   Creating an optimized production build ...
-#15 30.44
-#15 30.44 > Build error occurred
-#15 30.45 Error: Turbopack build failed with 2 errors:
-#15 30.45 ./src/hooks/use-offline.ts:7:1
-#15 30.45 Export syncManager doesn't exist in target module
-#15 30.45 [0m [90m  5 |[39m
-#15 30.45  [90m  6 |[39m [36mimport[39m { useState[33m,[39m useEffect[33m,[39m useCallback } [36mfrom[39m [32m'react'[39m[33m;[39m
-#15 30.45 [31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { syncManager } [36mfrom[39m [32m'@/lib/offline'[39m[33m;[39m
-#15 30.45  [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
-#15 30.45  [90m  8 |[39m
-#15 30.45  [90m  9 |[39m [36minterface[39m [33mUseOfflineReturn[39m {
-#15 30.45  [90m 10 |[39m     isOnline[33m:[39m boolean[33m;[39m[0m
-#15 30.45
-#15 30.45 The export syncManager was not found in module [project]/src/lib/offline/index.ts [app-client] (ecmascript).
-#15 30.45 Did you mean to import offlineDB?
-#15 30.45 All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
-#15 30.45
-#15 30.45 Import traces:
-#15 30.45   Client Component Browser:
-#15 30.45     ./src/hooks/use-offline.ts [Client Component Browser]
-#15 30.45     ./src/hooks/index.ts [Client Component Browser]
-#15 30.45     ./src/app/(dashboard)/layout.tsx [Client Component Browser]
-#15 30.45     ./src/app/(dashboard)/layout.tsx [Server Component]
-#15 30.45
-#15 30.45   Client Component SSR:
-#15 30.45     ./src/hooks/use-offline.ts [Client Component SSR]
-#15 30.45     ./src/hooks/index.ts [Client Component SSR]
-#15 30.45     ./src/app/(dashboard)/layout.tsx [Client Component SSR]
-#15 30.45     ./src/app/(dashboard)/layout.tsx [Server Component]
-#15 30.45
-#15 30.45
-#15 30.45 ./src/hooks/use-offline.ts:7:1
-#15 30.45 Export syncManager doesn't exist in target module
-#15 30.45 [0m [90m  5 |[39m
-#15 30.45  [90m  6 |[39m [36mimport[39m { useState[33m,[39m useEffect[33m,[39m useCallback } [36mfrom[39m [32m'react'[39m[33m;[39m
-#15 30.45 [31m[1m>[22m[39m[90m  7 |[39m [36mimport[39m { syncManager } [36mfrom[39m [32m'@/lib/offline'[39m[33m;[39m
-#15 30.45  [90m    |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
-#15 30.45  [90m  8 |[39m
-#15 30.45  [90m  9 |[39m [36minterface[39m [33mUseOfflineReturn[39m {
-#15 30.45  [90m 10 |[39m     isOnline[33m:[39m boolean[33m;[39m[0m
-#15 30.45
-#15 30.45 The export syncManager was not found in module [project]/src/lib/offline/index.ts [app-ssr] (ecmascript).
-#15 30.45 Did you mean to import offlineDB?
-#15 30.45 All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
-#15 30.45
-#15 30.45 Import traces:
-#15 30.45   Client Component Browser:
-#15 30.45     ./src/hooks/use-offline.ts [Client Component Browser]
-#15 30.45     ./src/hooks/index.ts [Client Component Browser]
-#15 30.45     ./src/app/(dashboard)/layout.tsx [Client Component Browser]
-#15 30.45     ./src/app/(dashboard)/layout.tsx [Server Component]
-#15 30.45
-#15 30.45   Client Component SSR:
-#15 30.45     ./src/hooks/use-offline.ts [Client Component SSR]
-#15 30.45     ./src/hooks/index.ts [Client Component SSR]
-#15 30.45     ./src/app/(dashboard)/layout.tsx [Client Component SSR]
-#15 30.45     ./src/app/(dashboard)/layout.tsx [Server Component]
-#15 30.45
-#15 30.45
-#15 30.45     at <unknown> (./src/hooks/use-offline.ts:7:1)
-#15 30.45     at <unknown> (./src/hooks/use-offline.ts:7:1)
-#15 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+#5 [builder  2/11] WORKDIR /app
+#5 CACHED
+#6 [internal] load build context
+#6 transferring context: 1.70MB 0.1s done
+#6 DONE 0.5s
+#7 [runner 3/8] RUN apt-get update && apt-get install -y openssl curl && rm -rf /var/lib/apt/lists/*
+#7 1.031 Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+#7 1.054 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+#7 1.054 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
+#7 1.215 Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8791 kB]
+#7 1.853 Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+#7 1.854 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [290 kB]
+#7 3.104 Fetched 9342 kB in 2s (4491 kB/s)
+#7 3.104 Reading package lists...
+#7 4.284 Reading package lists...
+#7 5.317 Building dependency tree...
+#7 5.656 Reading state information...
+#7 6.118 The following additional packages will be installed:
+#7 6.119   ca-certificates krb5-locales libbrotli1 libcurl4 libgssapi-krb5-2
+#7 6.119   libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 libldap-2.5-0
+#7 6.119   libldap-common libnghttp2-14 libpsl5 librtmp1 libsasl2-2 libsasl2-modules
+#7 6.120   libsasl2-modules-db libssh2-1 libssl3 publicsuffix
+#7 6.123 Suggested packages:
+#7 6.123   krb5-doc krb5-user libsasl2-modules-gssapi-mit
+#7 6.123   | libsasl2-modules-gssapi-heimdal libsasl2-modules-ldap libsasl2-modules-otp
+#7 6.123   libsasl2-modules-sql
+#7 6.422 The following NEW packages will be installed:
+#7 6.423   ca-certificates curl krb5-locales libbrotli1 libcurl4 libgssapi-krb5-2
+#7 6.423   libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 libldap-2.5-0
+#7 6.424   libldap-common libnghttp2-14 libpsl5 librtmp1 libsasl2-2 libsasl2-modules
+#7 6.425   libsasl2-modules-db libssh2-1 libssl3 openssl publicsuffix
+#7 6.499 0 upgraded, 22 newly installed, 0 to remove and 0 not upgraded.
+#7 6.499 Need to get 6111 kB of archives.
+#7 6.499 After this operation, 15.7 MB of additional disk space will be used.
+#7 6.499 Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libssl3 amd64 3.0.17-1~deb12u3 [2028 kB]
+#7 6.629 Get:2 http://deb.debian.org/debian-security bookworm-security/main amd64 openssl amd64 3.0.17-1~deb12u3 [1434 kB]
+#7 6.687 Get:3 http://deb.debian.org/debian bookworm/main amd64 ca-certificates all 20230311+deb12u1 [155 kB]
+#7 6.693 Get:4 http://deb.debian.org/debian bookworm/main amd64 krb5-locales all 1.20.1-2+deb12u4 [63.4 kB]
+#7 6.696 Get:5 http://deb.debian.org/debian bookworm/main amd64 libbrotli1 amd64 1.0.9-2+b6 [275 kB]
+#7 6.706 Get:6 http://deb.debian.org/debian bookworm/main amd64 libkrb5support0 amd64 1.20.1-2+deb12u4 [33.2 kB]
+#7 6.708 Get:7 http://deb.debian.org/debian bookworm/main amd64 libk5crypto3 amd64 1.20.1-2+deb12u4 [79.8 kB]
+#7 6.710 Get:8 http://deb.debian.org/debian bookworm/main amd64 libkeyutils1 amd64 1.6.3-2 [8808 B]
+#7 6.711 Get:9 http://deb.debian.org/debian bookworm/main amd64 libkrb5-3 amd64 1.20.1-2+deb12u4 [334 kB]
+#7 6.724 Get:10 http://deb.debian.org/debian bookworm/main amd64 libgssapi-krb5-2 amd64 1.20.1-2+deb12u4 [135 kB]
+#7 6.732 Get:11 http://deb.debian.org/debian bookworm/main amd64 libsasl2-modules-db amd64 2.1.28+dfsg-10 [20.3 kB]
+#7 6.732 Get:12 http://deb.debian.org/debian bookworm/main amd64 libsasl2-2 amd64 2.1.28+dfsg-10 [59.7 kB]
+#7 6.740 Get:13 http://deb.debian.org/debian bookworm/main amd64 libldap-2.5-0 amd64 2.5.13+dfsg-5 [183 kB]
+#7 6.748 Get:14 http://deb.debian.org/debian bookworm/main amd64 libnghttp2-14 amd64 1.52.0-1+deb12u2 [73.0 kB]
+#7 6.750 Get:15 http://deb.debian.org/debian bookworm/main amd64 libpsl5 amd64 0.21.2-1 [58.7 kB]
+#7 6.753 Get:16 http://deb.debian.org/debian bookworm/main amd64 librtmp1 amd64 2.4+20151223.gitfa8646d.1-2+b2 [60.8 kB]
+#7 6.755 Get:17 http://deb.debian.org/debian bookworm/main amd64 libssh2-1 amd64 1.10.0-3+b1 [179 kB]
+#7 6.763 Get:18 http://deb.debian.org/debian bookworm/main amd64 libcurl4 amd64 7.88.1-10+deb12u14 [392 kB]
+#7 6.778 Get:19 http://deb.debian.org/debian bookworm/main amd64 curl amd64 7.88.1-10+deb12u14 [316 kB]
+#7 6.791 Get:20 http://deb.debian.org/debian bookworm/main amd64 libldap-common all 2.5.13+dfsg-5 [29.3 kB]
+#7 6.791 Get:21 http://deb.debian.org/debian bookworm/main amd64 libsasl2-modules amd64 2.1.28+dfsg-10 [66.6 kB]
+#7 6.794 Get:22 http://deb.debian.org/debian bookworm/main amd64 publicsuffix all 20230209.2326-1 [126 kB]
+#7 7.093 debconf: delaying package configuration, since apt-utils is not installed
+#7 7.179 Fetched 6111 kB in 0s (17.6 MB/s)
+#7 7.241 Selecting previously unselected package libssl3:amd64.
+#7 7.241 (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 6095 files and directories currently installed.)
+#7 7.258 Preparing to unpack .../00-libssl3_3.0.17-1~deb12u3_amd64.deb ...
+#7 7.269 Unpacking libssl3:amd64 (3.0.17-1~deb12u3) ...
+#7 7.498 Selecting previously unselected package openssl.
+#7 7.500 Preparing to unpack .../01-openssl_3.0.17-1~deb12u3_amd64.deb ...
+#7 7.503 Unpacking openssl (3.0.17-1~deb12u3) ...
+#7 7.740 Selecting previously unselected package ca-certificates.
+#7 7.742 Preparing to unpack .../02-ca-certificates_20230311+deb12u1_all.deb ...
+#7 7.749 Unpacking ca-certificates (20230311+deb12u1) ...
+#7 7.871 Selecting previously unselected package krb5-locales.
+#7 7.873 Preparing to unpack .../03-krb5-locales_1.20.1-2+deb12u4_all.deb ...
+#7 7.879 Unpacking krb5-locales (1.20.1-2+deb12u4) ...
+#7 7.943 Selecting previously unselected package libbrotli1:amd64.
+#7 7.945 Preparing to unpack .../04-libbrotli1_1.0.9-2+b6_amd64.deb ...
+#7 7.951 Unpacking libbrotli1:amd64 (1.0.9-2+b6) ...
+#7 8.047 Selecting previously unselected package libkrb5support0:amd64.
+#7 8.048 Preparing to unpack .../05-libkrb5support0_1.20.1-2+deb12u4_amd64.deb ...
+#7 8.054 Unpacking libkrb5support0:amd64 (1.20.1-2+deb12u4) ...
+#7 8.136 Selecting previously unselected package libk5crypto3:amd64.
+#7 8.137 Preparing to unpack .../06-libk5crypto3_1.20.1-2+deb12u4_amd64.deb ...
+#7 8.144 Unpacking libk5crypto3:amd64 (1.20.1-2+deb12u4) ...
+#7 8.254 Selecting previously unselected package libkeyutils1:amd64.
+#7 8.254 Preparing to unpack .../07-libkeyutils1_1.6.3-2_amd64.deb ...
+#7 8.265 Unpacking libkeyutils1:amd64 (1.6.3-2) ...
+#7 8.334 Selecting previously unselected package libkrb5-3:amd64.
+#7 8.334 Preparing to unpack .../08-libkrb5-3_1.20.1-2+deb12u4_amd64.deb ...
+#7 8.343 Unpacking libkrb5-3:amd64 (1.20.1-2+deb12u4) ...
+#7 8.473 Selecting previously unselected package libgssapi-krb5-2:amd64.
+#7 8.473 Preparing to unpack .../09-libgssapi-krb5-2_1.20.1-2+deb12u4_amd64.deb ...
+#7 8.481 Unpacking libgssapi-krb5-2:amd64 (1.20.1-2+deb12u4) ...
+#7 8.547 Selecting previously unselected package libsasl2-modules-db:amd64.
+#7 8.551 Preparing to unpack .../10-libsasl2-modules-db_2.1.28+dfsg-10_amd64.deb ...
+#7 8.556 Unpacking libsasl2-modules-db:amd64 (2.1.28+dfsg-10) ...
+#7 8.614 Selecting previously unselected package libsasl2-2:amd64.
+#7 8.615 Preparing to unpack .../11-libsasl2-2_2.1.28+dfsg-10_amd64.deb ...
+#7 8.624 Unpacking libsasl2-2:amd64 (2.1.28+dfsg-10) ...
+#7 8.693 Selecting previously unselected package libldap-2.5-0:amd64.
+#7 8.695 Preparing to unpack .../12-libldap-2.5-0_2.5.13+dfsg-5_amd64.deb ...
+#7 8.706 Unpacking libldap-2.5-0:amd64 (2.5.13+dfsg-5) ...
+#7 8.830 Selecting previously unselected package libnghttp2-14:amd64.
+#7 8.832 Preparing to unpack .../13-libnghttp2-14_1.52.0-1+deb12u2_amd64.deb ...
+#7 8.840 Unpacking libnghttp2-14:amd64 (1.52.0-1+deb12u2) ...
+#7 8.922 Selecting previously unselected package libpsl5:amd64.
+#7 8.924 Preparing to unpack .../14-libpsl5_0.21.2-1_amd64.deb ...
+#7 8.935 Unpacking libpsl5:amd64 (0.21.2-1) ...
+#7 9.007 Selecting previously unselected package librtmp1:amd64.
+#7 9.010 Preparing to unpack .../15-librtmp1_2.4+20151223.gitfa8646d.1-2+b2_amd64.deb ...
+#7 9.016 Unpacking librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2+b2) ...
+#7 9.079 Selecting previously unselected package libssh2-1:amd64.
+#7 9.081 Preparing to unpack .../16-libssh2-1_1.10.0-3+b1_amd64.deb ...
+#7 9.092 Unpacking libssh2-1:amd64 (1.10.0-3+b1) ...
+#7 9.166 Selecting previously unselected package libcurl4:amd64.
+#7 9.169 Preparing to unpack .../17-libcurl4_7.88.1-10+deb12u14_amd64.deb ...
+#7 9.172 Unpacking libcurl4:amd64 (7.88.1-10+deb12u14) ...
+#7 9.252 Selecting previously unselected package curl.
+#7 9.252 Preparing to unpack .../18-curl_7.88.1-10+deb12u14_amd64.deb ...
+#7 9.257 Unpacking curl (7.88.1-10+deb12u14) ...
+#7 9.327 Selecting previously unselected package libldap-common.
+#7 9.329 Preparing to unpack .../19-libldap-common_2.5.13+dfsg-5_all.deb ...
+#7 9.333 Unpacking libldap-common (2.5.13+dfsg-5) ...
+#7 9.408 Selecting previously unselected package libsasl2-modules:amd64.
+#7 9.411 Preparing to unpack .../20-libsasl2-modules_2.1.28+dfsg-10_amd64.deb ...
+#7 9.439 Unpacking libsasl2-modules:amd64 (2.1.28+dfsg-10) ...
+#7 9.540 Selecting previously unselected package publicsuffix.
+#7 9.543 Preparing to unpack .../21-publicsuffix_20230209.2326-1_all.deb ...
+#7 9.549 Unpacking publicsuffix (20230209.2326-1) ...
+#7 9.660 Setting up libkeyutils1:amd64 (1.6.3-2) ...
+#7 9.686 Setting up libpsl5:amd64 (0.21.2-1) ...
+#7 9.705 Setting up libbrotli1:amd64 (1.0.9-2+b6) ...
+#7 9.720 Setting up libssl3:amd64 (3.0.17-1~deb12u3) ...
+#7 9.755 Setting up libnghttp2-14:amd64 (1.52.0-1+deb12u2) ...
+#7 9.785 Setting up krb5-locales (1.20.1-2+deb12u4) ...
+#7 9.800 Setting up libldap-common (2.5.13+dfsg-5) ...
+#7 9.826 Setting up libkrb5support0:amd64 (1.20.1-2+deb12u4) ...
+#7 9.845 Setting up libsasl2-modules-db:amd64 (2.1.28+dfsg-10) ...
+#7 9.864 Setting up librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2+b2) ...
+#7 9.880 Setting up libk5crypto3:amd64 (1.20.1-2+deb12u4) ...
+#7 9.900 Setting up libsasl2-2:amd64 (2.1.28+dfsg-10) ...
+#7 9.915 Setting up libssh2-1:amd64 (1.10.0-3+b1) ...
+#7 9.924 Setting up libkrb5-3:amd64 (1.20.1-2+deb12u4) ...
+#7 9.942 Setting up openssl (3.0.17-1~deb12u3) ...
+#7 9.966 Setting up publicsuffix (20230209.2326-1) ...
+#7 9.985 Setting up libsasl2-modules:amd64 (2.1.28+dfsg-10) ...
+#7 10.02 Setting up libldap-2.5-0:amd64 (2.5.13+dfsg-5) ...
+#7 10.04 Setting up ca-certificates (20230311+deb12u1) ...
+#7 ...
+#8 [builder  3/11] RUN apt-get update && apt-get install -y     openssl     python3     make     g++     && rm -rf /var/lib/apt/lists/*
+#8 1.039 Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+#8 1.069 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+#8 1.070 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
+#8 1.246 Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8791 kB]
+#8 1.952 Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+#8 1.953 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [290 kB]
+#8 3.216 Fetched 9342 kB in 2s (4268 kB/s)
+#8 3.216 Reading package lists...
+#8 4.383 Reading package lists...
+#8 5.451 Building dependency tree...
+#8 5.776 Reading state information...
+#8 6.289 The following additional packages will be installed:
+#8 6.289   binutils binutils-common binutils-x86-64-linux-gnu ca-certificates cpp
+#8 6.290   cpp-12 fontconfig-config fonts-dejavu-core g++-12 gcc gcc-12 krb5-locales
+#8 6.290   libabsl20220623 libaom3 libasan8 libatomic1 libavif15 libbinutils libbrotli1
+#8 6.290   libbsd0 libc-dev-bin libc-devtools libc6-dev libcc1-0 libcrypt-dev
+#8 6.290   libctf-nobfd0 libctf0 libdav1d6 libde265-0 libdeflate0 libexpat1
+#8 6.290   libfontconfig1 libfreetype6 libgav1-1 libgcc-12-dev libgd3 libgomp1 libgpm2
+#8 6.290   libgprofng0 libgssapi-krb5-2 libheif1 libisl23 libitm1 libjansson4 libjbig0
+#8 6.290   libjpeg62-turbo libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 liblerc4
+#8 6.290   liblsan0 libmpc3 libmpfr6 libncursesw6 libnsl-dev libnsl2 libnuma1
+#8 6.290   libpng16-16 libpython3-stdlib libpython3.11-minimal libpython3.11-stdlib
+#8 6.290   libquadmath0 librav1e0 libreadline8 libsqlite3-0 libssl3 libstdc++-12-dev
+#8 6.290   libsvtav1enc1 libtiff6 libtirpc-common libtirpc-dev libtirpc3 libtsan2
+#8 6.290   libubsan1 libwebp7 libx11-6 libx11-data libx265-199 libxau6 libxcb1
+#8 6.293   libxdmcp6 libxpm4 libyuv0 linux-libc-dev manpages manpages-dev media-types
+#8 6.293   python3-minimal python3.11 python3.11-minimal readline-common rpcsvc-proto
+#8 6.296 Suggested packages:
+#8 6.296   binutils-doc cpp-doc gcc-12-locales cpp-12-doc g++-multilib g++-12-multilib
+#8 6.296   gcc-12-doc gcc-multilib autoconf automake libtool flex bison gdb gcc-doc
+#8 6.296   gcc-12-multilib glibc-doc libgd-tools gpm krb5-doc krb5-user
+#8 6.296   libstdc++-12-doc make-doc man-browser python3-doc python3-tk python3-venv
+#8 6.296   python3.11-venv python3.11-doc binfmt-support readline-doc
+#8 6.991 The following NEW packages will be installed:
+#8 6.991   binutils binutils-common binutils-x86-64-linux-gnu ca-certificates cpp
+#8 6.992   cpp-12 fontconfig-config fonts-dejavu-core g++ g++-12 gcc gcc-12
+#8 6.992   krb5-locales libabsl20220623 libaom3 libasan8 libatomic1 libavif15
+#8 6.992   libbinutils libbrotli1 libbsd0 libc-dev-bin libc-devtools libc6-dev libcc1-0
+#8 6.992   libcrypt-dev libctf-nobfd0 libctf0 libdav1d6 libde265-0 libdeflate0
+#8 6.992   libexpat1 libfontconfig1 libfreetype6 libgav1-1 libgcc-12-dev libgd3
+#8 6.992   libgomp1 libgpm2 libgprofng0 libgssapi-krb5-2 libheif1 libisl23 libitm1
+#8 6.992   libjansson4 libjbig0 libjpeg62-turbo libk5crypto3 libkeyutils1 libkrb5-3
+#8 6.992   libkrb5support0 liblerc4 liblsan0 libmpc3 libmpfr6 libncursesw6 libnsl-dev
+#8 6.992   libnsl2 libnuma1 libpng16-16 libpython3-stdlib libpython3.11-minimal
+#8 6.992   libpython3.11-stdlib libquadmath0 librav1e0 libreadline8 libsqlite3-0
+#8 6.992   libssl3 libstdc++-12-dev libsvtav1enc1 libtiff6 libtirpc-common libtirpc-dev
+#8 6.992   libtirpc3 libtsan2 libubsan1 libwebp7 libx11-6 libx11-data libx265-199
+#8 6.993   libxau6 libxcb1 libxdmcp6 libxpm4 libyuv0 linux-libc-dev make manpages
+#8 6.993   manpages-dev media-types openssl python3 python3-minimal python3.11
+#8 6.993   python3.11-minimal readline-common rpcsvc-proto
+#8 7.093 0 upgraded, 97 newly installed, 0 to remove and 0 not upgraded.
+#8 7.093 Need to get 91.3 MB of archives.
+#8 7.093 After this operation, 354 MB of additional disk space will be used.
+#8 7.093 Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libssl3 amd64 3.0.17-1~deb12u3 [2028 kB]
+#8 7.180 Get:2 http://deb.debian.org/debian bookworm/main amd64 libpython3.11-minimal amd64 3.11.2-6+deb12u6 [817 kB]
+#8 7.214 Get:3 http://deb.debian.org/debian bookworm/main amd64 libexpat1 amd64 2.5.0-1+deb12u2 [99.9 kB]
+#8 7.217 Get:4 http://deb.debian.org/debian bookworm/main amd64 python3.11-minimal amd64 3.11.2-6+deb12u6 [2064 kB]
+#8 7.301 Get:5 http://deb.debian.org/debian bookworm/main amd64 python3-minimal amd64 3.11.2-1+b1 [26.3 kB]
+#8 7.302 Get:6 http://deb.debian.org/debian bookworm/main amd64 media-types all 10.0.0 [26.1 kB]
+#8 7.304 Get:7 http://deb.debian.org/debian bookworm/main amd64 libncursesw6 amd64 6.4-4 [134 kB]
+#8 7.307 Get:8 http://deb.debian.org/debian bookworm/main amd64 libkrb5support0 amd64 1.20.1-2+deb12u4 [33.2 kB]
+#8 7.308 Get:9 http://deb.debian.org/debian bookworm/main amd64 libk5crypto3 amd64 1.20.1-2+deb12u4 [79.8 kB]
+#8 7.311 Get:10 http://deb.debian.org/debian bookworm/main amd64 libkeyutils1 amd64 1.6.3-2 [8808 B]
+#8 7.313 Get:11 http://deb.debian.org/debian bookworm/main amd64 libkrb5-3 amd64 1.20.1-2+deb12u4 [334 kB]
+#8 7.326 Get:12 http://deb.debian.org/debian bookworm/main amd64 libgssapi-krb5-2 amd64 1.20.1-2+deb12u4 [135 kB]
+#8 7.331 Get:13 http://deb.debian.org/debian bookworm/main amd64 libtirpc-common all 1.3.3+ds-1 [14.0 kB]
+#8 7.333 Get:14 http://deb.debian.org/debian bookworm/main amd64 libtirpc3 amd64 1.3.3+ds-1 [85.2 kB]
+#8 7.335 Get:15 http://deb.debian.org/debian bookworm/main amd64 libnsl2 amd64 1.3.0-2 [39.5 kB]
+#8 7.336 Get:16 http://deb.debian.org/debian bookworm/main amd64 readline-common all 8.2-1.3 [69.0 kB]
+#8 7.339 Get:17 http://deb.debian.org/debian bookworm/main amd64 libreadline8 amd64 8.2-1.3 [166 kB]
+#8 7.346 Get:18 http://deb.debian.org/debian bookworm/main amd64 libsqlite3-0 amd64 3.40.1-2+deb12u2 [839 kB]
+#8 7.379 Get:19 http://deb.debian.org/debian bookworm/main amd64 libpython3.11-stdlib amd64 3.11.2-6+deb12u6 [1798 kB]
+#8 7.453 Get:20 http://deb.debian.org/debian bookworm/main amd64 python3.11 amd64 3.11.2-6+deb12u6 [573 kB]
+#8 7.476 Get:21 http://deb.debian.org/debian bookworm/main amd64 libpython3-stdlib amd64 3.11.2-1+b1 [9312 B]
+#8 7.477 Get:22 http://deb.debian.org/debian bookworm/main amd64 python3 amd64 3.11.2-1+b1 [26.3 kB]
+#8 7.477 Get:23 http://deb.debian.org/debian-security bookworm-security/main amd64 openssl amd64 3.0.17-1~deb12u3 [1434 kB]
+#8 7.534 Get:24 http://deb.debian.org/debian bookworm/main amd64 ca-certificates all 20230311+deb12u1 [155 kB]
+#8 7.539 Get:25 http://deb.debian.org/debian bookworm/main amd64 krb5-locales all 1.20.1-2+deb12u4 [63.4 kB]
+#8 7.542 Get:26 http://deb.debian.org/debian bookworm/main amd64 manpages all 6.03-2 [1332 kB]
+#8 7.595 Get:27 http://deb.debian.org/debian bookworm/main amd64 binutils-common amd64 2.40-2 [2487 kB]
+#8 7.695 Get:28 http://deb.debian.org/debian bookworm/main amd64 libbinutils amd64 2.40-2 [572 kB]
+#8 7.720 Get:29 http://deb.debian.org/debian bookworm/main amd64 libctf-nobfd0 amd64 2.40-2 [153 kB]
+#8 7.726 Get:30 http://deb.debian.org/debian bookworm/main amd64 libctf0 amd64 2.40-2 [89.8 kB]
+#8 7.730 Get:31 http://deb.debian.org/debian bookworm/main amd64 libgprofng0 amd64 2.40-2 [812 kB]
+#8 7.776 Get:32 http://deb.debian.org/debian bookworm/main amd64 libjansson4 amd64 2.14-2 [40.8 kB]
+#8 7.779 Get:33 http://deb.debian.org/debian bookworm/main amd64 binutils-x86-64-linux-gnu amd64 2.40-2 [2246 kB]
+#8 7.855 Get:34 http://deb.debian.org/debian bookworm/main amd64 binutils amd64 2.40-2 [65.0 kB]
+#8 7.857 Get:35 http://deb.debian.org/debian bookworm/main amd64 libisl23 amd64 0.25-1.1 [683 kB]
+#8 7.884 Get:36 http://deb.debian.org/debian bookworm/main amd64 libmpfr6 amd64 4.2.0-1 [701 kB]
+#8 7.912 Get:37 http://deb.debian.org/debian bookworm/main amd64 libmpc3 amd64 1.3.1-1 [51.5 kB]
+#8 7.914 Get:38 http://deb.debian.org/debian bookworm/main amd64 cpp-12 amd64 12.2.0-14+deb12u1 [9768 kB]
+#8 8.311 Get:39 http://deb.debian.org/debian bookworm/main amd64 cpp amd64 4:12.2.0-3 [6836 B]
+#8 8.312 Get:40 http://deb.debian.org/debian bookworm/main amd64 fonts-dejavu-core all 2.37-6 [1068 kB]
+#8 8.348 Get:41 http://deb.debian.org/debian bookworm/main amd64 fontconfig-config amd64 2.14.1-4 [315 kB]
+#8 8.360 Get:42 http://deb.debian.org/debian bookworm/main amd64 libcc1-0 amd64 12.2.0-14+deb12u1 [41.7 kB]
+#8 8.361 Get:43 http://deb.debian.org/debian bookworm/main amd64 libgomp1 amd64 12.2.0-14+deb12u1 [116 kB]
+#8 8.367 Get:44 http://deb.debian.org/debian bookworm/main amd64 libitm1 amd64 12.2.0-14+deb12u1 [26.1 kB]
+#8 8.367 Get:45 http://deb.debian.org/debian bookworm/main amd64 libatomic1 amd64 12.2.0-14+deb12u1 [9376 B]
+#8 8.367 Get:46 http://deb.debian.org/debian bookworm/main amd64 libasan8 amd64 12.2.0-14+deb12u1 [2193 kB]
+#8 8.456 Get:47 http://deb.debian.org/debian bookworm/main amd64 liblsan0 amd64 12.2.0-14+deb12u1 [969 kB]
+#8 8.494 Get:48 http://deb.debian.org/debian bookworm/main amd64 libtsan2 amd64 12.2.0-14+deb12u1 [2197 kB]
+#8 8.583 Get:49 http://deb.debian.org/debian bookworm/main amd64 libubsan1 amd64 12.2.0-14+deb12u1 [883 kB]
+#8 8.616 Get:50 http://deb.debian.org/debian bookworm/main amd64 libquadmath0 amd64 12.2.0-14+deb12u1 [145 kB]
+#8 8.622 Get:51 http://deb.debian.org/debian bookworm/main amd64 libgcc-12-dev amd64 12.2.0-14+deb12u1 [2437 kB]
+#8 8.720 Get:52 http://deb.debian.org/debian bookworm/main amd64 gcc-12 amd64 12.2.0-14+deb12u1 [19.3 MB]
+#8 9.502 Get:53 http://deb.debian.org/debian bookworm/main amd64 gcc amd64 4:12.2.0-3 [5216 B]
+#8 9.505 Get:54 http://deb.debian.org/debian bookworm/main amd64 libc-dev-bin amd64 2.36-9+deb12u13 [47.4 kB]
+#8 9.507 Get:55 http://deb.debian.org/debian-security bookworm-security/main amd64 linux-libc-dev amd64 6.1.158-1 [2204 kB]
+#8 9.598 Get:56 http://deb.debian.org/debian bookworm/main amd64 libcrypt-dev amd64 1:4.4.33-2 [118 kB]
+#8 9.599 Get:57 http://deb.debian.org/debian bookworm/main amd64 libtirpc-dev amd64 1.3.3+ds-1 [191 kB]
+#8 9.600 Get:58 http://deb.debian.org/debian bookworm/main amd64 libnsl-dev amd64 1.3.0-2 [66.4 kB]
+#8 9.603 Get:59 http://deb.debian.org/debian bookworm/main amd64 rpcsvc-proto amd64 1.4.3-1 [63.3 kB]
+#8 9.607 Get:60 http://deb.debian.org/debian bookworm/main amd64 libc6-dev amd64 2.36-9+deb12u13 [1904 kB]
+#8 9.679 Get:61 http://deb.debian.org/debian bookworm/main amd64 libstdc++-12-dev amd64 12.2.0-14+deb12u1 [2047 kB]
+#8 9.765 Get:62 http://deb.debian.org/debian bookworm/main amd64 g++-12 amd64 12.2.0-14+deb12u1 [10.7 MB]
+#8 10.19 Get:63 http://deb.debian.org/debian bookworm/main amd64 g++ amd64 4:12.2.0-3 [1356 B]
+#8 10.20 Get:64 http://deb.debian.org/debian bookworm/main amd64 libabsl20220623 amd64 20220623.1-1+deb12u2 [391 kB]
+#8 10.20 Get:65 http://deb.debian.org/debian bookworm/main amd64 libaom3 amd64 3.6.0-1+deb12u2 [1850 kB]
+#8 10.28 Get:66 http://deb.debian.org/debian bookworm/main amd64 libdav1d6 amd64 1.0.0-2+deb12u1 [513 kB]
+#8 10.30 Get:67 http://deb.debian.org/debian bookworm/main amd64 libgav1-1 amd64 0.18.0-1+b1 [332 kB]
+#8 ...
+#7 [runner 3/8] RUN apt-get update && apt-get install -y openssl curl && rm -rf /var/lib/apt/lists/*
+#7 10.20 debconf: unable to initialize frontend: Dialog
+#7 10.20 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#7 10.20 debconf: falling back to frontend: Readline
+#7 10.20 debconf: unable to initialize frontend: Readline
+#7 10.20 debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.36.0 /usr/local/share/perl/5.36.0 /usr/lib/x86_64-linux-gnu/perl5/5.36 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl-base /usr/lib/x86_64-linux-gnu/perl/5.36 /usr/share/perl/5.36 /usr/local/lib/site_perl) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 7.)
+#7 10.20 debconf: falling back to frontend: Teletype
+#7 11.21 Updating certificates in /etc/ssl/certs...
+#7 12.50 142 added, 0 removed; done.
+#7 12.53 Setting up libgssapi-krb5-2:amd64 (1.20.1-2+deb12u4) ...
+#7 12.55 Setting up libcurl4:amd64 (7.88.1-10+deb12u14) ...
+#7 12.55 Setting up curl (7.88.1-10+deb12u14) ...
+#7 12.57 Processing triggers for libc-bin (2.36-9+deb12u13) ...
+#7 12.60 Processing triggers for ca-certificates (20230311+deb12u1) ...
+#7 12.61 Updating certificates in /etc/ssl/certs...
+#7 13.67 0 added, 0 removed; done.
+#7 13.67 Running hooks in /etc/ca-certificates/update.d...
+#7 13.68 done.
+#7 DONE 13.8s
+#8 [builder  3/11] RUN apt-get update && apt-get install -y     openssl     python3     make     g++     && rm -rf /var/lib/apt/lists/*
+#8 10.31 Get:68 http://deb.debian.org/debian bookworm/main amd64 librav1e0 amd64 0.5.1-6 [763 kB]
+#8 10.34 Get:69 http://deb.debian.org/debian bookworm/main amd64 libsvtav1enc1 amd64 1.4.1+dfsg-1 [2121 kB]
+#8 10.43 Get:70 http://deb.debian.org/debian bookworm/main amd64 libjpeg62-turbo amd64 1:2.1.5-2 [166 kB]
+#8 10.43 Get:71 http://deb.debian.org/debian bookworm/main amd64 libyuv0 amd64 0.0~git20230123.b2528b0-1 [168 kB]
+#8 10.44 Get:72 http://deb.debian.org/debian bookworm/main amd64 libavif15 amd64 0.11.1-1+deb12u1 [94.4 kB]
+#8 10.44 Get:73 http://deb.debian.org/debian bookworm/main amd64 libbrotli1 amd64 1.0.9-2+b6 [275 kB]
+#8 10.45 Get:74 http://deb.debian.org/debian bookworm/main amd64 libbsd0 amd64 0.11.7-2 [117 kB]
+#8 10.46 Get:75 http://deb.debian.org/debian-security bookworm-security/main amd64 libpng16-16 amd64 1.6.39-2+deb12u1 [276 kB]
+#8 10.47 Get:76 http://deb.debian.org/debian bookworm/main amd64 libfreetype6 amd64 2.12.1+dfsg-5+deb12u4 [398 kB]
+#8 10.49 Get:77 http://deb.debian.org/debian bookworm/main amd64 libfontconfig1 amd64 2.14.1-4 [386 kB]
+#8 10.50 Get:78 http://deb.debian.org/debian bookworm/main amd64 libde265-0 amd64 1.0.11-1+deb12u2 [185 kB]
+#8 10.51 Get:79 http://deb.debian.org/debian bookworm/main amd64 libnuma1 amd64 2.0.16-1 [21.0 kB]
+#8 10.51 Get:80 http://deb.debian.org/debian bookworm/main amd64 libx265-199 amd64 3.5-2+b1 [1150 kB]
+#8 10.56 Get:81 http://deb.debian.org/debian bookworm/main amd64 libheif1 amd64 1.15.1-1+deb12u1 [215 kB]
+#8 10.57 Get:82 http://deb.debian.org/debian bookworm/main amd64 libdeflate0 amd64 1.14-1 [61.4 kB]
+#8 10.58 Get:83 http://deb.debian.org/debian bookworm/main amd64 libjbig0 amd64 2.1-6.1 [31.7 kB]
+#8 10.58 Get:84 http://deb.debian.org/debian bookworm/main amd64 liblerc4 amd64 4.0.0+ds-2 [170 kB]
+#8 10.59 Get:85 http://deb.debian.org/debian bookworm/main amd64 libwebp7 amd64 1.2.4-0.2+deb12u1 [286 kB]
+#8 10.59 Get:86 http://deb.debian.org/debian-security bookworm-security/main amd64 libtiff6 amd64 4.5.0-6+deb12u3 [316 kB]
+#8 10.60 Get:87 http://deb.debian.org/debian bookworm/main amd64 libxau6 amd64 1:1.0.9-1 [19.7 kB]
+#8 10.60 Get:88 http://deb.debian.org/debian bookworm/main amd64 libxdmcp6 amd64 1:1.1.2-3 [26.3 kB]
+#8 10.60 Get:89 http://deb.debian.org/debian bookworm/main amd64 libxcb1 amd64 1.15-1 [144 kB]
+#8 10.61 Get:90 http://deb.debian.org/debian bookworm/main amd64 libx11-data all 2:1.8.4-2+deb12u2 [292 kB]
+#8 10.62 Get:91 http://deb.debian.org/debian bookworm/main amd64 libx11-6 amd64 2:1.8.4-2+deb12u2 [760 kB]
+#8 10.65 Get:92 http://deb.debian.org/debian bookworm/main amd64 libxpm4 amd64 1:3.5.12-1.1+deb12u1 [48.6 kB]
+#8 10.65 Get:93 http://deb.debian.org/debian bookworm/main amd64 libgd3 amd64 2.3.3-9 [124 kB]
+#8 10.66 Get:94 http://deb.debian.org/debian bookworm/main amd64 libc-devtools amd64 2.36-9+deb12u13 [55.0 kB]
+#8 10.66 Get:95 http://deb.debian.org/debian bookworm/main amd64 libgpm2 amd64 1.20.7-10+b1 [14.2 kB]
+#8 10.66 Get:96 http://deb.debian.org/debian bookworm/main amd64 make amd64 4.3-4.1 [396 kB]
+#8 10.68 Get:97 http://deb.debian.org/debian bookworm/main amd64 manpages-dev all 6.03-2 [2030 kB]
+#8 11.04 debconf: delaying package configuration, since apt-utils is not installed
+#8 11.12 Fetched 91.3 MB in 4s (24.6 MB/s)
+#8 11.18 Selecting previously unselected package libssl3:amd64.
+#8 11.18 (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 6095 files and directories currently installed.)
+#8 11.19 Preparing to unpack .../libssl3_3.0.17-1~deb12u3_amd64.deb ...
+#8 11.20 Unpacking libssl3:amd64 (3.0.17-1~deb12u3) ...
+#8 11.43 Selecting previously unselected package libpython3.11-minimal:amd64.
+#8 11.43 Preparing to unpack .../libpython3.11-minimal_3.11.2-6+deb12u6_amd64.deb ...
+#8 11.43 Unpacking libpython3.11-minimal:amd64 (3.11.2-6+deb12u6) ...
+#8 11.60 Selecting previously unselected package libexpat1:amd64.
+#8 11.60 Preparing to unpack .../libexpat1_2.5.0-1+deb12u2_amd64.deb ...
+#8 11.60 Unpacking libexpat1:amd64 (2.5.0-1+deb12u2) ...
+#8 11.65 Selecting previously unselected package python3.11-minimal.
+#8 11.65 Preparing to unpack .../python3.11-minimal_3.11.2-6+deb12u6_amd64.deb ...
+#8 11.66 Unpacking python3.11-minimal (3.11.2-6+deb12u6) ...
+#8 11.91 Setting up libssl3:amd64 (3.0.17-1~deb12u3) ...
+#8 11.91 Setting up libpython3.11-minimal:amd64 (3.11.2-6+deb12u6) ...
+#8 11.94 Setting up libexpat1:amd64 (2.5.0-1+deb12u2) ...
+#8 11.95 Setting up python3.11-minimal (3.11.2-6+deb12u6) ...
+#8 12.90 Selecting previously unselected package python3-minimal.
+#8 12.90 (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 6423 files and directories currently installed.)
+#8 12.91 Preparing to unpack .../00-python3-minimal_3.11.2-1+b1_amd64.deb ...
+#8 12.91 Unpacking python3-minimal (3.11.2-1+b1) ...
+#8 12.95 Selecting previously unselected package media-types.
+#8 12.95 Preparing to unpack .../01-media-types_10.0.0_all.deb ...
+#8 12.95 Unpacking media-types (10.0.0) ...
+#8 13.00 Selecting previously unselected package libncursesw6:amd64.
+#8 13.01 Preparing to unpack .../02-libncursesw6_6.4-4_amd64.deb ...
+#8 13.01 Unpacking libncursesw6:amd64 (6.4-4) ...
+#8 13.06 Selecting previously unselected package libkrb5support0:amd64.
+#8 13.07 Preparing to unpack .../03-libkrb5support0_1.20.1-2+deb12u4_amd64.deb ...
+#8 13.07 Unpacking libkrb5support0:amd64 (1.20.1-2+deb12u4) ...
+#8 13.11 Selecting previously unselected package libk5crypto3:amd64.
+#8 13.12 Preparing to unpack .../04-libk5crypto3_1.20.1-2+deb12u4_amd64.deb ...
+#8 13.12 Unpacking libk5crypto3:amd64 (1.20.1-2+deb12u4) ...
+#8 13.18 Selecting previously unselected package libkeyutils1:amd64.
+#8 13.18 Preparing to unpack .../05-libkeyutils1_1.6.3-2_amd64.deb ...
+#8 13.19 Unpacking libkeyutils1:amd64 (1.6.3-2) ...
+#8 13.23 Selecting previously unselected package libkrb5-3:amd64.
+#8 13.23 Preparing to unpack .../06-libkrb5-3_1.20.1-2+deb12u4_amd64.deb ...
+#8 13.24 Unpacking libkrb5-3:amd64 (1.20.1-2+deb12u4) ...
+#8 13.32 Selecting previously unselected package libgssapi-krb5-2:amd64.
+#8 13.32 Preparing to unpack .../07-libgssapi-krb5-2_1.20.1-2+deb12u4_amd64.deb ...
+#8 13.33 Unpacking libgssapi-krb5-2:amd64 (1.20.1-2+deb12u4) ...
+#8 13.39 Selecting previously unselected package libtirpc-common.
+#8 13.39 Preparing to unpack .../08-libtirpc-common_1.3.3+ds-1_all.deb ...
+#8 13.39 Unpacking libtirpc-common (1.3.3+ds-1) ...
+#8 13.45 Selecting previously unselected package libtirpc3:amd64.
+#8 13.45 Preparing to unpack .../09-libtirpc3_1.3.3+ds-1_amd64.deb ...
+#8 13.45 Unpacking libtirpc3:amd64 (1.3.3+ds-1) ...
+#8 13.51 Selecting previously unselected package libnsl2:amd64.
+#8 13.51 Preparing to unpack .../10-libnsl2_1.3.0-2_amd64.deb ...
+#8 13.52 Unpacking libnsl2:amd64 (1.3.0-2) ...
+#8 13.55 Selecting previously unselected package readline-common.
+#8 13.56 Preparing to unpack .../11-readline-common_8.2-1.3_all.deb ...
+#8 13.56 Unpacking readline-common (8.2-1.3) ...
+#8 13.60 Selecting previously unselected package libreadline8:amd64.
+#8 13.60 Preparing to unpack .../12-libreadline8_8.2-1.3_amd64.deb ...
+#8 13.61 Unpacking libreadline8:amd64 (8.2-1.3) ...
+#8 13.66 Selecting previously unselected package libsqlite3-0:amd64.
+#8 13.66 Preparing to unpack .../13-libsqlite3-0_3.40.1-2+deb12u2_amd64.deb ...
+#8 13.67 Unpacking libsqlite3-0:amd64 (3.40.1-2+deb12u2) ...
+#8 13.81 Selecting previously unselected package libpython3.11-stdlib:amd64.
+#8 13.81 Preparing to unpack .../14-libpython3.11-stdlib_3.11.2-6+deb12u6_amd64.deb ...
+#8 13.82 Unpacking libpython3.11-stdlib:amd64 (3.11.2-6+deb12u6) ...
+#8 14.06 Selecting previously unselected package python3.11.
+#8 14.07 Preparing to unpack .../15-python3.11_3.11.2-6+deb12u6_amd64.deb ...
+#8 14.07 Unpacking python3.11 (3.11.2-6+deb12u6) ...
+#8 14.11 Selecting previously unselected package libpython3-stdlib:amd64.
+#8 14.11 Preparing to unpack .../16-libpython3-stdlib_3.11.2-1+b1_amd64.deb ...
+#8 14.12 Unpacking libpython3-stdlib:amd64 (3.11.2-1+b1) ...
+#8 14.16 Setting up python3-minimal (3.11.2-1+b1) ...
+#8 14.37 Selecting previously unselected package python3.
+#8 14.37 (Reading database ... 
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 6931 files and directories currently installed.)
+#8 14.38 Preparing to unpack .../00-python3_3.11.2-1+b1_amd64.deb ...
+#8 14.40 Unpacking python3 (3.11.2-1+b1) ...
+#8 14.44 Selecting previously unselected package openssl.
+#8 14.44 Preparing to unpack .../01-openssl_3.0.17-1~deb12u3_amd64.deb ...
+#8 14.44 Unpacking openssl (3.0.17-1~deb12u3) ...
+#8 14.63 Selecting previously unselected package ca-certificates.
+#8 14.64 Preparing to unpack .../02-ca-certificates_20230311+deb12u1_all.deb ...
+#8 14.64 Unpacking ca-certificates (20230311+deb12u1) ...
+#8 14.76 Selecting previously unselected package krb5-locales.
+#8 14.76 Preparing to unpack .../03-krb5-locales_1.20.1-2+deb12u4_all.deb ...
+#8 14.77 Unpacking krb5-locales (1.20.1-2+deb12u4) ...
+#8 14.81 Selecting previously unselected package manpages.
+#8 14.82 Preparing to unpack .../04-manpages_6.03-2_all.deb ...
+#8 14.82 Unpacking manpages (6.03-2) ...
+#8 14.95 Selecting previously unselected package binutils-common:amd64.
+#8 14.95 Preparing to unpack .../05-binutils-common_2.40-2_amd64.deb ...
+#8 14.95 Unpacking binutils-common:amd64 (2.40-2) ...
+#8 15.23 Selecting previously unselected package libbinutils:amd64.
+#8 15.23 Preparing to unpack .../06-libbinutils_2.40-2_amd64.deb ...
+#8 15.23 Unpacking libbinutils:amd64 (2.40-2) ...
+#8 15.32 Selecting previously unselected package libctf-nobfd0:amd64.
+#8 15.33 Preparing to unpack .../07-libctf-nobfd0_2.40-2_amd64.deb ...
+#8 15.33 Unpacking libctf-nobfd0:amd64 (2.40-2) ...
+#8 15.39 Selecting previously unselected package libctf0:amd64.
+#8 15.39 Preparing to unpack .../08-libctf0_2.40-2_amd64.deb ...
+#8 15.39 Unpacking libctf0:amd64 (2.40-2) ...
+#8 15.45 Selecting previously unselected package libgprofng0:amd64.
+#8 15.45 Preparing to unpack .../09-libgprofng0_2.40-2_amd64.deb ...
+#8 15.46 Unpacking libgprofng0:amd64 (2.40-2) ...
+#8 15.58 Selecting previously unselected package libjansson4:amd64.
+#8 15.59 Preparing to unpack .../10-libjansson4_2.14-2_amd64.deb ...
+#8 15.59 Unpacking libjansson4:amd64 (2.14-2) ...
+#8 15.63 Selecting previously unselected package binutils-x86-64-linux-gnu.
+#8 15.63 Preparing to unpack .../11-binutils-x86-64-linux-gnu_2.40-2_amd64.deb ...
+#8 15.64 Unpacking binutils-x86-64-linux-gnu (2.40-2) ...
+#8 15.93 Selecting previously unselected package binutils.
+#8 15.93 Preparing to unpack .../12-binutils_2.40-2_amd64.deb ...
+#8 15.93 Unpacking binutils (2.40-2) ...
+#8 15.99 Selecting previously unselected package libisl23:amd64.
+#8 15.99 Preparing to unpack .../13-libisl23_0.25-1.1_amd64.deb ...
+#8 15.99 Unpacking libisl23:amd64 (0.25-1.1) ...
+#8 16.12 Selecting previously unselected package libmpfr6:amd64.
+#8 16.12 Preparing to unpack .../14-libmpfr6_4.2.0-1_amd64.deb ...
+#8 16.12 Unpacking libmpfr6:amd64 (4.2.0-1) ...
+#8 16.20 Selecting previously unselected package libmpc3:amd64.
+#8 16.20 Preparing to unpack .../15-libmpc3_1.3.1-1_amd64.deb ...
+#8 16.21 Unpacking libmpc3:amd64 (1.3.1-1) ...
+#8 16.24 Selecting previously unselected package cpp-12.
+#8 16.24 Preparing to unpack .../16-cpp-12_12.2.0-14+deb12u1_amd64.deb ...
+#8 16.25 Unpacking cpp-12 (12.2.0-14+deb12u1) ...
+#8 17.12 Selecting previously unselected package cpp.
+#8 17.12 Preparing to unpack .../17-cpp_4%3a12.2.0-3_amd64.deb ...
+#8 17.13 Unpacking cpp (4:12.2.0-3) ...
+#8 17.17 Selecting previously unselected package fonts-dejavu-core.
+#8 17.17 Preparing to unpack .../18-fonts-dejavu-core_2.37-6_all.deb ...
+#8 17.18 Unpacking fonts-dejavu-core (2.37-6) ...
+#8 17.34 Selecting previously unselected package fontconfig-config.
+#8 17.34 Preparing to unpack .../19-fontconfig-config_2.14.1-4_amd64.deb ...
+#8 17.59 Unpacking fontconfig-config (2.14.1-4) ...
+#8 17.66 Selecting previously unselected package libcc1-0:amd64.
+#8 17.66 Preparing to unpack .../20-libcc1-0_12.2.0-14+deb12u1_amd64.deb ...
+#8 17.67 Unpacking libcc1-0:amd64 (12.2.0-14+deb12u1) ...
+#8 17.72 Selecting previously unselected package libgomp1:amd64.
+#8 17.72 Preparing to unpack .../21-libgomp1_12.2.0-14+deb12u1_amd64.deb ...
+#8 17.72 Unpacking libgomp1:amd64 (12.2.0-14+deb12u1) ...
+#8 17.78 Selecting previously unselected package libitm1:amd64.
+#8 17.78 Preparing to unpack .../22-libitm1_12.2.0-14+deb12u1_amd64.deb ...
+#8 17.79 Unpacking libitm1:amd64 (12.2.0-14+deb12u1) ...
+#8 17.82 Selecting previously unselected package libatomic1:amd64.
+#8 17.83 Preparing to unpack .../23-libatomic1_12.2.0-14+deb12u1_amd64.deb ...
+#8 17.83 Unpacking libatomic1:amd64 (12.2.0-14+deb12u1) ...
+#8 17.86 Selecting previously unselected package libasan8:amd64.
+#8 17.87 Preparing to unpack .../24-libasan8_12.2.0-14+deb12u1_amd64.deb ...
+#8 17.87 Unpacking libasan8:amd64 (12.2.0-14+deb12u1) ...
+#8 18.13 Selecting previously unselected package liblsan0:amd64.
+#8 18.13 Preparing to unpack .../25-liblsan0_12.2.0-14+deb12u1_amd64.deb ...
+#8 18.13 Unpacking liblsan0:amd64 (12.2.0-14+deb12u1) ...
+#8 18.27 Selecting previously unselected package libtsan2:amd64.
+#8 18.27 Preparing to unpack .../26-libtsan2_12.2.0-14+deb12u1_amd64.deb ...
+#8 18.27 Unpacking libtsan2:amd64 (12.2.0-14+deb12u1) ...
+#8 18.51 Selecting previously unselected package libubsan1:amd64.
+#8 18.52 Preparing to unpack .../27-libubsan1_12.2.0-14+deb12u1_amd64.deb ...
+#8 18.52 Unpacking libubsan1:amd64 (12.2.0-14+deb12u1) ...
+#8 18.64 Selecting previously unselected package libquadmath0:amd64.
+#8 18.64 Preparing to unpack .../28-libquadmath0_12.2.0-14+deb12u1_amd64.deb ...
+#8 18.65 Unpacking libquadmath0:amd64 (12.2.0-14+deb12u1) ...
+#8 18.69 Selecting previously unselected package libgcc-12-dev:amd64.
+#8 18.69 Preparing to unpack .../29-libgcc-12-dev_12.2.0-14+deb12u1_amd64.deb ...
+#8 18.70 Unpacking libgcc-12-dev:amd64 (12.2.0-14+deb12u1) ...
+#8 18.96 Selecting previously unselected package gcc-12.
+#8 18.96 Preparing to unpack .../30-gcc-12_12.2.0-14+deb12u1_amd64.deb ...
+#8 18.96 Unpacking gcc-12 (12.2.0-14+deb12u1) ...
+#8 19.97 Selecting previously unselected package gcc.
+#8 19.98 Preparing to unpack .../31-gcc_4%3a12.2.0-3_amd64.deb ...
+#8 19.98 Unpacking gcc (4:12.2.0-3) ...
+#8 20.02 Selecting previously unselected package libc-dev-bin.
+#8 20.02 Preparing to unpack .../32-libc-dev-bin_2.36-9+deb12u13_amd64.deb ...
+#8 20.03 Unpacking libc-dev-bin (2.36-9+deb12u13) ...
+#8 20.06 Selecting previously unselected package linux-libc-dev:amd64.
+#8 20.06 Preparing to unpack .../33-linux-libc-dev_6.1.158-1_amd64.deb ...
+#8 20.06 Unpacking linux-libc-dev:amd64 (6.1.158-1) ...
+#8 20.38 Selecting previously unselected package libcrypt-dev:amd64.
+#8 20.38 Preparing to unpack .../34-libcrypt-dev_1%3a4.4.33-2_amd64.deb ...
+#8 20.39 Unpacking libcrypt-dev:amd64 (1:4.4.33-2) ...
+#8 20.43 Selecting previously unselected package libtirpc-dev:amd64.
+#8 20.44 Preparing to unpack .../35-libtirpc-dev_1.3.3+ds-1_amd64.deb ...
+#8 20.44 Unpacking libtirpc-dev:amd64 (1.3.3+ds-1) ...
+#8 20.49 Selecting previously unselected package libnsl-dev:amd64.
+#8 20.49 Preparing to unpack .../36-libnsl-dev_1.3.0-2_amd64.deb ...
+#8 20.50 Unpacking libnsl-dev:amd64 (1.3.0-2) ...
+#8 20.53 Selecting previously unselected package rpcsvc-proto.
+#8 20.54 Preparing to unpack .../37-rpcsvc-proto_1.4.3-1_amd64.deb ...
+#8 20.54 Unpacking rpcsvc-proto (1.4.3-1) ...
+#8 20.59 Selecting previously unselected package libc6-dev:amd64.
+#8 20.59 Preparing to unpack .../38-libc6-dev_2.36-9+deb12u13_amd64.deb ...
+#8 20.60 Unpacking libc6-dev:amd64 (2.36-9+deb12u13) ...
+#8 20.85 Selecting previously unselected package libstdc++-12-dev:amd64.
+#8 20.86 Preparing to unpack .../39-libstdc++-12-dev_12.2.0-14+deb12u1_amd64.deb ...
+#8 20.86 Unpacking libstdc++-12-dev:amd64 (12.2.0-14+deb12u1) ...
+#8 21.20 Selecting previously unselected package g++-12.
+#8 21.21 Preparing to unpack .../40-g++-12_12.2.0-14+deb12u1_amd64.deb ...
+#8 21.21 Unpacking g++-12 (12.2.0-14+deb12u1) ...
+#8 22.11 Selecting previously unselected package g++.
+#8 22.11 Preparing to unpack .../41-g++_4%3a12.2.0-3_amd64.deb ...
+#8 22.11 Unpacking g++ (4:12.2.0-3) ...
+#8 22.14 Selecting previously unselected package libabsl20220623:amd64.
+#8 22.15 Preparing to unpack .../42-libabsl20220623_20220623.1-1+deb12u2_amd64.deb ...
+#8 22.15 Unpacking libabsl20220623:amd64 (20220623.1-1+deb12u2) ...
+#8 22.25 Selecting previously unselected package libaom3:amd64.
+#8 22.25 Preparing to unpack .../43-libaom3_3.6.0-1+deb12u2_amd64.deb ...
+#8 22.25 Unpacking libaom3:amd64 (3.6.0-1+deb12u2) ...
+#8 22.47 Selecting previously unselected package libdav1d6:amd64.
+#8 22.47 Preparing to unpack .../44-libdav1d6_1.0.0-2+deb12u1_amd64.deb ...
+#8 22.48 Unpacking libdav1d6:amd64 (1.0.0-2+deb12u1) ...
+#8 22.57 Selecting previously unselected package libgav1-1:amd64.
+#8 22.57 Preparing to unpack .../45-libgav1-1_0.18.0-1+b1_amd64.deb ...
+#8 22.58 Unpacking libgav1-1:amd64 (0.18.0-1+b1) ...
+#8 22.65 Selecting previously unselected package librav1e0:amd64.
+#8 22.66 Preparing to unpack .../46-librav1e0_0.5.1-6_amd64.deb ...
+#8 22.66 Unpacking librav1e0:amd64 (0.5.1-6) ...
+#8 22.80 Selecting previously unselected package libsvtav1enc1:amd64.
+#8 22.80 Preparing to unpack .../47-libsvtav1enc1_1.4.1+dfsg-1_amd64.deb ...
+#8 22.80 Unpacking libsvtav1enc1:amd64 (1.4.1+dfsg-1) ...
+#8 23.03 Selecting previously unselected package libjpeg62-turbo:amd64.
+#8 23.04 Preparing to unpack .../48-libjpeg62-turbo_1%3a2.1.5-2_amd64.deb ...
+#8 23.04 Unpacking libjpeg62-turbo:amd64 (1:2.1.5-2) ...
+#8 23.10 Selecting previously unselected package libyuv0:amd64.
+#8 23.11 Preparing to unpack .../49-libyuv0_0.0~git20230123.b2528b0-1_amd64.deb ...
+#8 23.11 Unpacking libyuv0:amd64 (0.0~git20230123.b2528b0-1) ...
+#8 23.20 Selecting previously unselected package libavif15:amd64.
+#8 23.20 Preparing to unpack .../50-libavif15_0.11.1-1+deb12u1_amd64.deb ...
+#8 23.21 Unpacking libavif15:amd64 (0.11.1-1+deb12u1) ...
+#8 23.26 Selecting previously unselected package libbrotli1:amd64.
+#8 23.26 Preparing to unpack .../51-libbrotli1_1.0.9-2+b6_amd64.deb ...
+#8 23.27 Unpacking libbrotli1:amd64 (1.0.9-2+b6) ...
+#8 23.33 Selecting previously unselected package libbsd0:amd64.
+#8 23.33 Preparing to unpack .../52-libbsd0_0.11.7-2_amd64.deb ...
+#8 23.34 Unpacking libbsd0:amd64 (0.11.7-2) ...
+#8 23.39 Selecting previously unselected package libpng16-16:amd64.
+#8 23.39 Preparing to unpack .../53-libpng16-16_1.6.39-2+deb12u1_amd64.deb ...
+#8 23.40 Unpacking libpng16-16:amd64 (1.6.39-2+deb12u1) ...
+#8 23.47 Selecting previously unselected package libfreetype6:amd64.
+#8 23.48 Preparing to unpack .../54-libfreetype6_2.12.1+dfsg-5+deb12u4_amd64.deb ...
+#8 23.48 Unpacking libfreetype6:amd64 (2.12.1+dfsg-5+deb12u4) ...
+#8 23.58 Selecting previously unselected package libfontconfig1:amd64.
+#8 23.58 Preparing to unpack .../55-libfontconfig1_2.14.1-4_amd64.deb ...
+#8 23.59 Unpacking libfontconfig1:amd64 (2.14.1-4) ...
+#8 23.65 Selecting previously unselected package libde265-0:amd64.
+#8 23.65 Preparing to unpack .../56-libde265-0_1.0.11-1+deb12u2_amd64.deb ...
+#8 23.65 Unpacking libde265-0:amd64 (1.0.11-1+deb12u2) ...
+#8 23.72 Selecting previously unselected package libnuma1:amd64.
+#8 23.72 Preparing to unpack .../57-libnuma1_2.0.16-1_amd64.deb ...
+#8 23.72 Unpacking libnuma1:amd64 (2.0.16-1) ...
+#8 23.77 Selecting previously unselected package libx265-199:amd64.
+#8 23.77 Preparing to unpack .../58-libx265-199_3.5-2+b1_amd64.deb ...
+#8 23.78 Unpacking libx265-199:amd64 (3.5-2+b1) ...
+#8 23.94 Selecting previously unselected package libheif1:amd64.
+#8 23.94 Preparing to unpack .../59-libheif1_1.15.1-1+deb12u1_amd64.deb ...
+#8 23.95 Unpacking libheif1:amd64 (1.15.1-1+deb12u1) ...
+#8 24.01 Selecting previously unselected package libdeflate0:amd64.
+#8 24.01 Preparing to unpack .../60-libdeflate0_1.14-1_amd64.deb ...
+#8 24.02 Unpacking libdeflate0:amd64 (1.14-1) ...
+#8 24.05 Selecting previously unselected package libjbig0:amd64.
+#8 24.06 Preparing to unpack .../61-libjbig0_2.1-6.1_amd64.deb ...
+#8 24.06 Unpacking libjbig0:amd64 (2.1-6.1) ...
+#8 24.10 Selecting previously unselected package liblerc4:amd64.
+#8 24.10 Preparing to unpack .../62-liblerc4_4.0.0+ds-2_amd64.deb ...
+#8 24.11 Unpacking liblerc4:amd64 (4.0.0+ds-2) ...
+#8 24.15 Selecting previously unselected package libwebp7:amd64.
+#8 24.15 Preparing to unpack .../63-libwebp7_1.2.4-0.2+deb12u1_amd64.deb ...
+#8 24.15 Unpacking libwebp7:amd64 (1.2.4-0.2+deb12u1) ...
+#8 24.21 Selecting previously unselected package libtiff6:amd64.
+#8 24.22 Preparing to unpack .../64-libtiff6_4.5.0-6+deb12u3_amd64.deb ...
+#8 24.22 Unpacking libtiff6:amd64 (4.5.0-6+deb12u3) ...
+#8 24.27 Selecting previously unselected package libxau6:amd64.
+#8 24.27 Preparing to unpack .../65-libxau6_1%3a1.0.9-1_amd64.deb ...
+#8 24.28 Unpacking libxau6:amd64 (1:1.0.9-1) ...
+#8 24.32 Selecting previously unselected package libxdmcp6:amd64.
+#8 24.32 Preparing to unpack .../66-libxdmcp6_1%3a1.1.2-3_amd64.deb ...
+#8 24.32 Unpacking libxdmcp6:amd64 (1:1.1.2-3) ...
+#8 24.36 Selecting previously unselected package libxcb1:amd64.
+#8 24.36 Preparing to unpack .../67-libxcb1_1.15-1_amd64.deb ...
+#8 24.37 Unpacking libxcb1:amd64 (1.15-1) ...
+#8 24.41 Selecting previously unselected package libx11-data.
+#8 24.42 Preparing to unpack .../68-libx11-data_2%3a1.8.4-2+deb12u2_all.deb ...
+#8 24.42 Unpacking libx11-data (2:1.8.4-2+deb12u2) ...
+#8 24.54 Selecting previously unselected package libx11-6:amd64.
+#8 24.54 Preparing to unpack .../69-libx11-6_2%3a1.8.4-2+deb12u2_amd64.deb ...
+#8 24.54 Unpacking libx11-6:amd64 (2:1.8.4-2+deb12u2) ...
+#8 24.63 Selecting previously unselected package libxpm4:amd64.
+#8 24.63 Preparing to unpack .../70-libxpm4_1%3a3.5.12-1.1+deb12u1_amd64.deb ...
+#8 24.64 Unpacking libxpm4:amd64 (1:3.5.12-1.1+deb12u1) ...
+#8 24.68 Selecting previously unselected package libgd3:amd64.
+#8 24.68 Preparing to unpack .../71-libgd3_2.3.3-9_amd64.deb ...
+#8 24.68 Unpacking libgd3:amd64 (2.3.3-9) ...
+#8 24.74 Selecting previously unselected package libc-devtools.
+#8 24.74 Preparing to unpack .../72-libc-devtools_2.36-9+deb12u13_amd64.deb ...
+#8 24.75 Unpacking libc-devtools (2.36-9+deb12u13) ...
+#8 24.84 Selecting previously unselected package libgpm2:amd64.
+#8 24.85 Preparing to unpack .../73-libgpm2_1.20.7-10+b1_amd64.deb ...
+#8 24.85 Unpacking libgpm2:amd64 (1.20.7-10+b1) ...
+#8 24.90 Selecting previously unselected package make.
+#8 24.90 Preparing to unpack .../74-make_4.3-4.1_amd64.deb ...
+#8 24.91 Unpacking make (4.3-4.1) ...
+#8 24.98 Selecting previously unselected package manpages-dev.
+#8 24.98 Preparing to unpack .../75-manpages-dev_6.03-2_all.deb ...
+#8 24.99 Unpacking manpages-dev (6.03-2) ...
+#8 25.28 Setting up media-types (10.0.0) ...
+#8 25.30 Setting up libaom3:amd64 (3.6.0-1+deb12u2) ...
+#8 25.31 Setting up libabsl20220623:amd64 (20220623.1-1+deb12u2) ...
+#8 25.32 Setting up libxau6:amd64 (1:1.0.9-1) ...
+#8 25.32 Setting up libkeyutils1:amd64 (1.6.3-2) ...
+#8 25.33 Setting up libgpm2:amd64 (1.20.7-10+b1) ...
+#8 25.34 Setting up liblerc4:amd64 (4.0.0+ds-2) ...
+#8 25.35 Setting up manpages (6.03-2) ...
+#8 25.37 Setting up libtirpc-common (1.3.3+ds-1) ...
+#8 25.38 Setting up libbrotli1:amd64 (1.0.9-2+b6) ...
+#8 25.40 Setting up libsqlite3-0:amd64 (3.40.1-2+deb12u2) ...
+#8 25.41 Setting up binutils-common:amd64 (2.40-2) ...
+#8 25.43 Setting up libdeflate0:amd64 (1.14-1) ...
+#8 25.44 Setting up linux-libc-dev:amd64 (6.1.158-1) ...
+#8 25.45 Setting up libctf-nobfd0:amd64 (2.40-2) ...
+#8 25.46 Setting up krb5-locales (1.20.1-2+deb12u4) ...
+#8 25.48 Setting up libsvtav1enc1:amd64 (1.4.1+dfsg-1) ...
+#8 25.49 Setting up libgomp1:amd64 (12.2.0-14+deb12u1) ...
+#8 25.50 Setting up libjbig0:amd64 (2.1-6.1) ...
+#8 25.52 Setting up librav1e0:amd64 (0.5.1-6) ...
+#8 25.53 Setting up libjansson4:amd64 (2.14-2) ...
+#8 25.54 Setting up libkrb5support0:amd64 (1.20.1-2+deb12u4) ...
+#8 25.55 Setting up rpcsvc-proto (1.4.3-1) ...
+#8 25.57 Setting up libjpeg62-turbo:amd64 (1:2.1.5-2) ...
+#8 25.58 Setting up libx11-data (2:1.8.4-2+deb12u2) ...
+#8 25.59 Setting up make (4.3-4.1) ...
+#8 25.61 Setting up libmpfr6:amd64 (4.2.0-1) ...
+#8 25.62 Setting up libquadmath0:amd64 (12.2.0-14+deb12u1) ...
+#8 25.63 Setting up libpng16-16:amd64 (1.6.39-2+deb12u1) ...
+#8 25.64 Setting up libmpc3:amd64 (1.3.1-1) ...
+#8 25.65 Setting up libatomic1:amd64 (12.2.0-14+deb12u1) ...
+#8 25.66 Setting up fonts-dejavu-core (2.37-6) ...
+#8 25.73 Setting up libgav1-1:amd64 (0.18.0-1+b1) ...
+#8 25.75 Setting up libncursesw6:amd64 (6.4-4) ...
+#8 25.76 Setting up libk5crypto3:amd64 (1.20.1-2+deb12u4) ...
+#8 25.77 Setting up libdav1d6:amd64 (1.0.0-2+deb12u1) ...
+#8 25.78 Setting up libwebp7:amd64 (1.2.4-0.2+deb12u1) ...
+#8 25.80 Setting up libubsan1:amd64 (12.2.0-14+deb12u1) ...
+#8 25.81 Setting up libnuma1:amd64 (2.0.16-1) ...
+#8 25.82 Setting up libcrypt-dev:amd64 (1:4.4.33-2) ...
+#8 25.84 Setting up libtiff6:amd64 (4.5.0-6+deb12u3) ...
+#8 25.85 Setting up libasan8:amd64 (12.2.0-14+deb12u1) ...
+#8 25.85 Setting up libkrb5-3:amd64 (1.20.1-2+deb12u4) ...
+#8 25.86 Setting up libtsan2:amd64 (12.2.0-14+deb12u1) ...
+#8 25.87 Setting up libbinutils:amd64 (2.40-2) ...
+#8 25.89 Setting up libisl23:amd64 (0.25-1.1) ...
+#8 25.91 Setting up libde265-0:amd64 (1.0.11-1+deb12u2) ...
+#8 25.92 Setting up libc-dev-bin (2.36-9+deb12u13) ...
+#8 25.93 Setting up openssl (3.0.17-1~deb12u3) ...
+#8 25.95 Setting up libbsd0:amd64 (0.11.7-2) ...
+#8 25.97 Setting up libyuv0:amd64 (0.0~git20230123.b2528b0-1) ...
+#8 25.98 Setting up readline-common (8.2-1.3) ...
+#8 26.00 Setting up libcc1-0:amd64 (12.2.0-14+deb12u1) ...
+#8 26.01 Setting up liblsan0:amd64 (12.2.0-14+deb12u1) ...
+#8 26.02 Setting up libitm1:amd64 (12.2.0-14+deb12u1) ...
+#8 26.04 Setting up libctf0:amd64 (2.40-2) ...
+#8 26.04 Setting up manpages-dev (6.03-2) ...
+#8 26.06 Setting up libxdmcp6:amd64 (1:1.1.2-3) ...
+#8 26.06 Setting up cpp-12 (12.2.0-14+deb12u1) ...
+#8 26.08 Setting up libxcb1:amd64 (1.15-1) ...
+#8 26.09 Setting up libavif15:amd64 (0.11.1-1+deb12u1) ...
+#8 26.11 Setting up fontconfig-config (2.14.1-4) ...
+#8 26.23 debconf: unable to initialize frontend: Dialog
+#8 26.23 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#8 26.23 debconf: falling back to frontend: Readline
+#8 26.23 debconf: unable to initialize frontend: Readline
+#8 26.23 debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.36.0 /usr/local/share/perl/5.36.0 /usr/lib/x86_64-linux-gnu/perl5/5.36 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl-base /usr/lib/x86_64-linux-gnu/perl/5.36 /usr/share/perl/5.36 /usr/local/lib/site_perl) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 7.)
+#8 26.23 debconf: falling back to frontend: Teletype
+#8 26.53 Setting up libreadline8:amd64 (8.2-1.3) ...
+#8 26.54 Setting up ca-certificates (20230311+deb12u1) ...
+#8 26.65 debconf: unable to initialize frontend: Dialog
+#8 26.65 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#8 26.65 debconf: falling back to frontend: Readline
+#8 26.66 debconf: unable to initialize frontend: Readline
+#8 26.66 debconf: (Can't locate Term/ReadLine.pm in @INC (you may need to install the Term::ReadLine module) (@INC contains: /etc/perl /usr/local/lib/x86_64-linux-gnu/perl/5.36.0 /usr/local/share/perl/5.36.0 /usr/lib/x86_64-linux-gnu/perl5/5.36 /usr/share/perl5 /usr/lib/x86_64-linux-gnu/perl-base /usr/lib/x86_64-linux-gnu/perl/5.36 /usr/share/perl/5.36 /usr/local/lib/site_perl) at /usr/share/perl5/Debconf/FrontEnd/Readline.pm line 7.)
+#8 26.66 debconf: falling back to frontend: Teletype
+#8 27.71 Updating certificates in /etc/ssl/certs...
+#8 29.06 142 added, 0 removed; done.
+#8 29.11 Setting up libgprofng0:amd64 (2.40-2) ...
+#8 29.12 Setting up libfreetype6:amd64 (2.12.1+dfsg-5+deb12u4) ...
+#8 29.13 Setting up libgcc-12-dev:amd64 (12.2.0-14+deb12u1) ...
+#8 29.14 Setting up libgssapi-krb5-2:amd64 (1.20.1-2+deb12u4) ...
+#8 29.15 Setting up libx265-199:amd64 (3.5-2+b1) ...
+#8 29.16 Setting up cpp (4:12.2.0-3) ...
+#8 29.19 Setting up libx11-6:amd64 (2:1.8.4-2+deb12u2) ...
+#8 29.20 Setting up libfontconfig1:amd64 (2.14.1-4) ...
+#8 29.21 Setting up binutils-x86-64-linux-gnu (2.40-2) ...
+#8 29.22 Setting up libtirpc3:amd64 (1.3.3+ds-1) ...
+#8 29.22 Setting up libxpm4:amd64 (1:3.5.12-1.1+deb12u1) ...
+#8 29.23 Setting up libheif1:amd64 (1.15.1-1+deb12u1) ...
+#8 29.24 Setting up binutils (2.40-2) ...
+#8 29.25 Setting up libtirpc-dev:amd64 (1.3.3+ds-1) ...
+#8 29.28 Setting up gcc-12 (12.2.0-14+deb12u1) ...
+#8 29.29 Setting up libgd3:amd64 (2.3.3-9) ...
+#8 29.30 Setting up libnsl2:amd64 (1.3.0-2) ...
+#8 29.31 Setting up libc-devtools (2.36-9+deb12u13) ...
+#8 29.32 Setting up libpython3.11-stdlib:amd64 (3.11.2-6+deb12u6) ...
+#8 29.32 Setting up gcc (4:12.2.0-3) ...
+#8 29.35 Setting up libnsl-dev:amd64 (1.3.0-2) ...
+#8 29.37 Setting up libc6-dev:amd64 (2.36-9+deb12u13) ...
+#8 29.38 Setting up libpython3-stdlib:amd64 (3.11.2-1+b1) ...
+#8 29.39 Setting up python3.11 (3.11.2-6+deb12u6) ...
+#8 30.39 Setting up libstdc++-12-dev:amd64 (12.2.0-14+deb12u1) ...
+#8 30.40 Setting up python3 (3.11.2-1+b1) ...
+#8 30.42 running python rtupdate hooks for python3.11...
+#8 30.42 running python post-rtupdate hooks for python3.11...
+#8 30.54 Setting up g++-12 (12.2.0-14+deb12u1) ...
+#8 30.55 Setting up g++ (4:12.2.0-3) ...
+#8 30.56 update-alternatives: using /usr/bin/g++ to provide /usr/bin/c++ (c++) in auto mode
+#8 30.57 Processing triggers for libc-bin (2.36-9+deb12u13) ...
+#8 30.61 Processing triggers for ca-certificates (20230311+deb12u1) ...
+#8 30.62 Updating certificates in /etc/ssl/certs...
+#8 31.66 0 added, 0 removed; done.
+#8 31.66 Running hooks in /etc/ca-certificates/update.d...
+#8 31.67 done.
+#8 DONE 32.0s
+#9 [builder  4/11] COPY package*.json ./
+#9 DONE 0.1s
+#10 [builder  5/11] COPY prisma ./prisma/
+#10 DONE 0.0s
+#11 [builder  6/11] RUN rm -f package-lock.json
+#11 DONE 0.3s
+#12 [builder  7/11] RUN npm install --legacy-peer-deps
+#12 49.32 npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+#12 49.75 npm warn deprecated rollup-plugin-terser@7.0.2: This package has been deprecated and is no longer maintained. Please use @rollup/plugin-terser
+#12 50.62 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+#12 50.62 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#12 50.98 npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+#12 51.13 npm warn deprecated workbox-cacheable-response@6.6.0: workbox-background-sync@6.6.0
+#12 51.94 npm warn deprecated workbox-google-analytics@6.6.0: It is not compatible with newer versions of GA starting with v4, as long as you are using GAv3 it should be ok, but the package is not longer being maintained
+#12 55.99 npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+#12 81.20
+#12 81.20 added 805 packages, and audited 806 packages in 1m
+#12 81.20
+#12 81.20 172 packages are looking for funding
+#12 81.20   run `npm fund` for details
+#12 81.20
+#12 81.20 found 0 vulnerabilities
+#12 81.21 npm notice
+#12 81.21 npm notice New major version of npm available! 10.8.2 -> 11.7.0
+#12 81.21 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.7.0
+#12 81.21 npm notice To update run: npm install -g npm@11.7.0
+#12 81.21 npm notice
+#12 DONE 82.1s
+#13 [builder  8/11] RUN npm install lightningcss-linux-x64-gnu --save-optional || true
+#13 14.29
+#13 14.29 added 49 packages, removed 8 packages, changed 4 packages, and audited 847 packages in 14s
+#13 14.29
+#13 14.29 177 packages are looking for funding
+#13 14.29   run `npm fund` for details
+#13 14.29
+#13 14.29 found 0 vulnerabilities
+#13 DONE 14.5s
+#14 [builder  9/11] RUN npx prisma generate
+#14 1.435 Prisma schema loaded from prisma/schema.prisma
+#14 2.501
+#14 2.501 ✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 582ms
+#14 2.501
+#14 2.501 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+#14 2.501
+#14 2.501 Tip: Easily identify and fix slow SQL queries in your app. Optimize helps you enhance your visibility: https://pris.ly/--optimize
+#14 2.501
+#14 DONE 2.8s
+#15 [builder 10/11] COPY . .
+#15 DONE 0.1s
+#16 [builder 11/11] RUN npm run build
+#16 0.453
+#16 0.453 > repairappv2@0.1.0 build
+#16 0.453 > next build
+#16 0.453
+#16 1.464 ▲ Next.js 16.1.0 (Turbopack)
+#16 1.465 - Experiments (use with caution):
+#16 1.465   · serverActions
+#16 1.465
+#16 1.469 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+#16 1.528   Creating an optimized production build ...
+#16 29.97 ✓ Compiled successfully in 28.0s
+#16 30.03   Running TypeScript ...
+#16 47.18 Failed to compile.
+#16 47.18
+#16 47.18 ./src/app/api/ventas/route.ts:241:25
+#16 47.18 Type error: Object literal may only specify known properties, and 'venta_id' does not exist in type 'Without<FacturacionElectronicaCreateInput, FacturacionElectronicaUncheckedCreateInput> & FacturacionElectronicaUncheckedCreateInput'.
+#16 47.18
+#16 47.18 [0m [90m 239 |[39m                     data[33m:[39m {
+#16 47.18  [90m 240 |[39m                         empresa_id[33m:[39m empresa[33m.[39mid[33m,[39m
+#16 47.18 [31m[1m>[22m[39m[90m 241 |[39m                         venta_id[33m:[39m venta[33m.[39mid[33m,[39m [90m// Need to add relation to schema if not exists, or just link by ID[39m
+#16 47.18  [90m     |[39m                         [31m[1m^[22m[39m
+#16 47.18  [90m 242 |[39m                         clave_acceso[33m:[39m xmlUnsigned[33m.[39mmatch([35m/<claveAcceso>(.*?)<\/claveAcceso>/[39m)[33m?[39m[33m.[39m[[35m1[39m] [33m||[39m [32m''[39m[33m,[39m
+#16 47.18  [90m 243 |[39m                         numero_autorizacion[33m:[39m [36mnull[39m[33m,[39m
+#16 47.18  [90m 244 |[39m                         estado[33m:[39m [32m'GENERADO'[39m[33m,[39m [90m// Not sent yet[39m[0m
+#16 47.33 Next.js build worker exited with code: 1 and signal: null
+#16 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
 ------
 > [builder 11/11] RUN npm run build:
-30.45
-30.45   Client Component SSR:
-30.45     ./src/hooks/use-offline.ts [Client Component SSR]
-30.45     ./src/hooks/index.ts [Client Component SSR]
-30.45     ./src/app/(dashboard)/layout.tsx [Client Component SSR]
-30.45     ./src/app/(dashboard)/layout.tsx [Server Component]
-30.45
-30.45
-30.45     at <unknown> (./src/hooks/use-offline.ts:7:1)
-30.45     at <unknown> (./src/hooks/use-offline.ts:7:1)
+47.18 Type error: Object literal may only specify known properties, and 'venta_id' does not exist in type 'Without<FacturacionElectronicaCreateInput, FacturacionElectronicaUncheckedCreateInput> & FacturacionElectronicaUncheckedCreateInput'.
+47.18
+47.18 [0m [90m 239 |[39m                     data[33m:[39m {
+47.18  [90m 240 |[39m                         empresa_id[33m:[39m empresa[33m.[39mid[33m,[39m
+47.18 [31m[1m>[22m[39m[90m 241 |[39m                         venta_id[33m:[39m venta[33m.[39mid[33m,[39m [90m// Need to add relation to schema if not exists, or just link by ID[39m
+47.18  [90m     |[39m                         [31m[1m^[22m[39m
+47.18  [90m 242 |[39m                         clave_acceso[33m:[39m xmlUnsigned[33m.[39mmatch([35m/<claveAcceso>(.*?)<\/claveAcceso>/[39m)[33m?[39m[33m.[39m[[35m1[39m] [33m||[39m [32m''[39m[33m,[39m
+47.18  [90m 243 |[39m                         numero_autorizacion[33m:[39m [36mnull[39m[33m,[39m
+47.18  [90m 244 |[39m                         estado[33m:[39m [32m'GENERADO'[39m[33m,[39m [90m// Not sent yet[39m[0m
+47.33 Next.js build worker exited with code: 1 and signal: null
 ------
 [33m2 warnings found (use docker --debug to expand):
-[0m - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "NEXTAUTH_SECRET") (line 12)
-- SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "NEXTAUTH_SECRET") (line 18)
+[0m - SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ENV "NEXTAUTH_SECRET") (line 18)
+- SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data (ARG "NEXTAUTH_SECRET") (line 12)
 Dockerfile:51
 --------------------
 |
