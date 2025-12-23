@@ -29,12 +29,12 @@
     /* Light glassmorphism */
 
     /* ========== TEXT COLORS ========== */
-    --text-primary: 215 28% 17%;
-    /* Slate 900 - Main text */
-    --text-secondary: 215 16% 47%;
-    /* Slate 500 - Secondary text */
-    --text-muted: 215 20% 65%;
-    /* Slate 400 - Muted/disabled */
+    --text-primary: 215 28% 15%;
+    /* Slate 900+ - Main text (Darkened for better contrast) */
+    --text-secondary: 215 25% 40%;
+    /* Slate 600 - Secondary text (Darkened from 47%) */
+    --text-muted: 215 20% 55%;
+    /* Slate 500 - Muted/disabled (Darkened from 65%) */
     --text-accent: 215 28% 17%;
     /* Slate 900 - Links */
 
