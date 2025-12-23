@@ -191,6 +191,14 @@ export default function OrdenDetallePage() {
                 })))
             }
             setManoObra(Number(data.mano_obra) || 0)
+
+            // Auto-generate QR for PDF - silently, no dialog
+            try {
+                const qr = await generateOrderQR(data.id || ordenId)
+                setQRData(qr)
+            } catch (e) {
+                console.warn('Could not pre-generate QR:', e)
+            }
         } catch (error: any) {
             toast.error('Error al cargar orden', { description: error.message })
             router.push('/ordenes')
