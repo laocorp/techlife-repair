@@ -1,6 +1,5 @@
 // src/app/cliente/login/page.tsx
-// Customer login - simplified version without Supabase Auth
-// TODO: Implement proper magic link or password auth for clients
+// Customer login - premium glass redesign
 
 'use client'
 
@@ -10,7 +9,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import {
@@ -20,6 +19,7 @@ import {
     ArrowLeft,
     Search,
 } from 'lucide-react'
+import { PremiumBackground } from '@/components/ui/premium-background'
 
 export default function ClienteLoginPage() {
     const router = useRouter()
@@ -69,45 +69,53 @@ export default function ClienteLoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--surface-base))] p-4">
+        <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden bg-slate-50">
+            <PremiumBackground />
+
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="w-full max-w-md"
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="w-full max-w-md relative z-10"
             >
                 {/* Back to main */}
-                <Link href="/" className="inline-flex items-center gap-2 text-[hsl(var(--text-muted))] hover:text-[hsl(var(--text-primary))] mb-6">
-                    <ArrowLeft className="h-4 w-4" />
-                    Volver al inicio
+                <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors mb-8 group pl-2"
+                >
+                    <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                    <span className="font-medium text-sm">Volver al inicio</span>
                 </Link>
 
-                <Card className="card-linear">
-                    <CardHeader className="text-center pb-2">
-                        <div className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-violet-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                            <Wrench className="h-7 w-7 text-white" />
+                <Card className="border-white/40 bg-white/60 backdrop-blur-xl shadow-2xl shadow-slate-200/50">
+                    <CardContent className="p-8">
+                        <div className="text-center mb-8">
+                            <div className="w-16 h-16 mx-auto mb-6 bg-slate-900 rounded-2xl flex items-center justify-center shadow-xl shadow-slate-900/20 rotate-3 transition-transform hover:rotate-6 duration-300">
+                                <Wrench className="h-8 w-8 text-white" />
+                            </div>
+                            <h1 className="text-2xl font-bold text-slate-900 mb-2">
+                                Portal de Clientes
+                            </h1>
+                            <p className="text-slate-500 text-sm">
+                                Consulta el estado de tus equipos y reparaciones
+                            </p>
                         </div>
-                        <CardTitle className="text-xl text-[hsl(var(--text-primary))]">
-                            Portal de Clientes
-                        </CardTitle>
-                        <CardDescription className="text-[hsl(var(--text-muted))]">
-                            Consulta el estado de tus equipos
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-4">
-                        <form onSubmit={handleSubmit} className="space-y-4">
+
+                        <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <Label className="text-[hsl(var(--text-secondary))]">
+                                <Label className="text-slate-700 font-medium ml-1">
                                     Email registrado
                                 </Label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--text-muted))]" />
+                                <div className="relative group">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-slate-900 transition-colors" />
                                     <Input
                                         type="email"
                                         placeholder="tu@email.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="pl-10 input-linear"
+                                        className="pl-10 h-11 bg-white/50 border-slate-200 focus:bg-white focus:border-slate-400 transition-all rounded-xl"
                                         required
+                                        autoFocus
                                     />
                                 </div>
                             </div>
@@ -115,35 +123,26 @@ export default function ClienteLoginPage() {
                             <Button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-gradient-to-r from-blue-500 to-violet-600 hover:from-blue-600 hover:to-violet-700 gap-2"
+                                className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white shadow-lg shadow-slate-900/20 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
                             >
                                 {isLoading ? (
                                     <>
-                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <Loader2 className="h-5 w-5 animate-spin mr-2" />
                                         Verificando...
                                     </>
                                 ) : (
                                     <>
-                                        <Search className="h-4 w-4" />
+                                        <Search className="h-5 w-5 mr-2" />
                                         Acceder al Portal
                                     </>
                                 )}
                             </Button>
                         </form>
 
-                        <div className="mt-6 p-4 bg-[hsl(var(--surface-highlight))] rounded-lg">
-                            <p className="text-sm text-[hsl(var(--text-muted))]">
-                                Ingresa el email con el que registraste tu equipo
-                                para ver el estado de tus reparaciones.
-                            </p>
-                        </div>
-
-                        <div className="mt-4 text-center">
-                            <p className="text-sm text-[hsl(var(--text-muted))]">
-                                ¿No tienes cuenta?{' '}
-                                <span className="text-[hsl(var(--text-secondary))]">
-                                    Se crea automáticamente al dejar un equipo
-                                </span>
+                        <div className="mt-8 p-4 bg-slate-50/50 rounded-xl border border-slate-100 text-center">
+                            <p className="text-xs text-slate-500 leading-relaxed">
+                                Ingresa con el email que proporcionaste al dejar tu equipo en el taller.
+                                No necesitas contraseña.
                             </p>
                         </div>
                     </CardContent>

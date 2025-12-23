@@ -1,12 +1,12 @@
 // src/app/(cliente)/equipos/page.tsx
-// Customer Dashboard - Shows current equipment in repair
+// Customer Dashboard - Premium Glass Redesign
 
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { motion, Variants } from 'framer-motion'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -18,6 +18,8 @@ import {
     Package,
     RefreshCw,
     Calendar,
+    ArrowRight,
+    Smartphone
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -34,27 +36,27 @@ interface OrdenActiva {
     created_at: string
 }
 
-const estadoConfig: Record<string, { label: string; color: string; bgColor: string; icon: any }> = {
-    recibido: { label: 'Recibido', color: 'text-slate-400', bgColor: 'bg-slate-500/10', icon: Clock },
-    en_diagnostico: { label: 'En Diagnóstico', color: 'text-blue-400', bgColor: 'bg-blue-500/10', icon: Wrench },
-    cotizado: { label: 'Cotizado', color: 'text-amber-400', bgColor: 'bg-amber-500/10', icon: AlertTriangle },
-    aprobado: { label: 'Aprobado', color: 'text-cyan-400', bgColor: 'bg-cyan-500/10', icon: CheckCircle },
-    en_reparacion: { label: 'En Reparación', color: 'text-violet-400', bgColor: 'bg-violet-500/10', icon: Wrench },
-    terminado: { label: 'Listo para Retirar', color: 'text-emerald-400', bgColor: 'bg-emerald-500/10', icon: CheckCircle },
-    entregado: { label: 'Entregado', color: 'text-green-400', bgColor: 'bg-green-500/10', icon: CheckCircle },
+const estadoConfig: Record<string, { label: string; color: string; bgColor: string; borderColor: string; icon: any }> = {
+    recibido: { label: 'Recibido', color: 'text-slate-600', bgColor: 'bg-slate-100', borderColor: 'border-slate-200', icon: Clock },
+    en_diagnostico: { label: 'En Diagnóstico', color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200', icon: Wrench },
+    cotizado: { label: 'Cotizado', color: 'text-amber-600', bgColor: 'bg-amber-50', borderColor: 'border-amber-200', icon: AlertTriangle },
+    aprobado: { label: 'Aprobado', color: 'text-cyan-600', bgColor: 'bg-cyan-50', borderColor: 'border-cyan-200', icon: CheckCircle },
+    en_reparacion: { label: 'En Reparación', color: 'text-violet-600', bgColor: 'bg-violet-50', borderColor: 'border-violet-200', icon: Wrench },
+    terminado: { label: 'Listo para Retirar', color: 'text-emerald-600', bgColor: 'bg-emerald-50', borderColor: 'border-emerald-200', icon: CheckCircle },
+    entregado: { label: 'Entregado', color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200', icon: CheckCircle },
 }
 
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
         opacity: 1,
-        transition: { staggerChildren: 0.05 },
+        transition: { staggerChildren: 0.1 },
     },
 }
 
-const itemVariants = {
-    hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0 },
+const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
 }
 
 export default function ClienteDashboard() {
@@ -64,18 +66,15 @@ export default function ClienteDashboard() {
     const loadOrdenes = useCallback(async () => {
         setIsLoading(true)
         try {
-            // Get cliente from localStorage
             const stored = localStorage.getItem('cliente_portal')
             if (!stored) return
 
             const cliente = JSON.parse(stored)
 
-            // Get active orders for this client
             const response = await fetch(`/api/ordenes?cliente_id=${cliente.id}`)
             if (!response.ok) throw new Error('Error loading orders')
 
             const data = await response.json()
-            // Filter out delivered orders
             setOrdenes(data.filter((o: any) => o.estado !== 'entregado'))
         } catch (error) {
             console.error('Error loading orders:', error)
@@ -97,23 +96,22 @@ export default function ClienteDashboard() {
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="space-y-6"
+            className="space-y-8"
         >
-            {/* Welcome */}
-            <motion.div variants={itemVariants} className="flex items-center justify-between">
+            {/* Header */}
+            <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-xl font-semibold text-[hsl(var(--text-primary))]">
-                        Mis Equipos en Taller
+                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+                        Mis Equipos
                     </h1>
-                    <p className="text-sm text-[hsl(var(--text-muted))] mt-0.5">
-                        Estado actual de tus equipos en reparación
+                    <p className="text-slate-500 mt-1">
+                        Gestiona tus equipos en proceso de reparación
                     </p>
                 </div>
                 <Button
                     variant="outline"
-                    size="sm"
                     onClick={loadOrdenes}
-                    className="gap-2 border-[hsl(var(--border-subtle))]"
+                    className="gap-2 bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-sm rounded-xl"
                 >
                     <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                     Actualizar
@@ -121,166 +119,172 @@ export default function ClienteDashboard() {
             </motion.div>
 
             {/* Quick Stats */}
-            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4">
-                <Card className="card-linear">
-                    <CardContent className="p-4 text-center">
-                        <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-blue-500/10 flex items-center justify-center">
-                            <Wrench className="h-5 w-5 text-blue-400" />
+            <motion.div variants={itemVariants} className="grid grid-cols-3 gap-6">
+                <Card className="border-0 shadow-xl shadow-slate-200/40 bg-white/70 backdrop-blur-xl overflow-hidden group">
+                    <CardContent className="p-6 relative">
+                        <div className="absolute right-0 top-0 p-24 bg-blue-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div className="relative z-10 text-center">
+                            <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 group-hover:rotate-12 transition-transform duration-300">
+                                <Wrench className="h-6 w-6" />
+                            </div>
+                            <p className="text-4xl font-bold text-slate-900 mb-1">{ordenesActivas.length}</p>
+                            <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">En Taller</p>
                         </div>
-                        <p className="text-2xl font-bold text-[hsl(var(--text-primary))]">{ordenesActivas.length}</p>
-                        <p className="text-xs text-[hsl(var(--text-muted))]">En Taller</p>
                     </CardContent>
                 </Card>
-                <Card className="card-linear">
-                    <CardContent className="p-4 text-center">
-                        <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                            <CheckCircle className="h-5 w-5 text-emerald-400" />
+                <Card className="border-0 shadow-xl shadow-slate-200/40 bg-white/70 backdrop-blur-xl overflow-hidden group">
+                    <CardContent className="p-6 relative">
+                        <div className="absolute right-0 top-0 p-24 bg-emerald-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div className="relative z-10 text-center">
+                            <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 group-hover:rotate-12 transition-transform duration-300">
+                                <CheckCircle className="h-6 w-6" />
+                            </div>
+                            <p className="text-4xl font-bold text-slate-900 mb-1">{ordenesListas.length}</p>
+                            <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">Listos</p>
                         </div>
-                        <p className="text-2xl font-bold text-[hsl(var(--text-primary))]">{ordenesListas.length}</p>
-                        <p className="text-xs text-[hsl(var(--text-muted))]">Listos</p>
                     </CardContent>
                 </Card>
-                <Card className="card-linear">
-                    <CardContent className="p-4 text-center">
-                        <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-amber-500/10 flex items-center justify-center">
-                            <AlertTriangle className="h-5 w-5 text-amber-400" />
+                <Card className="border-0 shadow-xl shadow-slate-200/40 bg-white/70 backdrop-blur-xl overflow-hidden group">
+                    <CardContent className="p-6 relative">
+                        <div className="absolute right-0 top-0 p-24 bg-amber-500/5 rounded-full -mr-12 -mt-12 group-hover:scale-110 transition-transform duration-500"></div>
+                        <div className="relative z-10 text-center">
+                            <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-600 group-hover:rotate-12 transition-transform duration-300">
+                                <AlertTriangle className="h-6 w-6" />
+                            </div>
+                            <p className="text-4xl font-bold text-slate-900 mb-1">{ordenesPendienteCotizacion.length}</p>
+                            <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">Por Aprobar</p>
                         </div>
-                        <p className="text-2xl font-bold text-[hsl(var(--text-primary))]">{ordenesPendienteCotizacion.length}</p>
-                        <p className="text-xs text-[hsl(var(--text-muted))]">Por Aprobar</p>
                     </CardContent>
                 </Card>
             </motion.div>
 
-            {/* Pending Approval Alert */}
+            {/* Smart Alerts */}
             {ordenesPendienteCotizacion.length > 0 && (
                 <motion.div variants={itemVariants}>
-                    <Card className="border-amber-500/30 bg-amber-500/5">
-                        <CardContent className="p-4 flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                                <AlertTriangle className="h-5 w-5 text-amber-400" />
+                    <div className="p-1 rounded-2xl bg-gradient-to-r from-amber-200 to-orange-200 shadow-lg shadow-orange-500/10">
+                        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 flex flex-col md:flex-row items-center gap-6">
+                            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center shrink-0 animate-pulse">
+                                <AlertTriangle className="h-6 w-6 text-amber-600" />
                             </div>
-                            <div className="flex-1">
-                                <p className="font-medium text-[hsl(var(--text-primary))]">
-                                    Tienes {ordenesPendienteCotizacion.length} cotización(es) pendiente(s)
-                                </p>
-                                <p className="text-sm text-[hsl(var(--text-muted))]">
-                                    Revisa y aprueba para continuar con la reparación
+                            <div className="flex-1 text-center md:text-left">
+                                <h3 className="font-bold text-slate-900 text-lg">Cotización pendiente</h3>
+                                <p className="text-slate-600">
+                                    Tienes {ordenesPendienteCotizacion.length} equipo(s) esperando tu aprobación para continuar.
                                 </p>
                             </div>
                             <Link href={`/tracking/${ordenesPendienteCotizacion[0].id}`}>
-                                <Button size="sm" className="bg-amber-500 hover:bg-amber-600">
-                                    Ver Cotización
+                                <Button className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/30 rounded-xl px-8">
+                                    Revisar Ahora
                                 </Button>
                             </Link>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </motion.div>
             )}
 
-            {/* Ready for Pickup Alert */}
             {ordenesListas.length > 0 && (
                 <motion.div variants={itemVariants}>
-                    <Card className="border-emerald-500/30 bg-emerald-500/5">
-                        <CardContent className="p-4 flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                                <CheckCircle className="h-5 w-5 text-emerald-400" />
+                    <div className="p-1 rounded-2xl bg-gradient-to-r from-emerald-200 to-teal-200 shadow-lg shadow-emerald-500/10">
+                        <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 flex flex-col md:flex-row items-center gap-6">
+                            <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                <CheckCircle className="h-6 w-6 text-emerald-600" />
                             </div>
-                            <div className="flex-1">
-                                <p className="font-medium text-[hsl(var(--text-primary))]">
-                                    ¡{ordenesListas.length} equipo(s) listo(s) para retirar!
-                                </p>
-                                <p className="text-sm text-[hsl(var(--text-muted))]">
-                                    Pasa por el taller para recoger tu equipo
+                            <div className="flex-1 text-center md:text-left">
+                                <h3 className="font-bold text-slate-900 text-lg">¡Equipo listo para retirar!</h3>
+                                <p className="text-slate-600">
+                                    Puedes pasar por nuestro taller para recoger tu equipo reparado.
                                 </p>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </motion.div>
             )}
 
-            {/* Orders List */}
+            {/* Main List */}
             <motion.div variants={itemVariants}>
-                <Card className="card-linear">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium text-[hsl(var(--text-primary))]">
-                            Órdenes Activas
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        {isLoading ? (
-                            <div className="p-4 space-y-3">
-                                {[...Array(3)].map((_, i) => (
-                                    <Skeleton key={i} className="h-20 w-full bg-[hsl(var(--surface-highlight))]" />
-                                ))}
+                <div className="flex items-center gap-3 mb-4">
+                    <h2 className="text-xl font-bold text-slate-900">Órdenes en Curso</h2>
+                    <div className="h-px bg-slate-200 flex-1"></div>
+                </div>
+
+                {isLoading ? (
+                    <div className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                            <Skeleton key={i} className="h-24 w-full rounded-2xl bg-white/50" />
+                        ))}
+                    </div>
+                ) : ordenesActivas.length === 0 ? (
+                    <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
+                        <CardContent className="p-12 text-center">
+                            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                                <Package className="h-8 w-8" />
                             </div>
-                        ) : ordenes.length === 0 ? (
-                            <div className="p-8 text-center">
-                                <Package className="h-12 w-12 text-[hsl(var(--text-muted))] mx-auto mb-3 opacity-50" />
-                                <p className="text-[hsl(var(--text-secondary))]">No tienes equipos en taller</p>
-                                <p className="text-sm text-[hsl(var(--text-muted))] mt-1">
-                                    Cuando dejes un equipo, aparecerá aquí
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="divide-y divide-[hsl(var(--border-subtle))]">
-                                {ordenes.map((orden) => {
-                                    const estado = estadoConfig[orden.estado] || estadoConfig.recibido
-                                    const Icon = estado.icon
-                                    return (
-                                        <Link key={orden.id} href={`/tracking/${orden.id}`}>
-                                            <div className="p-4 hover:bg-[hsl(var(--interactive-hover))] transition-colors cursor-pointer">
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-10 h-10 rounded-lg ${estado.bgColor} flex items-center justify-center`}>
-                                                            <Icon className={`h-5 w-5 ${estado.color}`} />
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-medium text-[hsl(var(--text-primary))]">
-                                                                {orden.equipo_tipo}
-                                                            </p>
-                                                            <p className="text-xs text-[hsl(var(--text-muted))]">
-                                                                {orden.equipo_marca} {orden.equipo_modelo} · {orden.numero}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <Badge className={`${estado.bgColor} ${estado.color} border-0 text-[10px]`}>
-                                                        {estado.label}
+                            <h3 className="font-semibold text-slate-900 text-lg">No hay equipos en taller</h3>
+                            <p className="text-slate-500 mt-2 max-w-sm mx-auto">
+                                Actualmente no tienes ninguna orden activa. Cuando traigas un equipo, aparecerá aquí automáticamente.
+                            </p>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="grid gap-4">
+                        {ordenesActivas.map((orden) => {
+                            const estado = estadoConfig[orden.estado] || estadoConfig.recibido
+                            const Icon = estado.icon
+
+                            return (
+                                <Link key={orden.id} href={`/tracking/${orden.id}`}>
+                                    <div className="group relative bg-white border border-slate-100 rounded-2xl p-5 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1">
+                                        <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+                                            {/* Icon Brand */}
+                                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                                <Smartphone className="h-7 w-7 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                                            </div>
+
+                                            {/* Info */}
+                                            <div className="flex-1">
+                                                <div className="flex flex-wrap items-center gap-3 mb-1">
+                                                    <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition-colors">
+                                                        {orden.equipo_tipo} {orden.equipo_marca}
+                                                    </h3>
+                                                    <Badge variant="outline" className="font-mono text-[10px] text-slate-400 bg-slate-50 border-slate-200">
+                                                        {orden.numero}
                                                     </Badge>
                                                 </div>
-                                                <div className="flex items-center justify-between text-xs">
-                                                    <span className="text-[hsl(var(--text-muted))] flex items-center gap-1">
-                                                        <Calendar className="h-3 w-3" />
-                                                        {format(new Date(orden.created_at), "d 'de' MMM", { locale: es })}
+                                                <div className="flex items-center gap-4 text-sm text-slate-500">
+                                                    <span className="flex items-center gap-1.5">
+                                                        <Calendar className="h-3.5 w-3.5" />
+                                                        {format(new Date(orden.created_at), "d MMM yyyy", { locale: es })}
                                                     </span>
-                                                    {orden.costo_estimado && (
-                                                        <span className="text-emerald-400 font-medium">
-                                                            ${orden.costo_estimado.toFixed(2)}
-                                                        </span>
+                                                    {orden.equipo_modelo && (
+                                                        <span>• {orden.equipo_modelo}</span>
                                                     )}
                                                 </div>
                                             </div>
-                                        </Link>
-                                    )
-                                })}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </motion.div>
 
-            {/* Help Section */}
-            <motion.div variants={itemVariants}>
-                <Card className="card-linear">
-                    <CardContent className="p-4">
-                        <p className="text-sm text-[hsl(var(--text-secondary))] mb-2">
-                            ¿Necesitas ayuda?
-                        </p>
-                        <p className="text-xs text-[hsl(var(--text-muted))]">
-                            Contacta al taller directamente para consultas sobre tu equipo.
-                            Puedes ver los detalles de cada orden haciendo clic en ella.
-                        </p>
-                    </CardContent>
-                </Card>
+                                            {/* Status & Price */}
+                                            <div className="flex flex-row md:flex-col items-center md:items-end gap-4 md:gap-2 w-full md:w-auto justify-between md:justify-end border-t md:border-0 border-slate-100 pt-4 md:pt-0 mt-2 md:mt-0">
+                                                <Badge className={`${estado.bgColor} ${estado.color} border ${estado.borderColor} px-3 py-1.5 rounded-lg flex items-center gap-1.5`}>
+                                                    <Icon className="h-3.5 w-3.5" />
+                                                    {estado.label}
+                                                </Badge>
+                                                {orden.costo_estimado && (
+                                                    <div className="text-right">
+                                                        <p className="text-xs text-slate-400 font-medium">Estimado</p>
+                                                        <p className="font-bold text-lg text-slate-900">${orden.costo_estimado.toFixed(2)}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300 hidden md:block">
+                                                <ArrowRight className="h-5 w-5 text-slate-300" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            )
+                        })}
+                    </div>
+                )}
             </motion.div>
         </motion.div>
     )
