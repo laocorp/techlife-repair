@@ -29,12 +29,13 @@
     /* Light glassmorphism */
 
     /* ========== TEXT COLORS ========== */
-    --text-primary: 215 28% 15%;
-    /* Slate 900+ - Main text (Darkened for better contrast) */
-    --text-secondary: 215 25% 40%;
-    /* Slate 600 - Secondary text (Darkened from 47%) */
-    --text-muted: 215 20% 55%;
-    /* Slate 500 - Muted/disabled (Darkened from 65%) */
+    /* ========== TEXT COLORS ========== */
+    --text-primary: 215 28% 13%;
+    /* Slate 900+ - Deepest dark for main text */
+    --text-secondary: 215 25% 35%;
+    /* Slate 700 - Much clearer secondary text */
+    --text-muted: 215 20% 50%;
+    /* Slate 500 - Readable muted text */
     --text-accent: 215 28% 17%;
     /* Slate 900 - Links */
 
@@ -76,10 +77,10 @@
     --glow-primary: none;
     --glow-success: none;
     --glow-purple: none;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.08);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.12), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.15), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.15), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 
     /* ========== SPACING SCALE ========== */
     --space-1: 0.25rem;
