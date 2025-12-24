@@ -71,6 +71,25 @@ export default function POSPage() {
         total,
     } = usePOSStore()
 
+    // Local discount
+    const [discount, setDiscount] = useState(0)
+
+    const [searchQuery, setSearchQuery] = useState('')
+    const [productos, setProductos] = useState<Producto[]>([])
+    const [filteredProducts, setFilteredProducts] = useState<Producto[]>([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [isSearching, setIsSearching] = useState(false)
+    const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
+    const [clientes, setClientes] = useState<Cliente[]>([])
+    const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+    const [isClienteDialogOpen, setIsClienteDialogOpen] = useState(false)
+    const [paymentMethod, setPaymentMethod] = useState<string>('efectivo')
+    const [amountReceived, setAmountReceived] = useState<string>('')
+    const [isProcessing, setIsProcessing] = useState(false)
+    const [clienteSearch, setClienteSearch] = useState('')
+
+    const searchInputRef = useRef<HTMLInputElement>(null)
+
     // Scanner Hook
     const handleScan = async (code: string) => {
         if (!user?.empresa_id) return
@@ -133,24 +152,7 @@ export default function POSPage() {
         }
     }, [selectedCliente])
 
-    // Local discount
-    const [discount, setDiscount] = useState(0)
 
-    const [searchQuery, setSearchQuery] = useState('')
-    const [productos, setProductos] = useState<Producto[]>([])
-    const [filteredProducts, setFilteredProducts] = useState<Producto[]>([])
-    const [isLoading, setIsLoading] = useState(true)
-    const [isSearching, setIsSearching] = useState(false)
-    const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
-    const [clientes, setClientes] = useState<Cliente[]>([])
-    const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
-    const [isClienteDialogOpen, setIsClienteDialogOpen] = useState(false)
-    const [paymentMethod, setPaymentMethod] = useState<string>('efectivo')
-    const [amountReceived, setAmountReceived] = useState<string>('')
-    const [isProcessing, setIsProcessing] = useState(false)
-    const [clienteSearch, setClienteSearch] = useState('')
-
-    const searchInputRef = useRef<HTMLInputElement>(null)
 
     // Load products
     const loadProducts = useCallback(async () => {
