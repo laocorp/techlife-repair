@@ -24,6 +24,7 @@ import {
     Command,
     Columns3,
     Shield,
+    Crown,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -49,37 +50,40 @@ const menuItems = [
     {
         title: 'General',
         items: [
-            { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['admin', 'tecnico', 'vendedor'] },
-            { name: 'Kanban', href: '/kanban', icon: Columns3, roles: ['admin', 'tecnico', 'vendedor'] },
-            { name: 'Punto de Venta', href: '/pos', icon: ShoppingCart, roles: ['admin', 'vendedor'] },
-            { name: 'Órdenes', href: '/ordenes', icon: Wrench, roles: ['admin', 'tecnico', 'vendedor'] },
+            { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['superadmin', 'admin', 'tecnico', 'vendedor'] },
+            { name: 'Kanban', href: '/kanban', icon: Columns3, roles: ['superadmin', 'admin', 'tecnico', 'vendedor'] },
+            { name: 'Punto de Venta', href: '/pos', icon: ShoppingCart, roles: ['superadmin', 'admin', 'vendedor'] },
+            { name: 'Órdenes', href: '/ordenes', icon: Wrench, roles: ['superadmin', 'admin', 'tecnico', 'vendedor'] },
         ],
     },
     {
         title: 'Gestión',
         items: [
-            { name: 'Inventario', href: '/inventario', icon: Package, roles: ['admin', 'tecnico', 'vendedor'] },
-            { name: 'Clientes', href: '/clientes', icon: Users, roles: ['admin', 'vendedor'] },
-            { name: 'Catálogo', href: '/catalogo', icon: Tag, roles: ['admin'] },
-            { name: 'Caja', href: '/caja', icon: Wallet, roles: ['admin', 'vendedor'] },
-            { name: 'Usuarios', href: '/usuarios', icon: Shield, roles: ['admin'] },
+            { name: 'Inventario', href: '/inventario', icon: Package, roles: ['superadmin', 'admin', 'tecnico', 'vendedor'] },
+            { name: 'Clientes', href: '/clientes', icon: Users, roles: ['superadmin', 'admin', 'vendedor'] },
+            { name: 'Catálogo', href: '/catalogo', icon: Tag, roles: ['superadmin', 'admin'] },
+            { name: 'Caja', href: '/caja', icon: Wallet, roles: ['superadmin', 'admin', 'vendedor'] },
+            { name: 'Usuarios', href: '/usuarios', icon: Shield, roles: ['superadmin', 'admin'] },
         ],
     },
     {
         title: 'Finanzas',
         items: [
-            { name: 'Facturación', href: '/facturacion', icon: FileText, roles: ['admin', 'vendedor'] },
-            { name: 'Contabilidad', href: '/contabilidad', icon: Wallet, roles: ['admin'] },
-            { name: 'Reportes', href: '/reportes', icon: BarChart3, roles: ['admin'] },
+            { name: 'Facturación', href: '/facturacion', icon: FileText, roles: ['superadmin', 'admin', 'vendedor'] },
+            { name: 'Contabilidad', href: '/contabilidad', icon: Wallet, roles: ['superadmin', 'admin'] },
+            { name: 'Reportes', href: '/reportes', icon: BarChart3, roles: ['superadmin', 'admin'] },
         ],
     },
 ]
 
 const bottomItems = [
-    { name: 'Mi Suscripción', href: '/suscripcion', icon: Tag, roles: ['admin'] },
-    { name: 'Configuración', href: '/configuracion', icon: Settings, roles: ['admin'] },
-    { name: 'Ayuda', href: '/ayuda', icon: HelpCircle, roles: ['admin', 'tecnico', 'vendedor'] },
+    { name: 'Mi Suscripción', href: '/suscripcion', icon: Tag, roles: ['admin', 'superadmin'] },
+    { name: 'Configuración', href: '/configuracion', icon: Settings, roles: ['admin', 'superadmin'] },
+    { name: 'Ayuda', href: '/ayuda', icon: HelpCircle, roles: ['admin', 'tecnico', 'vendedor', 'superadmin'] },
 ]
+
+// Super Admin only item
+const superAdminItem = { name: 'Super Admin', href: '/superadmin', icon: Crown, roles: ['superadmin'] }
 
 export function Sidebar({ isCollapsed, onToggle, isMobile, isOpenMobile, onCloseMobile }: SidebarProps) {
     if (isMobile) {
@@ -293,6 +297,24 @@ function SidebarInner({ isCollapsed, onToggle, isMobile, onCloseMobile }: { isCo
 
                     return <div key={item.href}>{linkContent}</div>
                 })}
+
+                {/* Super Admin Button - Only for superadmin users */}
+                {user?.rol === 'superadmin' && (
+                    <Link
+                        href={superAdminItem.href}
+                        onClick={isMobile ? onCloseMobile : undefined}
+                        className={cn(
+                            'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-all mt-2',
+                            isActiveRoute(superAdminItem.href)
+                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30'
+                                : 'bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-600 hover:from-amber-500/20 hover:to-orange-500/20 border border-amber-500/30',
+                            isCollapsed && 'justify-center px-0'
+                        )}
+                    >
+                        <Crown className="h-4 w-4 flex-shrink-0" />
+                        {!isCollapsed && <span>Super Admin</span>}
+                    </Link>
+                )}
             </div>
 
             {/* User Section */}
