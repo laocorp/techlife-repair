@@ -45,7 +45,6 @@ async function main() {
             data: {
                 nombre: 'RepairApp System',
                 ruc: '0000000000001',
-                slug: 'system',
                 direccion: 'Sistema',
                 telefono: '0000000000',
                 email: 'system@repairapp.com',
