@@ -160,7 +160,10 @@ export default function POSPage() {
 
         try {
             const response = await fetch(`/api/productos?empresa_id=${user.empresa_id}`)
-            if (!response.ok) throw new Error('Error al cargar productos')
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error(errorData.error || errorData.details || 'Error al cargar productos')
+            }
 
             const data = await response.json()
             setProductos(data || [])

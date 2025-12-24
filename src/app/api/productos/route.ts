@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         console.error('Error fetching productos:', error)
         return NextResponse.json(
-            { error: 'Error al obtener productos' },
+            { error: 'Error al obtener productos', details: error instanceof Error ? error.message : String(error) },
             { status: 500 }
         )
     }
