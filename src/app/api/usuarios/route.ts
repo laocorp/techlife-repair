@@ -32,7 +32,14 @@ export async function GET(request: NextRequest) {
                 id: true,
                 nombre: true,
                 email: true,
-                rol: true
+                rol: true,
+                role_id: true,
+                role: {
+                    select: {
+                        id: true,
+                        nombre: true,
+                    }
+                }
             },
             orderBy: { nombre: 'asc' }
         })

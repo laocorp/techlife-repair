@@ -4,8 +4,9 @@
 import { useAuthStore } from '@/stores'
 import { UserRole } from '@/types'
 
-// Permission definitions per role
-const rolePermissions: Record<UserRole, string[]> = {
+// Permission definitions per role (legacy - fallback when role_id is not set)
+// These will be used when user doesn't have a role_id assigned
+const legacyRolePermissions: Record<UserRole, string[]> = {
     admin: [
         'dashboard.view',
         'dashboard.stats',
@@ -42,6 +43,9 @@ const rolePermissions: Record<UserRole, string[]> = {
         'users.create',
         'users.update',
         'users.delete',
+        'roles.view',
+        'roles.manage',
+        'logs.view',
     ],
     tecnico: [
         'dashboard.view',
@@ -72,10 +76,13 @@ const rolePermissions: Record<UserRole, string[]> = {
     ],
 }
 
-// Check if role has a specific permission
+// For backwards compatibility
+export const rolePermissions = legacyRolePermissions
+
+// Check if role has a specific permission (legacy system)
 export function hasPermission(role: UserRole | undefined | null, permission: string): boolean {
     if (!role) return false
-    return rolePermissions[role]?.includes(permission) ?? false
+    return legacyRolePermissions[role]?.includes(permission) ?? false
 }
 
 // Hook to check permissions

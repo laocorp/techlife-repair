@@ -57,6 +57,8 @@ model Empresa {
   suscripciones         Suscripcion[]
   facturas              FacturacionElectronica[]
   pagos                 Pago[]
+  roles                 Role[]
+  activity_logs         ActivityLog[]
   
   @@map("empresas")
 }
@@ -66,7 +68,9 @@ model Usuario {
   email       String    @unique
   password    String
   nombre      String
-  rol         String    @default("tecnico") // 'admin' | 'tecnico' | 'vendedor'
+  rol         String    @default("tecnico") // 'admin' | 'tecnico' | 'vendedor' - Mantener para compatibilidad
+  role_id     String?   // Nueva relación con Role (opcional para compatibilidad)
+  role        Role?     @relation(fields: [role_id], references: [id])
   activo      Boolean   @default(true)
   empresa_id  String
   empresa     Empresa   @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
@@ -79,6 +83,7 @@ model Usuario {
   ordenes_creadas   OrdenServicio[] @relation("CreadoPor")
   cajas             Caja[]
   pagos_registrados Pago[]
+  activity_logs     ActivityLog[]
   
   @@map("usuarios")
 }
@@ -523,4 +528,66 @@ model FacturacionElectronica {
   updated_at              DateTime  @updatedAt
   
   @@map("facturacion_electronica")
+}
+
+// ============ RBAC - ROLES Y PERMISOS ============
+
+model Role {
+  id          String   @id @default(uuid())
+  nombre      String   @unique
+  descripcion String?
+  es_sistema  Boolean  @default(false) // Roles del sistema no se pueden eliminar
+  empresa_id  String?  // null = rol global, string = rol de empresa específica
+  empresa     Empresa? @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
+  
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  
+  permisos    RolePermission[]
+  usuarios    Usuario[]
+  
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  codigo      String   @unique  // ej: "orders.create", "inventory.delete"
+  nombre      String            // ej: "Crear Órdenes"
+  modulo      String            // ej: "orders", "inventory", "cash"
+  descripcion String?
+  
+  roles       RolePermission[]
+  
+  @@map("permissions")
+}
+
+model RolePermission {
+  role_id       String
+  permission_id String
+  role          Role       @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  permission    Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+  
+  @@id([role_id, permission_id])
+  @@map("role_permissions")
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  empresa_id  String
+  usuario_id  String?
+  accion      String   // "create", "update", "delete", "login", "logout"
+  modulo      String   // "orders", "inventory", "users", etc.
+  entidad_id  String?  // ID del registro afectado
+  detalles    Json?    // Datos adicionales (antes/después)
+  ip_address  String?
+  user_agent  String?
+  created_at  DateTime @default(now())
+  
+  empresa     Empresa  @relation(fields: [empresa_id], references: [id], onDelete: Cascade)
+  usuario     Usuario? @relation(fields: [usuario_id], references: [id], onDelete: SetNull)
+  
+  @@index([empresa_id, created_at])
+  @@index([usuario_id])
+  @@index([modulo, accion])
+  @@map("activity_logs")
 }

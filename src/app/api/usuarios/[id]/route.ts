@@ -48,12 +48,13 @@ export async function PATCH(
         const { id } = await params
         const body = await request.json()
 
-        const { nombre, rol, activo } = body
+        const { nombre, rol, role_id, activo } = body
 
         const updateData: any = {}
 
         if (nombre !== undefined) updateData.nombre = nombre
         if (rol !== undefined) updateData.rol = rol
+        if (role_id !== undefined) updateData.role_id = role_id
         if (activo !== undefined) updateData.activo = activo
 
         const usuario = await prisma.usuario.update({
@@ -64,6 +65,13 @@ export async function PATCH(
                 nombre: true,
                 email: true,
                 rol: true,
+                role_id: true,
+                role: {
+                    select: {
+                        id: true,
+                        nombre: true,
+                    }
+                },
                 activo: true
             }
         })
