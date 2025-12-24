@@ -10,7 +10,12 @@ export async function GET(
         const { id } = await params
 
         const producto = await prisma.producto.findUnique({
-            where: { id }
+            where: { id },
+            include: {
+                imagenes: {
+                    orderBy: { orden: 'asc' }
+                }
+            }
         })
 
         if (!producto) {
@@ -41,6 +46,7 @@ export async function PATCH(
 
         const {
             codigo,
+            codigo_barras,
             nombre,
             descripcion,
             precio_venta,
@@ -49,12 +55,14 @@ export async function PATCH(
             stock_minimo,
             categoria,
             marca,
-            activo
+            activo,
+            imagenes
         } = body
 
         const updateData: any = {}
 
         if (codigo !== undefined) updateData.codigo = codigo
+        if (codigo_barras !== undefined) updateData.codigo_barras = codigo_barras
         if (nombre !== undefined) updateData.nombre = nombre
         if (descripcion !== undefined) updateData.descripcion = descripcion
         if (precio_venta !== undefined) updateData.precio_venta = parseFloat(precio_venta)
@@ -65,9 +73,23 @@ export async function PATCH(
         if (marca !== undefined) updateData.marca = marca
         if (activo !== undefined) updateData.activo = activo
 
+        if (imagenes !== undefined) {
+            updateData.imagenes = {
+                deleteMany: {},
+                create: Array.isArray(imagenes) ? imagenes.map((url: string, index: number) => ({
+                    url,
+                    orden: index,
+                    principal: index === 0
+                })) : []
+            }
+        }
+
         const producto = await prisma.producto.update({
             where: { id },
-            data: updateData
+            data: updateData,
+            include: {
+                imagenes: true
+            }
         })
 
         return NextResponse.json(producto)
@@ -75,6 +97,13 @@ export async function PATCH(
         console.error('Error updating producto:', error)
 
         if (error.code === 'P2002') {
+            const target = error.meta?.target || []
+            if (target.includes('codigo')) {
+                return NextResponse.json({ error: 'Ya existe un producto con ese código interno' }, { status: 409 })
+            }
+            if (target.includes('codigo_barras')) {
+                return NextResponse.json({ error: 'Ya existe un producto con ese código de barras' }, { status: 409 })
+            }
             return NextResponse.json(
                 { error: 'Ya existe un producto con ese código' },
                 { status: 409 }

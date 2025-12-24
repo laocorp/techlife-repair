@@ -45,10 +45,12 @@ import {
     TrendingDown,
     Filter,
 } from 'lucide-react'
+import { ImageGalleryUploader } from '@/components/ui/image-gallery-uploader'
 
 interface Producto {
     id: string
     codigo: string
+    codigo_barras: string | null
     nombre: string
     descripcion: string | null
     precio_venta: number
@@ -58,6 +60,7 @@ interface Producto {
     categoria: string | null
     marca: string | null
     activo: boolean
+    imagenes?: { url: string }[]
 }
 
 export default function InventarioPage() {
@@ -73,6 +76,7 @@ export default function InventarioPage() {
     // Form state
     const [formData, setFormData] = useState({
         codigo: '',
+        codigo_barras: '',
         nombre: '',
         descripcion: '',
         precio_venta: '',
@@ -81,6 +85,7 @@ export default function InventarioPage() {
         stock_minimo: '',
         categoria: '',
         marca: '',
+        imagenes: [] as string[]
     })
 
     const loadProductos = useCallback(async () => {
@@ -131,6 +136,7 @@ export default function InventarioPage() {
         setSelectedProducto(null)
         setFormData({
             codigo: '',
+            codigo_barras: '',
             nombre: '',
             descripcion: '',
             precio_venta: '',
@@ -139,6 +145,7 @@ export default function InventarioPage() {
             stock_minimo: '5',
             categoria: '',
             marca: '',
+            imagenes: []
         })
         setIsDialogOpen(true)
     }
@@ -147,6 +154,7 @@ export default function InventarioPage() {
         setSelectedProducto(producto)
         setFormData({
             codigo: producto.codigo || '',
+            codigo_barras: producto.codigo_barras || '',
             nombre: producto.nombre,
             descripcion: producto.descripcion || '',
             precio_venta: String(producto.precio_venta),
@@ -155,6 +163,7 @@ export default function InventarioPage() {
             stock_minimo: String(producto.stock_minimo),
             categoria: producto.categoria || '',
             marca: producto.marca || '',
+            imagenes: producto.imagenes ? producto.imagenes.map(i => i.url) : []
         })
         setIsDialogOpen(true)
     }
@@ -170,6 +179,7 @@ export default function InventarioPage() {
             const productoData = {
                 empresa_id: user?.empresa_id,
                 codigo: formData.codigo,
+                codigo_barras: formData.codigo_barras || null,
                 nombre: formData.nombre,
                 descripcion: formData.descripcion || null,
                 precio_venta: formData.precio_venta,
@@ -178,6 +188,7 @@ export default function InventarioPage() {
                 stock_minimo: formData.stock_minimo || '5',
                 categoria: formData.categoria || null,
                 marca: formData.marca || null,
+                imagenes: formData.imagenes
             }
 
             let response
@@ -432,7 +443,7 @@ export default function InventarioPage() {
                     <div className="space-y-5 py-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label className="text-gray-700">Código <span className="text-red-500">*</span></Label>
+                                <Label className="text-gray-700">Código SKU <span className="text-red-500">*</span></Label>
                                 <Input
                                     value={formData.codigo}
                                     onChange={(e) => setFormData(f => ({ ...f, codigo: e.target.value }))}
@@ -441,12 +452,41 @@ export default function InventarioPage() {
                                 />
                             </div>
                             <div className="space-y-2">
+                                <Label className="text-gray-700">Código de Barras</Label>
+                                <Input
+                                    value={formData.codigo_barras}
+                                    onChange={(e) => setFormData(f => ({ ...f, codigo_barras: e.target.value }))}
+                                    className="bg-white border-gray-200 font-mono"
+                                    placeholder="EAN/UPC"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-gray-700">Imágenes del Producto</Label>
+                            <ImageGalleryUploader
+                                images={formData.imagenes}
+                                onChange={(imgs) => setFormData(f => ({ ...f, imagenes: imgs }))}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
                                 <Label className="text-gray-700">Marca</Label>
                                 <Input
                                     value={formData.marca}
                                     onChange={(e) => setFormData(f => ({ ...f, marca: e.target.value }))}
                                     className="bg-white border-gray-200"
                                     placeholder="Marca"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-gray-700">Categoría</Label>
+                                <Input
+                                    value={formData.categoria}
+                                    onChange={(e) => setFormData(f => ({ ...f, categoria: e.target.value }))}
+                                    className="bg-white border-gray-200"
+                                    placeholder="Categoría"
                                 />
                             </div>
                         </div>

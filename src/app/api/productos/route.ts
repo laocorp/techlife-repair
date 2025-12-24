@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
             where.OR = [
                 { nombre: { contains: search, mode: 'insensitive' } },
                 { codigo: { contains: search, mode: 'insensitive' } },
+                { codigo_barras: { contains: search, mode: 'insensitive' } },
                 { marca: { contains: search, mode: 'insensitive' } }
             ]
         }
@@ -37,6 +38,11 @@ export async function GET(request: NextRequest) {
 
         const productos = await prisma.producto.findMany({
             where,
+            include: {
+                imagenes: {
+                    orderBy: { orden: 'asc' }
+                }
+            },
             orderBy: { nombre: 'asc' }
         })
 
@@ -58,6 +64,7 @@ export async function POST(request: NextRequest) {
         const {
             empresa_id,
             codigo,
+            codigo_barras,
             nombre,
             descripcion,
             categoria,
@@ -65,10 +72,11 @@ export async function POST(request: NextRequest) {
             precio_compra,
             precio_venta,
             stock,
-            stock_minimo
+            stock_minimo,
+            imagenes // Array of URLs
         } = body
 
-        if (!empresa_id || !codigo || !nombre || !precio_compra || !precio_venta) {
+        if (!empresa_id || !codigo || !nombre || !precio_venta) {
             return NextResponse.json(
                 { error: 'Campos requeridos faltantes' },
                 { status: 400 }
@@ -79,14 +87,25 @@ export async function POST(request: NextRequest) {
             data: {
                 empresa_id,
                 codigo,
+                codigo_barras,
                 nombre,
                 descripcion,
                 categoria,
                 marca,
-                precio_compra: parseFloat(precio_compra),
+                precio_compra: precio_compra ? parseFloat(precio_compra) : 0,
                 precio_venta: parseFloat(precio_venta),
                 stock: parseInt(stock) || 0,
-                stock_minimo: parseInt(stock_minimo) || 5
+                stock_minimo: parseInt(stock_minimo) || 5,
+                imagenes: imagenes && imagenes.length > 0 ? {
+                    create: imagenes.map((url: string, index: number) => ({
+                        url,
+                        orden: index,
+                        principal: index === 0
+                    }))
+                } : undefined
+            },
+            include: {
+                imagenes: true
             }
         })
 
@@ -95,6 +114,13 @@ export async function POST(request: NextRequest) {
         console.error('Error creating producto:', error)
 
         if (error.code === 'P2002') {
+            const target = error.meta?.target || []
+            if (target.includes('codigo')) {
+                return NextResponse.json({ error: 'Ya existe un producto con ese código interno' }, { status: 409 })
+            }
+            if (target.includes('codigo_barras')) {
+                return NextResponse.json({ error: 'Ya existe un producto con ese código de barras' }, { status: 409 })
+            }
             return NextResponse.json(
                 { error: 'Ya existe un producto con ese código' },
                 { status: 409 }

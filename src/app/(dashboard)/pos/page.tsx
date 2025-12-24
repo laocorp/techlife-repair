@@ -36,14 +36,17 @@ import {
     X,
     Check,
     Percent,
+    Barcode,
+    Image as ImageIcon
 } from 'lucide-react'
+import { useBarcodeScanner } from '@/hooks/use-barcode-scanner'
 
-interface Producto {
-    id: string
-    codigo: string | null
-    nombre: string
-    precio_venta: number
-    stock: number
+id: string
+codigo: string | null
+nombre: string
+precio_venta: number
+stock: number
+imagenes ?: { url: string; principal: boolean }[]
 }
 
 interface Cliente {
@@ -65,7 +68,70 @@ export default function POSPage() {
         subtotal,
         totalIva,
         total,
+        total,
     } = usePOSStore()
+
+    // Scanner Hook
+    const handleScan = async (code: string) => {
+        if (!user?.empresa_id) return
+
+        toast.info(`Buscando producto: ${code}`)
+        try {
+            const res = await fetch(`/api/productos/scan?empresa_id=${user.empresa_id}&barcode=${code}`)
+            if (res.ok) {
+                const producto = await res.json()
+                handleAddProduct(producto)
+            } else {
+                toast.error(`Producto no encontrado: ${code}`)
+            }
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    useBarcodeScanner({ onScan: handleScan })
+
+    // Persistence
+    useEffect(() => {
+        const savedCart = localStorage.getItem('pos_cart')
+        const savedClient = localStorage.getItem('pos_client')
+
+        if (savedCart) {
+            try {
+                // We depend on usePOSStore to have a hydration method or we manually add items
+                // Since usePOSStore is zuztand, we can't easily bulk set unless defined.
+                // Assuming we just want to restore if empty? 
+                // Better approach: If store is persistent (persist middleware), we don't need this.
+                // Assuming store is NOT persistent by default:
+
+                // For this quick implementation, let's just use manual logic if store is empty
+                const parsed = JSON.parse(savedCart)
+                if (items.length === 0 && parsed.length > 0) {
+                    parsed.forEach((item: any) => addItem(item.producto))
+                }
+            } catch (e) {
+                console.error('Error loading cart', e)
+            }
+        }
+
+        if (savedClient) {
+            try {
+                setSelectedCliente(JSON.parse(savedClient))
+            } catch (e) { }
+        }
+    }, [])
+
+    useEffect(() => {
+        localStorage.setItem('pos_cart', JSON.stringify(items))
+    }, [items])
+
+    useEffect(() => {
+        if (selectedCliente) {
+            localStorage.setItem('pos_client', JSON.stringify(selectedCliente))
+        } else {
+            localStorage.removeItem('pos_client')
+        }
+    }, [selectedCliente])
 
     // Local discount
     const [discount, setDiscount] = useState(0)
@@ -281,56 +347,65 @@ export default function POSPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
-                            {filteredProducts.map((producto) => (
-                                <motion.div
-                                    key={producto.id}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                >
-                                    <div
-                                        className={`
-                                            group relative p-4 rounded-2xl border cursor-pointer transition-all duration-300
-                                            backdrop-blur-md flex flex-col h-full justify-between
-                                            ${producto.stock <= 0
-                                                ? 'bg-slate-50/50 border-slate-200 opacity-60 grayscale'
-                                                : 'bg-white/40 border-white/40 hover:bg-white/60 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
-                                            }
-                                        `}
-                                        onClick={() => handleAddProduct(producto)}
+                            {filteredProducts.map((producto) => {
+                                const mainImage = producto.imagenes?.find(i => i.principal)?.url || producto.imagenes?.[0]?.url
+
+                                return (
+                                    <motion.div
+                                        key={producto.id}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
                                     >
-                                        <div>
-                                            <div className="flex justify-between items-start mb-3">
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="bg-white/50 text-muted-foreground border-white/20"
-                                                >
-                                                    Code: {producto.codigo || 'N/A'}
-                                                </Badge>
-                                                <span className={`text-xs font-medium px-2 py-1 rounded-full ${producto.stock <= 5
+                                        <div
+                                            className={`
+                                            group relative p-3 rounded-2xl border cursor-pointer transition-all duration-300
+                                            backdrop-blur-md flex flex-col h-full justify-between overflow-hidden
+                                            ${producto.stock <= 0
+                                                    ? 'bg-slate-50/50 border-slate-200 opacity-60 grayscale'
+                                                    : 'bg-white/40 border-white/40 hover:bg-white/60 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-500/5'
+                                                }
+                                        `}
+                                            onClick={() => handleAddProduct(producto)}
+                                        >
+                                            <div className="flex gap-3 mb-2">
+                                                <div className="h-16 w-16 rounded-lg bg-white shrink-0 overflow-hidden border border-slate-100 flex items-center justify-center">
+                                                    {mainImage ? (
+                                                        <img src={mainImage} alt={producto.nombre} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        <Package className="h-8 w-8 text-slate-300" />
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <Badge variant="secondary" className="bg-white/50 text-[10px] h-5 px-1.5 border-white/20">
+                                                            {producto.codigo || 'N/A'}
+                                                        </Badge>
+                                                    </div>
+                                                    <h3 className="font-semibold text-sm text-foreground line-clamp-2 leading-tight">
+                                                        {producto.nombre}
+                                                    </h3>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-auto flex justify-between items-end">
+                                                <div>
+                                                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${producto.stock <= 5
                                                         ? 'bg-amber-100 text-amber-700'
                                                         : 'bg-emerald-100 text-emerald-700'
-                                                    }`}>
-                                                    Stock: {producto.stock}
-                                                </span>
-                                            </div>
-                                            <h3 className="font-semibold text-foreground line-clamp-2 mb-2 leading-tight">
-                                                {producto.nombre}
-                                            </h3>
-                                        </div>
-
-                                        <div className="mt-2 pt-3 border-t border-black/5 flex justify-between items-end">
-                                            <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-                                                ${Number(producto.precio_venta).toFixed(2)}
-                                            </p>
-                                            <div className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
-                                                <Plus className="h-5 w-5" />
+                                                        }`}>
+                                                        Stock: {producto.stock}
+                                                    </span>
+                                                </div>
+                                                <p className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
+                                                    ${Number(producto.precio_venta).toFixed(2)}
+                                                </p>
                                             </div>
                                         </div>
-                                    </div>
-                                </motion.div>
-                            ))}
+                                    </motion.div>
+                                )
+                            })}
                         </div>
                     )}
                 </ScrollArea>

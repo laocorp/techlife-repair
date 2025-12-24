@@ -229,12 +229,14 @@ model Pago {
 model Producto {
   id              String    @id @default(uuid())
   codigo          String
+  // SKU Interno
+  codigo_barras   String?   @unique // EAN/UPC para escáner
   nombre          String
   descripcion     String?
   categoria       String?
   marca           String?
   
-  precio_compra   Decimal   @db.Decimal(10, 2)
+  precio_compra   Decimal   @default(0) @db.Decimal(10, 2)
   precio_venta    Decimal   @db.Decimal(10, 2)
   stock           Int       @default(0)
   stock_minimo    Int       @default(5)
@@ -250,9 +252,23 @@ model Producto {
   // Relaciones
   detalles_venta  VentaDetalle[]
   ordenes         OrdenRepuesto[]
+  imagenes        ProductoImagen[]
   
   @@unique([empresa_id, codigo])
   @@map("productos")
+}
+
+model ProductoImagen {
+  id          String   @id @default(uuid())
+  url         String
+  orden       Int      @default(0)
+  principal   Boolean  @default(false)
+  producto_id String
+  producto    Producto @relation(fields: [producto_id], references: [id], onDelete: Cascade)
+  
+  created_at  DateTime @default(now())
+  
+  @@map("producto_imagenes")
 }
 
 // ============ VENTAS / POS ============
