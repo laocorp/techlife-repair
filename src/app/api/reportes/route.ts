@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
             },
             select: { total: true }
         })
-        const ventasTotal = ventas.reduce((acc, v) => acc + Number(v.total || 0), 0)
+        const ventasTotal = ventas.reduce((acc: number, v: any) => acc + Number(v.total || 0), 0)
 
         // Get completed orders count
         const ordenesCompletadas = await prisma.ordenServicio.count({

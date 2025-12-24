@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
         ])
 
         // Filter low stock
-        const lowStock = lowStockProducts.filter(p => p.stock <= p.stock_minimo)
+        const lowStock = lowStockProducts.filter((p: { stock: number; stock_minimo: number }) => p.stock <= p.stock_minimo)
 
         return NextResponse.json({
             stats: {

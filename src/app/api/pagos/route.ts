@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
     try {
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
         })
         if (!orden) return NextResponse.json({ error: 'Orden no encontrada' }, { status: 404 })
 
-        const result = await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             // A. Create Pago
             const pago = await tx.pago.create({
                 data: {
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
             const allPagos = await tx.pago.findMany({
                 where: { orden_id: orden_id }
             })
-            const totalPagado = allPagos.reduce((acc, p) => acc + Number(p.monto), 0)
+            const totalPagado = allPagos.reduce((acc: number, p: any) => acc + Number(p.monto), 0)
 
             // Determine status
             const costoFinal = Number(orden.costo_final || 0)

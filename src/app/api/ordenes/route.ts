@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 // GET /api/ordenes - Obtener órdenes de la empresa
 export async function GET(request: NextRequest) {
@@ -131,7 +132,7 @@ export async function POST(request: NextRequest) {
             })
         }
 
-        const orden = await prisma.$transaction(async (tx) => {
+        const orden = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             // 1. Process Stock Deduction
             if (repuestosCreateData.length > 0) {
                 for (const item of repuestosCreateData) {

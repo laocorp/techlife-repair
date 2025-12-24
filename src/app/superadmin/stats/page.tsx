@@ -334,7 +334,7 @@ export default function StatsPage() {
                                                         paddingAngle={5}
                                                         dataKey="total"
                                                         nameKey="plan"
-                                                        label={({ plan, percent }) => `${plan} ${(percent * 100).toFixed(0)}%`}
+                                                        label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                                                     >
                                                         {stats.empresasPorPlan.map((_, index) => (
                                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

@@ -40,7 +40,7 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
                 accion: params.accion,
                 modulo: params.modulo,
                 entidad_id: params.entidadId || null,
-                detalles: params.detalles ? (params.detalles as Prisma.InputJsonValue) : Prisma.JsonNull,
+                detalles: params.detalles ? (params.detalles as any) : null,
                 ip_address: params.ipAddress || null,
                 user_agent: params.userAgent || null,
             },

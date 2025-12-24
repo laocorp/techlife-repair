@@ -31,7 +31,7 @@ export async function GET(
         return NextResponse.json({
             ...role,
             usuarios_count: role._count.usuarios,
-            permisos: role.permisos.map((rp) => rp.permission),
+            permisos: role.permisos.map((rp: any) => rp.permission),
         })
     } catch (error: unknown) {
         console.error('Error fetching role:', error)
@@ -102,7 +102,7 @@ export async function PATCH(
 
         return NextResponse.json({
             ...updatedRole,
-            permisos: updatedRole.permisos.map((rp) => rp.permission),
+            permisos: updatedRole.permisos.map((rp: any) => rp.permission),
         })
     } catch (error: unknown) {
         console.error('Error updating role:', error)

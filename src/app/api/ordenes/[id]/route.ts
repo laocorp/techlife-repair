@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 // GET /api/ordenes/[id] - Obtener una orden
 export async function GET(
@@ -78,7 +79,7 @@ export async function PATCH(
             repuestos // Array of { producto_id, cantidad, precio_unitario }
         } = body
 
-        const orden = await prisma.$transaction(async (tx) => {
+        const orden = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             // 1. Handle Repuestos (Stock Management)
             if (repuestos !== undefined && Array.isArray(repuestos)) {
                 // A. Revert Stock for EXISTING items (Return to shelf)

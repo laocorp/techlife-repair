@@ -13,7 +13,7 @@ export async function GET() {
         })
 
         // Group permissions by module
-        const grouped = permissions.reduce((acc, permission) => {
+        const grouped = permissions.reduce((acc: any, permission: any) => {
             if (!acc[permission.modulo]) {
                 acc[permission.modulo] = []
             }
