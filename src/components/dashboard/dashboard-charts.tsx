@@ -13,27 +13,6 @@ import {
 } from 'recharts'
 import { motion } from 'framer-motion'
 
-// Sample chart data
-const revenueData = [
-    { name: 'Lun', value: 1200 },
-    { name: 'Mar', value: 1800 },
-    { name: 'Mié', value: 1400 },
-    { name: 'Jue', value: 2200 },
-    { name: 'Vie', value: 1900 },
-    { name: 'Sáb', value: 2800 },
-    { name: 'Dom', value: 2100 },
-]
-
-const ordersData = [
-    { name: 'Lun', ordenes: 8 },
-    { name: 'Mar', ordenes: 12 },
-    { name: 'Mié', ordenes: 9 },
-    { name: 'Jue', ordenes: 15 },
-    { name: 'Vie', ordenes: 11 },
-    { name: 'Sáb', ordenes: 18 },
-    { name: 'Dom', ordenes: 14 },
-]
-
 const itemVariants = {
     hidden: { opacity: 0, y: 12 },
     show: {
@@ -48,9 +27,24 @@ interface DashboardChartsProps {
         ventas_mes: number
         ordenes_hoy: number
     } | null
+    charts?: {
+        name: string
+        sales: number
+        orders: number
+        originalDate?: string
+    }[]
 }
 
-export default function DashboardCharts({ stats }: DashboardChartsProps) {
+export default function DashboardCharts({ stats, charts = [] }: DashboardChartsProps) {
+    // Reverse charts if needed, API returns desc or asc? API loops today backwards (i--), so [Today, Yesterday...]. 
+    // Recharts usually wants Left->Right as Old->New.
+    // The API loop was: for (i=6; i>=0; i--) { subDays(today, i) }
+    // i=6 -> 6 days ago. i=0 -> Today.
+    // So order is [6 days ago, ..., Today]. This is CORRECT for charts (Left to Right).
+
+    // If no data, show empty state or simple placeholder, but parent likely sends correct structure.
+    // We can fallback to empty array which renders empty axis.
+
     return (
         <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Revenue Chart */}
@@ -62,11 +56,11 @@ export default function DashboardCharts({ stats }: DashboardChartsProps) {
                     </div>
                     <div className="text-right">
                         <p className="text-lg font-bold text-slate-900">${((stats?.ventas_mes || 0)).toFixed(0)}</p>
-                        <p className="text-xs text-emerald-600">+23% vs semana pasada</p>
+                        <p className="text-xs text-emerald-600">Total acumulado</p>
                     </div>
                 </div>
                 <ResponsiveContainer width="100%" height={200}>
-                    <AreaChart data={revenueData}>
+                    <AreaChart data={charts}>
                         <defs>
                             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#0f172a" stopOpacity={0.1} />
@@ -86,7 +80,7 @@ export default function DashboardCharts({ stats }: DashboardChartsProps) {
                             fontSize={11}
                             tickLine={false}
                             axisLine={false}
-                            tickFormatter={(value) => `$${value}`}
+                            tickFormatter={(value: any) => `$${value}`}
                         />
                         <Tooltip
                             contentStyle={{
@@ -97,10 +91,11 @@ export default function DashboardCharts({ stats }: DashboardChartsProps) {
                                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                             }}
                             labelStyle={{ color: '#0f172a' }}
+                            formatter={(value: any) => [`$${value}`, 'Ventas']}
                         />
                         <Area
                             type="monotone"
-                            dataKey="value"
+                            dataKey="sales"
                             stroke="#0f172a"
                             strokeWidth={2}
                             fillOpacity={1}
@@ -123,7 +118,7 @@ export default function DashboardCharts({ stats }: DashboardChartsProps) {
                     </div>
                 </div>
                 <ResponsiveContainer width="100%" height={200}>
-                    <BarChart data={ordersData}>
+                    <BarChart data={charts}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                         <XAxis
                             dataKey="name"
@@ -137,6 +132,7 @@ export default function DashboardCharts({ stats }: DashboardChartsProps) {
                             fontSize={11}
                             tickLine={false}
                             axisLine={false}
+                            allowDecimals={false}
                         />
                         <Tooltip
                             contentStyle={{
@@ -147,9 +143,10 @@ export default function DashboardCharts({ stats }: DashboardChartsProps) {
                                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                             }}
                             labelStyle={{ color: '#0f172a' }}
+                            formatter={(value: any) => [value, 'Órdenes']}
                         />
                         <Bar
-                            dataKey="ordenes"
+                            dataKey="orders"
                             fill="#0f172a"
                             radius={[4, 4, 0, 0]}
                         />

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { subDays, format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 export async function GET(request: NextRequest) {
     try {
@@ -15,8 +17,8 @@ export async function GET(request: NextRequest) {
 
         const today = new Date()
         today.setHours(0, 0, 0, 0)
-
         const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+        const sevenDaysAgo = subDays(today, 6)
 
         // Get counts in parallel
         const [
@@ -26,9 +28,11 @@ export async function GET(request: NextRequest) {
             clientesTotal,
             ventasMes,
             recentOrders,
-            lowStockProducts
+            lowStockProducts,
+            ventasSemana,
+            ordenesSemana
         ] = await Promise.all([
-            // Active orders (not delivered)
+            // Active orders (not delivered or cancelled)
             prisma.ordenServicio.count({
                 where: {
                     empresa_id: empresaId,
@@ -96,11 +100,53 @@ export async function GET(request: NextRequest) {
                 },
                 orderBy: { stock: 'asc' },
                 take: 10
+            }),
+
+            // Ventas de la semana (para el gráfico)
+            prisma.venta.findMany({
+                where: {
+                    empresa_id: empresaId,
+                    created_at: { gte: sevenDaysAgo },
+                    estado: 'completada'
+                },
+                select: { created_at: true, total: true }
+            }),
+
+            // Órdenes de la semana (para el gráfico)
+            prisma.ordenServicio.findMany({
+                where: {
+                    empresa_id: empresaId,
+                    created_at: { gte: sevenDaysAgo }
+                },
+                select: { created_at: true }
             })
         ])
 
         // Filter low stock
         const lowStock = lowStockProducts.filter((p: { stock: number; stock_minimo: number }) => p.stock <= p.stock_minimo)
+
+        // Process Charts Data
+        const chartData = []
+        for (let i = 6; i >= 0; i--) {
+            const d = subDays(new Date(), i)
+            const dayKey = format(d, 'yyyy-MM-dd')
+            const dayName = format(d, 'EEE', { locale: es })
+
+            // Filter sales for this day
+            const daySales = ventasSemana.filter((v: any) => format(new Date(v.created_at), 'yyyy-MM-dd') === dayKey)
+            const salesTotal = daySales.reduce((acc: number, v: any) => acc + Number(v.total), 0)
+
+            // Filter orders for this day
+            const dayOrders = ordenesSemana.filter((o: any) => format(new Date(o.created_at), 'yyyy-MM-dd') === dayKey)
+            const ordersTotal = dayOrders.length
+
+            chartData.push({
+                name: dayName.charAt(0).toUpperCase() + dayName.slice(1), // Capitalize: lun -> Lun
+                originalDate: dayKey,
+                sales: salesTotal,
+                orders: ordersTotal
+            })
+        }
 
         return NextResponse.json({
             stats: {
@@ -114,7 +160,8 @@ export async function GET(request: NextRequest) {
                 productos_stock_bajo: lowStock.length
             },
             recentOrders,
-            lowStock
+            lowStock,
+            charts: chartData
         })
     } catch (error) {
         console.error('Error fetching dashboard stats:', error)

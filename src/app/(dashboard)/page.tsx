@@ -90,6 +90,7 @@ export default function DashboardPage() {
     const { user } = useAuthStore()
     const { empresa, isLoading: tenantLoading } = useTenant()
     const [stats, setStats] = useState<DashboardStats | null>(null)
+    const [charts, setCharts] = useState<any[]>([])
     const [recentOrders, setRecentOrders] = useState<any[]>([])
     const [lowStock, setLowStock] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState(true)
@@ -107,6 +108,7 @@ export default function DashboardPage() {
             const data = await response.json()
 
             setStats(data.stats)
+            setCharts(data.charts || [])
             setRecentOrders(data.recentOrders || [])
             setLowStock(data.lowStock || [])
         } catch (error) {
@@ -252,7 +254,7 @@ export default function DashboardPage() {
             </motion.div>
 
             {/* Charts Row - Now Dynamically Loaded */}
-            <DashboardCharts stats={stats} />
+            <DashboardCharts stats={stats} charts={charts} />
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
