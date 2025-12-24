@@ -41,12 +41,13 @@ import {
 } from 'lucide-react'
 import { useBarcodeScanner } from '@/hooks/use-barcode-scanner'
 
-id: string
-codigo: string | null
-nombre: string
-precio_venta: number
-stock: number
-imagenes ?: { url: string; principal: boolean }[]
+interface Producto {
+    id: string
+    codigo: string | null
+    nombre: string
+    precio_venta: number
+    stock: number
+    imagenes?: { url: string; principal: boolean }[]
 }
 
 interface Cliente {
