@@ -7,6 +7,53 @@ import { UserRole } from '@/types'
 // Permission definitions per role (legacy - fallback when role_id is not set)
 // These will be used when user doesn't have a role_id assigned
 const legacyRolePermissions: Record<UserRole, string[]> = {
+    superadmin: [
+        // Superadmin tiene acceso a TODO
+        'superadmin.access',
+        'superadmin.manage',
+        'dashboard.view',
+        'dashboard.stats',
+        'pos.view',
+        'pos.sell',
+        'pos.discount',
+        'pos.void',
+        'inventory.view',
+        'inventory.create',
+        'inventory.update',
+        'inventory.delete',
+        'inventory.adjust',
+        'orders.view',
+        'orders.create',
+        'orders.update',
+        'orders.delete',
+        'orders.assign',
+        'cash.view',
+        'cash.open',
+        'cash.close',
+        'cash.movements',
+        'clients.view',
+        'clients.create',
+        'clients.update',
+        'clients.delete',
+        'reports.view',
+        'reports.export',
+        'invoices.view',
+        'invoices.create',
+        'invoices.void',
+        'settings.view',
+        'settings.update',
+        'users.view',
+        'users.create',
+        'users.update',
+        'users.delete',
+        'roles.view',
+        'roles.manage',
+        'logs.view',
+        'empresas.view',
+        'empresas.create',
+        'empresas.update',
+        'empresas.delete',
+    ],
     admin: [
         'dashboard.view',
         'dashboard.stats',
@@ -173,6 +220,7 @@ export function RoleGate({
 // Get role display name
 export function getRoleDisplayName(role: UserRole): string {
     const names: Record<UserRole, string> = {
+        superadmin: 'Super Admin',
         admin: 'Administrador',
         tecnico: 'Técnico',
         vendedor: 'Vendedor',
@@ -184,6 +232,7 @@ export function getRoleDisplayName(role: UserRole): string {
 // Get role badge color
 export function getRoleBadgeColor(role: UserRole): string {
     const colors: Record<UserRole, string> = {
+        superadmin: 'bg-amber-500',
         admin: 'bg-purple-500',
         tecnico: 'bg-blue-500',
         vendedor: 'bg-emerald-500',

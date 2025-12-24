@@ -1,7 +1,7 @@
 // Database Types for RepairApp v2
 
 // Enums
-export type UserRole = 'admin' | 'tecnico' | 'vendedor' | 'cliente'
+export type UserRole = 'superadmin' | 'admin' | 'tecnico' | 'vendedor' | 'cliente'
 export type TipoIdentificacion = 'cedula' | 'ruc' | 'pasaporte'
 export type TipoProducto = 'producto' | 'servicio'
 export type EstadoOrden = 'recibido' | 'en_diagnostico' | 'cotizado' | 'aprobado' | 'rechazado' | 'en_reparacion' | 'terminado' | 'entregado'
