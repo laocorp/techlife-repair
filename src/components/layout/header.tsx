@@ -336,17 +336,23 @@ export function Header({ isSidebarCollapsed, onMenuClick }: HeaderProps) {
                             )}
 
                             <div className="p-1 space-y-0.5">
-                                <DropdownMenuItem className="rounded-lg focus:bg-slate-100 cursor-pointer text-slate-600 focus:text-slate-900">
-                                    <User className="h-4 w-4 mr-2 opacity-70" />
-                                    Mi Perfil
+                                <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-100 cursor-pointer text-slate-600 focus:text-slate-900">
+                                    <Link href="/perfil">
+                                        <User className="h-4 w-4 mr-2 opacity-70" />
+                                        Mi Perfil
+                                    </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="rounded-lg focus:bg-slate-100 cursor-pointer text-slate-600 focus:text-slate-900">
-                                    <CreditCard className="h-4 w-4 mr-2 opacity-70" />
-                                    Suscripción
+                                <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-100 cursor-pointer text-slate-600 focus:text-slate-900">
+                                    <Link href="/suscripcion">
+                                        <CreditCard className="h-4 w-4 mr-2 opacity-70" />
+                                        Suscripción
+                                    </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="rounded-lg focus:bg-slate-100 cursor-pointer text-slate-600 focus:text-slate-900">
-                                    <Settings className="h-4 w-4 mr-2 opacity-70" />
-                                    Configuración
+                                <DropdownMenuItem asChild className="rounded-lg focus:bg-slate-100 cursor-pointer text-slate-600 focus:text-slate-900">
+                                    <Link href="/configuracion">
+                                        <Settings className="h-4 w-4 mr-2 opacity-70" />
+                                        Configuración
+                                    </Link>
                                 </DropdownMenuItem>
                             </div>
 

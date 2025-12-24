@@ -23,6 +23,7 @@ import {
     Search,
     Command,
     Columns3,
+    Shield,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -61,6 +62,7 @@ const menuItems = [
             { name: 'Clientes', href: '/clientes', icon: Users, roles: ['admin', 'vendedor'] },
             { name: 'Catálogo', href: '/catalogo', icon: Tag, roles: ['admin'] },
             { name: 'Caja', href: '/caja', icon: Wallet, roles: ['admin', 'vendedor'] },
+            { name: 'Usuarios', href: '/usuarios', icon: Shield, roles: ['admin'] },
         ],
     },
     {
