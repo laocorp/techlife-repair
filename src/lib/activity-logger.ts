@@ -1,5 +1,6 @@
 // Activity Logger - Utility for logging critical actions
 import { prisma } from './prisma'
+import { Prisma } from '@prisma/client'
 
 export type ActivityAction = 'create' | 'update' | 'delete' | 'login' | 'logout' | 'view' | 'export'
 
@@ -39,7 +40,7 @@ export async function logActivity(params: LogActivityParams): Promise<void> {
                 accion: params.accion,
                 modulo: params.modulo,
                 entidad_id: params.entidadId || null,
-                detalles: params.detalles || null,
+                detalles: params.detalles ? (params.detalles as Prisma.InputJsonValue) : Prisma.JsonNull,
                 ip_address: params.ipAddress || null,
                 user_agent: params.userAgent || null,
             },
