@@ -65,72 +65,12 @@ export default function StatsPage() {
     const loadStats = useCallback(async () => {
         setIsLoading(true)
         try {
-            // Obtener datos de empresas
-            const empresasRes = await fetch('/api/empresas')
-            const empresas = await empresasRes.json()
-
-            // Procesar datos para gráficos
-            const empresasPorPlan = [
-                { plan: 'Trial', total: empresas.filter((e: any) => e.plan === 'trial').length },
-                { plan: 'Básico', total: empresas.filter((e: any) => e.plan === 'basic').length },
-                { plan: 'Pro', total: empresas.filter((e: any) => e.plan === 'professional').length },
-                { plan: 'Enterprise', total: empresas.filter((e: any) => e.plan === 'enterprise').length },
-            ].filter(p => p.total > 0)
-
-            // Simular datos de crecimiento por mes
-            const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
-            const mesActual = new Date().getMonth()
-            const empresasPorMes = []
-            let acumulado = 0
-            for (let i = 5; i >= 0; i--) {
-                const idx = (mesActual - i + 12) % 12
-                acumulado += Math.floor(Math.random() * 3) + (i === 0 ? empresas.length - acumulado : 0)
-                empresasPorMes.push({
-                    mes: meses[idx],
-                    total: Math.min(acumulado, empresas.length)
-                })
-            }
-            empresasPorMes[empresasPorMes.length - 1].total = empresas.length
-
-            // Top empresas por actividad
-            const topEmpresas = empresas
-                .slice(0, 5)
-                .map((e: any) => ({
-                    nombre: e.nombre.slice(0, 15) + (e.nombre.length > 15 ? '...' : ''),
-                    ordenes: e._count?.ordenes || Math.floor(Math.random() * 100),
-                    ventas: e._count?.ventas || Math.floor(Math.random() * 50),
-                }))
-
-            // Actividad por día (últimos 7 días)
-            const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-            const hoy = new Date().getDay()
-            const actividadDiaria = []
-            for (let i = 6; i >= 0; i--) {
-                const idx = (hoy - i + 7) % 7
-                actividadDiaria.push({
-                    dia: dias[idx],
-                    acciones: Math.floor(Math.random() * 150) + 50
-                })
-            }
-
-            // Totales
-            const totalUsuarios = empresas.reduce((acc: number, e: any) => acc + (e._count?.usuarios || 0), 0)
-            const totalOrdenes = empresas.reduce((acc: number, e: any) => acc + (e._count?.ordenes || 0), 0)
-            const totalVentas = empresas.reduce((acc: number, e: any) => acc + (e._count?.ventas || 0), 0)
-
-            setStats({
-                empresasPorMes,
-                empresasPorPlan,
-                topEmpresas,
-                actividadDiaria,
-                totales: {
-                    empresas: empresas.length,
-                    usuarios: totalUsuarios || empresas.length * 3,
-                    ordenes: totalOrdenes || empresas.length * 25,
-                    ventas: totalVentas || empresas.length * 15,
-                }
-            })
+            const response = await fetch('/api/superadmin/stats')
+            if (!response.ok) throw new Error('Error cargando estadísticas')
+            const data = await response.json()
+            setStats(data)
         } catch (error: any) {
+            console.error(error)
             toast.error('Error al cargar estadísticas')
         } finally {
             setIsLoading(false)

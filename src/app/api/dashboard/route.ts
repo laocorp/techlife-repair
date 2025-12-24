@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
             prisma.ordenServicio.count({
                 where: {
                     empresa_id: empresaId,
-                    estado: { not: 'entregado' }
+                    estado: { notIn: ['entregado', 'cancelado'] }
                 }
             }),
 
@@ -61,7 +61,8 @@ export async function GET(request: NextRequest) {
             prisma.venta.aggregate({
                 where: {
                     empresa_id: empresaId,
-                    created_at: { gte: startOfMonth }
+                    created_at: { gte: startOfMonth },
+                    estado: 'completada'
                 },
                 _sum: { total: true }
             }),
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest) {
             prisma.ordenServicio.findMany({
                 where: {
                     empresa_id: empresaId,
-                    estado: { not: 'entregado' }
+                    estado: { notIn: ['entregado', 'cancelado'] }
                 },
                 include: {
                     cliente: {
