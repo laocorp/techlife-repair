@@ -39,6 +39,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import {
     Shield,
@@ -60,6 +61,12 @@ import {
     AlertTriangle,
     Crown,
     ArrowLeft,
+    UserCog,
+    Eye,
+    Mail,
+    Lock,
+    Activity,
+    BarChart3,
 } from 'lucide-react'
 import { format, differenceInDays } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -83,6 +90,18 @@ interface Empresa {
     }
 }
 
+interface Usuario {
+    id: string
+    email: string
+    nombre: string
+    rol: string
+    activo: boolean
+    empresa?: {
+        id: string
+        nombre: string
+    }
+}
+
 interface Stats {
     totalEmpresas: number
     empresasActivas: number
@@ -92,6 +111,7 @@ interface Stats {
 
 export default function SuperAdminPage() {
     const [empresas, setEmpresas] = useState<Empresa[]>([])
+    const [usuarios, setUsuarios] = useState<Usuario[]>([])
     const [stats, setStats] = useState<Stats>({
         totalEmpresas: 0,
         empresasActivas: 0,
@@ -104,9 +124,12 @@ export default function SuperAdminPage() {
     const [filterStatus, setFilterStatus] = useState<string>('all')
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [isImpersonateDialogOpen, setIsImpersonateDialogOpen] = useState(false)
     const [selectedEmpresa, setSelectedEmpresa] = useState<Empresa | null>(null)
     const [isSaving, setIsSaving] = useState(false)
-    const { logout } = useAuthStore()
+    const [isImpersonating, setIsImpersonating] = useState(false)
+    const [createWithAdmin, setCreateWithAdmin] = useState(true)
+    const { user, logout, setUser } = useAuthStore()
 
     const [formData, setFormData] = useState({
         nombre: '',
@@ -116,6 +139,10 @@ export default function SuperAdminPage() {
         plan: 'trial',
         suscripcion_activa: true,
         fecha_vencimiento: '',
+        // Campos de admin
+        adminNombre: '',
+        adminEmail: '',
+        adminPassword: '',
     })
 
     const plans = [
@@ -162,6 +189,18 @@ export default function SuperAdminPage() {
         }
     }, [])
 
+    const loadUsuariosEmpresa = async (empresaId: string) => {
+        try {
+            const response = await fetch(`/api/superadmin/users?empresa_id=${empresaId}`)
+            if (!response.ok) throw new Error('Error loading users')
+            const data = await response.json()
+            setUsuarios(data || [])
+        } catch (error: any) {
+            toast.error('Error al cargar usuarios')
+            setUsuarios([])
+        }
+    }
+
     useEffect(() => {
         loadData()
     }, [loadData])
@@ -172,9 +211,21 @@ export default function SuperAdminPage() {
             return
         }
 
+        if (createWithAdmin) {
+            if (!formData.adminNombre || !formData.adminEmail || !formData.adminPassword) {
+                toast.error('Los datos del administrador son requeridos')
+                return
+            }
+            if (formData.adminPassword.length < 6) {
+                toast.error('La contraseña debe tener al menos 6 caracteres')
+                return
+            }
+        }
+
         setIsSaving(true)
         try {
-            const response = await fetch('/api/empresas', {
+            // Crear empresa
+            const empresaResponse = await fetch('/api/empresas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -188,9 +239,33 @@ export default function SuperAdminPage() {
                 })
             })
 
-            if (!response.ok) throw new Error('Error al crear empresa')
+            if (!empresaResponse.ok) throw new Error('Error al crear empresa')
+            const nuevaEmpresa = await empresaResponse.json()
 
-            toast.success('Empresa creada exitosamente')
+            // Crear usuario admin si está habilitado
+            if (createWithAdmin) {
+                const userResponse = await fetch('/api/superadmin/users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nombre: formData.adminNombre,
+                        email: formData.adminEmail,
+                        password: formData.adminPassword,
+                        empresa_id: nuevaEmpresa.id,
+                        rol: 'admin',
+                    })
+                })
+
+                if (!userResponse.ok) {
+                    // Si falla la creación del usuario, mostrar advertencia pero continuar
+                    toast.warning('Empresa creada pero hubo un error al crear el admin')
+                } else {
+                    toast.success('Empresa y administrador creados exitosamente')
+                }
+            } else {
+                toast.success('Empresa creada exitosamente')
+            }
+
             setIsCreateDialogOpen(false)
             resetForm()
             loadData()
@@ -270,6 +345,54 @@ export default function SuperAdminPage() {
         }
     }
 
+    const handleImpersonate = async (targetUser: Usuario) => {
+        if (!user) return
+
+        setIsImpersonating(true)
+        try {
+            const response = await fetch('/api/superadmin/impersonate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: targetUser.id,
+                    superadminId: user.id,
+                })
+            })
+
+            if (!response.ok) throw new Error('Error al impersonar')
+
+            const data = await response.json()
+
+            // Guardar la sesión actual antes de impersonar
+            const originalSession = {
+                user: user,
+                token: localStorage.getItem('token'),
+            }
+            localStorage.setItem('superadmin_original_session', JSON.stringify(originalSession))
+
+            // Establecer nueva sesión
+            setUser(data.user)
+            localStorage.setItem('token', data.token)
+
+            toast.success(`Ahora estás como ${targetUser.nombre}`, {
+                description: 'Recarga la página para ver los cambios completos'
+            })
+
+            // Redirigir al dashboard
+            window.location.href = '/'
+        } catch (error: any) {
+            toast.error('Error al impersonar', { description: error.message })
+        } finally {
+            setIsImpersonating(false)
+        }
+    }
+
+    const openImpersonateDialog = async (empresa: Empresa) => {
+        setSelectedEmpresa(empresa)
+        await loadUsuariosEmpresa(empresa.id)
+        setIsImpersonateDialogOpen(true)
+    }
+
     const openEditDialog = (empresa: Empresa) => {
         setSelectedEmpresa(empresa)
         setFormData({
@@ -280,6 +403,9 @@ export default function SuperAdminPage() {
             plan: empresa.plan,
             suscripcion_activa: empresa.suscripcion_activa,
             fecha_vencimiento: empresa.fecha_vencimiento?.split('T')[0] || '',
+            adminNombre: '',
+            adminEmail: '',
+            adminPassword: '',
         })
         setIsEditDialogOpen(true)
     }
@@ -293,7 +419,11 @@ export default function SuperAdminPage() {
             plan: 'trial',
             suscripcion_activa: true,
             fecha_vencimiento: '',
+            adminNombre: '',
+            adminEmail: '',
+            adminPassword: '',
         })
+        setCreateWithAdmin(true)
     }
 
     const getStatusBadge = (empresa: Empresa) => {
@@ -320,6 +450,20 @@ export default function SuperAdminPage() {
             <Badge variant="outline" className={`gap-1 font-medium ${planInfo?.color || ''}`}>
                 {plan === 'enterprise' && <Crown className="w-3 h-3" />}
                 {planInfo?.label || plan}
+            </Badge>
+        )
+    }
+
+    const getRoleBadge = (rol: string) => {
+        const colors: Record<string, string> = {
+            superadmin: 'bg-amber-100 text-amber-700',
+            admin: 'bg-purple-100 text-purple-700',
+            tecnico: 'bg-blue-100 text-blue-700',
+            vendedor: 'bg-emerald-100 text-emerald-700',
+        }
+        return (
+            <Badge variant="outline" className={`font-medium ${colors[rol] || 'bg-slate-100 text-slate-700'}`}>
+                {rol}
             </Badge>
         )
     }
@@ -364,15 +508,37 @@ export default function SuperAdminPage() {
                         </div>
                     </div>
 
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-slate-600 hover:text-red-600 hover:bg-red-50 gap-2"
-                        onClick={handleLogout}
-                    >
-                        <LogOut className="w-4 h-4" />
-                        Cerrar sesión
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Link href="/superadmin/logs">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 gap-2 border-slate-200"
+                            >
+                                <Activity className="w-4 h-4" />
+                                Logs
+                            </Button>
+                        </Link>
+                        <Link href="/superadmin/stats">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-slate-600 hover:text-purple-600 hover:bg-purple-50 gap-2 border-slate-200"
+                            >
+                                <BarChart3 className="w-4 h-4" />
+                                Stats
+                            </Button>
+                        </Link>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-slate-600 hover:text-red-600 hover:bg-red-50 gap-2"
+                            onClick={handleLogout}
+                        >
+                            <LogOut className="w-4 h-4" />
+                            Cerrar sesión
+                        </Button>
+                    </div>
                 </div>
             </header>
 
@@ -463,85 +629,157 @@ export default function SuperAdminPage() {
                                             Nueva Empresa
                                         </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="bg-white border-slate-200">
+                                    <DialogContent className="bg-white border-slate-200 max-w-2xl">
                                         <DialogHeader>
                                             <DialogTitle className="text-slate-800">Crear Nueva Empresa</DialogTitle>
                                             <DialogDescription className="text-slate-500">
                                                 Añade una nueva empresa al sistema
                                             </DialogDescription>
                                         </DialogHeader>
-                                        <div className="space-y-4 py-4">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-700">Nombre *</Label>
-                                                    <Input
-                                                        value={formData.nombre}
-                                                        onChange={(e) => setFormData(f => ({ ...f, nombre: e.target.value }))}
-                                                        className="border-slate-200"
-                                                        placeholder="Nombre de la empresa"
-                                                    />
+                                        <div className="space-y-6 py-4">
+                                            {/* Datos de la empresa */}
+                                            <div>
+                                                <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                                                    <Building2 className="w-4 h-4" />
+                                                    Datos de la Empresa
+                                                </h3>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-slate-700">Nombre *</Label>
+                                                        <Input
+                                                            value={formData.nombre}
+                                                            onChange={(e) => setFormData(f => ({ ...f, nombre: e.target.value }))}
+                                                            className="border-slate-200"
+                                                            placeholder="Nombre de la empresa"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-slate-700">RUC</Label>
+                                                        <Input
+                                                            value={formData.ruc}
+                                                            onChange={(e) => setFormData(f => ({ ...f, ruc: e.target.value }))}
+                                                            className="border-slate-200"
+                                                            placeholder="1234567890001"
+                                                            maxLength={13}
+                                                        />
+                                                    </div>
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-700">RUC</Label>
-                                                    <Input
-                                                        value={formData.ruc}
-                                                        onChange={(e) => setFormData(f => ({ ...f, ruc: e.target.value }))}
-                                                        className="border-slate-200"
-                                                        placeholder="1234567890001"
-                                                        maxLength={13}
+                                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-slate-700">Email</Label>
+                                                        <Input
+                                                            type="email"
+                                                            value={formData.email}
+                                                            onChange={(e) => setFormData(f => ({ ...f, email: e.target.value }))}
+                                                            className="border-slate-200"
+                                                            placeholder="contacto@empresa.com"
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-slate-700">Teléfono</Label>
+                                                        <Input
+                                                            value={formData.telefono}
+                                                            onChange={(e) => setFormData(f => ({ ...f, telefono: e.target.value }))}
+                                                            className="border-slate-200"
+                                                            placeholder="0999999999"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="text-slate-700">Plan</Label>
+                                                        <Select
+                                                            value={formData.plan}
+                                                            onValueChange={(v) => setFormData(f => ({ ...f, plan: v }))}
+                                                        >
+                                                            <SelectTrigger className="border-slate-200">
+                                                                <SelectValue />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {plans.map(plan => (
+                                                                    <SelectItem key={plan.value} value={plan.value}>
+                                                                        {plan.label} - ${planPrices[plan.value]}/mes
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="text-slate-700">Vencimiento</Label>
+                                                        <Input
+                                                            type="date"
+                                                            value={formData.fecha_vencimiento}
+                                                            onChange={(e) => setFormData(f => ({ ...f, fecha_vencimiento: e.target.value }))}
+                                                            className="border-slate-200"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Toggle para crear admin */}
+                                            <div className="border-t border-slate-200 pt-4">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <UserCog className="w-4 h-4 text-slate-600" />
+                                                        <span className="text-sm font-semibold text-slate-700">Crear Usuario Administrador</span>
+                                                    </div>
+                                                    <Switch
+                                                        checked={createWithAdmin}
+                                                        onCheckedChange={setCreateWithAdmin}
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-700">Email</Label>
-                                                    <Input
-                                                        type="email"
-                                                        value={formData.email}
-                                                        onChange={(e) => setFormData(f => ({ ...f, email: e.target.value }))}
-                                                        className="border-slate-200"
-                                                        placeholder="contacto@empresa.com"
-                                                    />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-700">Teléfono</Label>
-                                                    <Input
-                                                        value={formData.telefono}
-                                                        onChange={(e) => setFormData(f => ({ ...f, telefono: e.target.value }))}
-                                                        className="border-slate-200"
-                                                        placeholder="0999999999"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-700">Plan</Label>
-                                                    <Select
-                                                        value={formData.plan}
-                                                        onValueChange={(v) => setFormData(f => ({ ...f, plan: v }))}
-                                                    >
-                                                        <SelectTrigger className="border-slate-200">
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {plans.map(plan => (
-                                                                <SelectItem key={plan.value} value={plan.value}>
-                                                                    {plan.label} - ${planPrices[plan.value]}/mes
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-slate-700">Vencimiento</Label>
-                                                    <Input
-                                                        type="date"
-                                                        value={formData.fecha_vencimiento}
-                                                        onChange={(e) => setFormData(f => ({ ...f, fecha_vencimiento: e.target.value }))}
-                                                        className="border-slate-200"
-                                                    />
-                                                </div>
-                                            </div>
+
+                                            {/* Datos del admin */}
+                                            {createWithAdmin && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, height: 0 }}
+                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                    className="bg-slate-50 rounded-xl p-4 border border-slate-200"
+                                                >
+                                                    <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                                                        <Users className="w-4 h-4" />
+                                                        Datos del Administrador
+                                                    </h3>
+                                                    <div className="grid grid-cols-1 gap-4">
+                                                        <div className="space-y-2">
+                                                            <Label className="text-slate-700">Nombre completo *</Label>
+                                                            <Input
+                                                                value={formData.adminNombre}
+                                                                onChange={(e) => setFormData(f => ({ ...f, adminNombre: e.target.value }))}
+                                                                className="border-slate-200 bg-white"
+                                                                placeholder="Nombre del administrador"
+                                                            />
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div className="space-y-2">
+                                                                <Label className="text-slate-700 flex items-center gap-1">
+                                                                    <Mail className="w-3 h-3" /> Email *
+                                                                </Label>
+                                                                <Input
+                                                                    type="email"
+                                                                    value={formData.adminEmail}
+                                                                    onChange={(e) => setFormData(f => ({ ...f, adminEmail: e.target.value }))}
+                                                                    className="border-slate-200 bg-white"
+                                                                    placeholder="admin@empresa.com"
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label className="text-slate-700 flex items-center gap-1">
+                                                                    <Lock className="w-3 h-3" /> Contraseña *
+                                                                </Label>
+                                                                <Input
+                                                                    type="password"
+                                                                    value={formData.adminPassword}
+                                                                    onChange={(e) => setFormData(f => ({ ...f, adminPassword: e.target.value }))}
+                                                                    className="border-slate-200 bg-white"
+                                                                    placeholder="Mínimo 6 caracteres"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            )}
                                         </div>
                                         <DialogFooter>
                                             <Button variant="ghost" onClick={() => setIsCreateDialogOpen(false)}>
@@ -618,7 +856,7 @@ export default function SuperAdminPage() {
                                                 <TableHead className="text-slate-600 font-semibold">RUC</TableHead>
                                                 <TableHead className="text-slate-600 font-semibold">Plan</TableHead>
                                                 <TableHead className="text-slate-600 font-semibold">Estado</TableHead>
-                                                <TableHead className="text-slate-600 font-semibold">Creada</TableHead>
+                                                <TableHead className="text-slate-600 font-semibold">Usuarios</TableHead>
                                                 <TableHead className="text-slate-600 font-semibold text-right">Acciones</TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -646,8 +884,10 @@ export default function SuperAdminPage() {
                                                         <TableCell className="text-slate-600 font-mono text-sm">{empresa.ruc || '-'}</TableCell>
                                                         <TableCell>{getPlanBadge(empresa.plan)}</TableCell>
                                                         <TableCell>{getStatusBadge(empresa)}</TableCell>
-                                                        <TableCell className="text-slate-500 text-sm">
-                                                            {format(new Date(empresa.created_at), 'dd MMM yyyy', { locale: es })}
+                                                        <TableCell>
+                                                            <Badge variant="secondary" className="font-medium">
+                                                                {empresa._count?.usuarios || 0} usuarios
+                                                            </Badge>
                                                         </TableCell>
                                                         <TableCell className="text-right">
                                                             <DropdownMenu>
@@ -664,6 +904,12 @@ export default function SuperAdminPage() {
                                                                         onClick={() => openEditDialog(empresa)}
                                                                     >
                                                                         <Edit className="w-4 h-4" /> Editar
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        className="gap-2 cursor-pointer text-purple-600 focus:text-purple-700 focus:bg-purple-50"
+                                                                        onClick={() => openImpersonateDialog(empresa)}
+                                                                    >
+                                                                        <Eye className="w-4 h-4" /> Impersonar
                                                                     </DropdownMenuItem>
                                                                     <DropdownMenuItem
                                                                         className="gap-2 cursor-pointer"
@@ -784,6 +1030,71 @@ export default function SuperAdminPage() {
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
                                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Guardar Cambios'}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Impersonate Dialog */}
+                <Dialog open={isImpersonateDialogOpen} onOpenChange={setIsImpersonateDialogOpen}>
+                    <DialogContent className="bg-white border-slate-200 max-w-lg">
+                        <DialogHeader>
+                            <DialogTitle className="text-slate-800 flex items-center gap-2">
+                                <Eye className="w-5 h-5 text-purple-600" />
+                                Impersonar Usuario
+                            </DialogTitle>
+                            <DialogDescription className="text-slate-500">
+                                Iniciar sesión como un usuario de <span className="font-semibold text-slate-700">{selectedEmpresa?.nombre}</span>
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4">
+                            {usuarios.length === 0 ? (
+                                <div className="text-center py-8 text-slate-500">
+                                    <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                                    <p>No hay usuarios en esta empresa</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2 max-h-80 overflow-y-auto">
+                                    {usuarios.map((usuario) => (
+                                        <div
+                                            key={usuario.id}
+                                            className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-gradient-to-br from-slate-400 to-slate-600 rounded-full flex items-center justify-center text-white font-semibold">
+                                                    {usuario.nombre.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-slate-800">{usuario.nombre}</p>
+                                                    <p className="text-sm text-slate-500">{usuario.email}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {getRoleBadge(usuario.rol)}
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => handleImpersonate(usuario)}
+                                                    disabled={isImpersonating}
+                                                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                                                >
+                                                    {isImpersonating ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                        <>
+                                                            <Eye className="w-4 h-4 mr-1" />
+                                                            Entrar
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <DialogFooter>
+                            <Button variant="ghost" onClick={() => setIsImpersonateDialogOpen(false)}>
+                                Cerrar
                             </Button>
                         </DialogFooter>
                     </DialogContent>
