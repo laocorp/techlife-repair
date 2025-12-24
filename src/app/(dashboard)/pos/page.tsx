@@ -69,7 +69,6 @@ export default function POSPage() {
         subtotal,
         totalIva,
         total,
-        total,
     } = usePOSStore()
 
     // Scanner Hook
