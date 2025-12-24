@@ -187,6 +187,17 @@ export function Header({ isSidebarCollapsed, onMenuClick }: HeaderProps) {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
+                    {/* Settings Button */}
+                    <Link href="/configuracion">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-10 w-10 bg-white/50 hover:bg-white text-slate-500 hover:text-slate-700 border border-transparent hover:border-slate-200 shadow-sm rounded-xl transition-all"
+                        >
+                            <Settings className="h-5 w-5" />
+                        </Button>
+                    </Link>
+
                     {/* Notifications Dropdown - Glass Pill */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
