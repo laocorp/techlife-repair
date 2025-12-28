@@ -717,49 +717,49 @@ export default function POSPage() {
                                 )}
                             </div>
                         )}
-                    </div>
-                        )}
 
-                    <div className="flex items-center space-x-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                        <Checkbox
-                            id="factura"
-                            checked={generarFactura}
-                            onCheckedChange={(checked) => setGenerarFactura(checked as boolean)}
-                        />
-                        <Label htmlFor="factura" className="cursor-pointer font-medium">
-                            Generar Factura Electrónica (SRI)
-                        </Label>
-                    </div>
-                </div>
 
-                <DialogFooter className="gap-2 sm:gap-0">
-                    <Button
-                        variant="outline"
-                        onClick={() => setIsCheckoutOpen(false)}
-                        className="h-12"
-                    >
-                        Cancelar
-                    </Button>
-                    <Button
-                        onClick={handleCheckout}
-                        disabled={isProcessing || (paymentMethod === 'efectivo' && change < 0)}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-6 shadow-md shadow-emerald-500/20"
-                    >
-                        {isProcessing ? (
-                            <>
-                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                Procesando...
-                            </>
-                        ) : (
-                            <>
-                                <Check className="h-4 w-4 mr-2" />
-                                Confirmar Pago
-                            </>
-                        )}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+
+                        <div className="flex items-center space-x-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <Checkbox
+                                id="factura"
+                                checked={generarFactura}
+                                onCheckedChange={(checked) => setGenerarFactura(checked as boolean)}
+                            />
+                            <Label htmlFor="factura" className="cursor-pointer font-medium">
+                                Generar Factura Electrónica (SRI)
+                            </Label>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="gap-2 sm:gap-0">
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsCheckoutOpen(false)}
+                            className="h-12"
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={handleCheckout}
+                            disabled={isProcessing || (paymentMethod === 'efectivo' && change < 0)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-6 shadow-md shadow-emerald-500/20"
+                        >
+                            {isProcessing ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                    Procesando...
+                                </>
+                            ) : (
+                                <>
+                                    <Check className="h-4 w-4 mr-2" />
+                                    Confirmar Pago
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div >
     )
 }
