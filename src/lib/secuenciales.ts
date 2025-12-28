@@ -27,7 +27,7 @@ export async function getNextSecuencial(
                     empresa_id: empresaId,
                     tipo_documento: tipo,
                     establecimiento,
-                    punto_emision
+                    punto_emision: puntoEmision
                 }
             },
             update: {
@@ -37,7 +37,7 @@ export async function getNextSecuencial(
                 empresa_id: empresaId,
                 tipo_documento: tipo,
                 establecimiento,
-                punto_emision,
+                punto_emision: puntoEmision,
                 secuencial: 1
             }
         })
