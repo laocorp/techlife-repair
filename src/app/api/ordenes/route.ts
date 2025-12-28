@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
             }
 
             // 2. Create Order
-            return await tx.ordenServicio.create({
+            const newOrder = await tx.ordenServicio.create({
                 data: {
                     numero,
                     empresa_id,
@@ -185,6 +185,19 @@ export async function POST(request: NextRequest) {
                     repuestos: true
                 }
             })
+
+            // Trigger Notification
+            await tx.notificacion.create({
+                data: {
+                    empresa_id,
+                    tipo: 'orden',
+                    titulo: `Nueva Orden ${newOrder.numero}`,
+                    mensaje: `Cliente: ${newOrder.cliente.nombre} | Equipo: ${equipo_tipo} ${equipo_marca}`,
+                    link: `/ordenes/${newOrder.id}`
+                }
+            })
+
+            return newOrder
         })
 
         return NextResponse.json(orden, { status: 201 })

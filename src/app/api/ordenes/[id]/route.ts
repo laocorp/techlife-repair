@@ -151,7 +151,7 @@ export async function PATCH(
             if (fecha_entrega !== undefined) updateData.fecha_entrega = fecha_entrega ? new Date(fecha_entrega) : null
             if (tecnico_id !== undefined) updateData.tecnico_id = tecnico_id
 
-            return await tx.ordenServicio.update({
+            const updatedOrder = await tx.ordenServicio.update({
                 where: { id },
                 data: updateData,
                 include: {
@@ -164,6 +164,21 @@ export async function PATCH(
                     }
                 }
             })
+
+            // Trigger Notification if status changed
+            if (estado) {
+                await tx.notificacion.create({
+                    data: {
+                        empresa_id: updatedOrder.empresa_id,
+                        tipo: estado === 'mensajero' ? 'orden' : (estado === 'terminado' || estado === 'entregado' ? 'completada' : 'orden'),
+                        titulo: `Orden Actualizada #${updatedOrder.numero}`,
+                        mensaje: `El estado de la orden ha cambiado a: ${estado.toUpperCase()}`,
+                        link: `/ordenes/${updatedOrder.id}`
+                    }
+                })
+            }
+
+            return updatedOrder
         })
 
         return NextResponse.json(orden)

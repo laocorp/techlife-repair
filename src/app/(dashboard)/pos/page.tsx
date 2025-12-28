@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import {
     Search,
@@ -87,6 +88,7 @@ export default function POSPage() {
     const [amountReceived, setAmountReceived] = useState<string>('')
     const [isProcessing, setIsProcessing] = useState(false)
     const [clienteSearch, setClienteSearch] = useState('')
+    const [generarFactura, setGenerarFactura] = useState(false)
 
     const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -274,7 +276,8 @@ export default function POSPage() {
                         precio_unitario: item.precioUnitario,
                         subtotal: item.subtotal,
                         iva: item.iva,
-                    }))
+                    })),
+                    generar_factura: generarFactura
                 })
             })
 
@@ -292,8 +295,10 @@ export default function POSPage() {
             clearCart()
             setSelectedCliente(null)
             setDiscount(0)
+            setDiscount(0)
             setIsCheckoutOpen(false)
             setAmountReceived('')
+            setGenerarFactura(false)
         } catch (error: any) {
             toast.error('Error al procesar venta', { description: error.message })
         } finally {
@@ -713,35 +718,48 @@ export default function POSPage() {
                             </div>
                         )}
                     </div>
+                        )}
 
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button
-                            variant="outline"
-                            onClick={() => setIsCheckoutOpen(false)}
-                            className="h-12"
-                        >
-                            Cancelar
-                        </Button>
-                        <Button
-                            onClick={handleCheckout}
-                            disabled={isProcessing || (paymentMethod === 'efectivo' && change < 0)}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-6 shadow-md shadow-emerald-500/20"
-                        >
-                            {isProcessing ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                    Procesando...
-                                </>
-                            ) : (
-                                <>
-                                    <Check className="h-4 w-4 mr-2" />
-                                    Confirmar Pago
-                                </>
-                            )}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </div>
+                    <div className="flex items-center space-x-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <Checkbox
+                            id="factura"
+                            checked={generarFactura}
+                            onCheckedChange={(checked) => setGenerarFactura(checked as boolean)}
+                        />
+                        <Label htmlFor="factura" className="cursor-pointer font-medium">
+                            Generar Factura Electrónica (SRI)
+                        </Label>
+                    </div>
+                </div>
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsCheckoutOpen(false)}
+                        className="h-12"
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        onClick={handleCheckout}
+                        disabled={isProcessing || (paymentMethod === 'efectivo' && change < 0)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-6 shadow-md shadow-emerald-500/20"
+                    >
+                        {isProcessing ? (
+                            <>
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                                Procesando...
+                            </>
+                        ) : (
+                            <>
+                                <Check className="h-4 w-4 mr-2" />
+                                Confirmar Pago
+                            </>
+                        )}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+        </div >
     )
 }

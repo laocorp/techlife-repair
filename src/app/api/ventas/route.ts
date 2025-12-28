@@ -4,6 +4,50 @@ import { prisma } from '@/lib/prisma'
 import { generateFacturaXML, getIVACodigoPorcentaje, validateRUC, validateCedula, DatosEmisor, DatosComprador, InfoFactura, DetalleFactura, FacturaXMLOptions } from '@/lib/sri/xml-generator'
 import { signXML } from '@/lib/sri/xml-signer'
 import { SriService } from '@/lib/sri/sri-service'
+import { getNextSecuencial } from '@/lib/secuenciales'
+
+export async function GET(request: NextRequest) {
+    try {
+        const searchParams = request.nextUrl.searchParams
+        const empresa_id = searchParams.get('empresa_id')
+        const limit = Number(searchParams.get('limit') || '50')
+        // const page = Number(searchParams.get('page') || '1')
+
+        if (!empresa_id) {
+            return NextResponse.json({ error: 'Empresa ID requerido' }, { status: 400 })
+        }
+
+        const ventas = await prisma.venta.findMany({
+            where: {
+                empresa_id
+            },
+            take: limit,
+            orderBy: {
+                created_at: 'desc'
+            },
+            include: {
+                cliente: {
+                    select: {
+                        nombre: true,
+                        identificacion: true
+                    }
+                },
+                factura: {
+                    select: {
+                        estado: true,
+                        numero_autorizacion: true
+                    }
+                }
+            }
+        })
+
+        return NextResponse.json(ventas)
+
+    } catch (error: any) {
+        console.error('Error fetching sales:', error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -30,30 +74,22 @@ export async function POST(request: NextRequest) {
         // 1. Transaction: Create Sale + Update Stock
         const result = await prisma.$transaction(async (tx: any) => {
             // A. Get Sequential Number for Invoice
-            const secuencialDoc = await tx.secuencial.findFirst({
-                where: {
-                    empresa_id,
-                    tipo_documento: 'factura'
-                }
-            })
+            // Now using the shared utility with the current transaction
+            const tipoDoc = body.generar_factura ? 'factura' : 'venta'
 
-            let numeroFactura = `VTA-${Date.now()}` // Fallback
-            let establecimiento = '001'
-            let punto_emision = '001'
-            let secuencial = 1
+            const { numero, secuencial } = await getNextSecuencial(
+                empresa_id,
+                tipoDoc,
+                request.headers.get('x-establecimiento') || '001', // Allow overriding or default
+                request.headers.get('x-punto-emision') || '001',
+                undefined, // No prefix for SRI invoices usually, or 'FAC' if internal
+                tx
+            )
 
-            if (secuencialDoc) {
-                establecimiento = secuencialDoc.establecimiento
-                punto_emision = secuencialDoc.punto_emision
-                secuencial = secuencialDoc.secuencial
-                numeroFactura = `${establecimiento}-${punto_emision}-${secuencial.toString().padStart(9, '0')}`
-
-                // Increment sequential
-                await tx.secuencial.update({
-                    where: { id: secuencialDoc.id },
-                    data: { secuencial: { increment: 1 } }
-                })
-            }
+            // For internal reference we might use the formatted number
+            const numeroFactura = numero
+            const establecimiento = numero.split('-')[0]
+            const punto_emision = numero.split('-')[1]
 
             // B. Check Stock
             for (const item of items) {
@@ -101,6 +137,17 @@ export async function POST(request: NextRequest) {
                 }
             })
 
+            // Trigger Notification
+            await tx.notificacion.create({
+                data: {
+                    empresa_id,
+                    tipo: 'pago', // Technically a sale is a payment received? Or 'sistema'? 'pago' fits money in.
+                    titulo: `Nueva Venta ${venta.numero}`,
+                    mensaje: `Venta registrada por $${Number(total).toFixed(2)} (${metodo_pago})`,
+                    link: `/ventas/${venta.id}`
+                }
+            })
+
             // D. Create Caja Movimiento (Ingreso)
             // Find open box for user or generic
             const caja = await tx.caja.findFirst({
@@ -128,190 +175,189 @@ export async function POST(request: NextRequest) {
         const { venta, secuencialData } = result
 
         // 2. SRI Integration (XML Generation & Signing)
-        // This is done OUTSIDE the transaction to not block it if SRI fails, 
-        // but typically we want it to be part of the flow.
-        // We will Try-Catch it purely for the Invoice generation part.
+        // Only executed if requested
+        if (body.generar_factura) {
+            try {
+                const empresa = venta.empresa
 
-        try {
-            const empresa = venta.empresa
+                // Check if we can generate invoice
+                if (empresa.certificado_p12_url && empresa.certificado_password) {
 
-            // Check if we can generate invoice
-            if (empresa.certificado_p12_url && empresa.certificado_password) {
+                    // --- PREPARE DATA ---
 
-                // --- PREPARE DATA ---
-
-                // Emisor
-                const datosEmisor: DatosEmisor = {
-                    ruc: empresa.ruc || '9999999999999',
-                    razonSocial: empresa.razon_social || empresa.nombre,
-                    nombreComercial: empresa.nombre_comercial || empresa.nombre,
-                    direccionMatriz: empresa.direccion || 'S/N',
-                    obligadoContabilidad: empresa.obligado_contabilidad
-                }
-
-                // Comprador
-                let datosComprador: DatosComprador
-                if (venta.cliente) {
-                    let tipoId = '07' // Consumidor Final default
-                    if (venta.cliente.tipo_id === 'ruc') tipoId = '04'
-                    if (venta.cliente.tipo_id === 'cedula') tipoId = '05'
-                    if (venta.cliente.tipo_id === 'pasaporte') tipoId = '06'
-
-                    datosComprador = {
-                        tipoIdentificacion: tipoId as any,
-                        identificacion: venta.cliente.identificacion || '9999999999999',
-                        razonSocial: venta.cliente.nombre,
-                        direccion: venta.cliente.direccion || undefined,
-                        email: venta.cliente.email || undefined,
-                        telefono: venta.cliente.telefono || undefined
+                    // Emisor
+                    const datosEmisor: DatosEmisor = {
+                        ruc: empresa.ruc || '9999999999999',
+                        razonSocial: empresa.razon_social || empresa.nombre,
+                        nombreComercial: empresa.nombre_comercial || empresa.nombre,
+                        direccionMatriz: empresa.direccion || 'S/N',
+                        obligadoContabilidad: empresa.obligado_contabilidad
                     }
-                } else {
-                    datosComprador = {
-                        tipoIdentificacion: '07', // Consumidor Final
-                        identificacion: '9999999999999',
-                        razonSocial: 'CONSUMIDOR FINAL'
-                    }
-                }
 
-                // Info Factura
-                const infoFactura: InfoFactura = {
-                    fechaEmision: new Date().toLocaleDateString('es-EC', { day: '2-digit', month: '2-digit', year: 'numeric' }),
-                    dirEstablecimiento: empresa.direccion || 'S/N',
-                    obligadoContabilidad: empresa.obligado_contabilidad ? 'SI' : 'NO',
-                    tipoIdentificacionComprador: datosComprador.tipoIdentificacion,
-                    razonSocialComprador: datosComprador.razonSocial,
-                    identificacionComprador: datosComprador.identificacion,
-                    direccionComprador: datosComprador.direccion,
-                    totalSinImpuestos: Number(venta.subtotal),
-                    totalDescuento: Number(venta.descuento),
-                    // Assuming all items are 15% IVA for simplicity in this MVP, 
-                    // or deriving from items. Ideally items should carry their tax code.
-                    totalConImpuestos: [{
-                        codigo: '2', // IVA
-                        codigoPorcentaje: '4', // 15%
-                        baseImponible: Number(venta.subtotal),
-                        valor: Number(venta.iva)
-                    }],
-                    propina: 0,
-                    importeTotal: Number(venta.total),
-                    moneda: 'DOLAR'
-                }
+                    // Comprador
+                    let datosComprador: DatosComprador
+                    if (venta.cliente) {
+                        let tipoId = '07' // Consumidor Final default
+                        if (venta.cliente.tipo_id === 'ruc') tipoId = '04'
+                        if (venta.cliente.tipo_id === 'cedula') tipoId = '05'
+                        if (venta.cliente.tipo_id === 'pasaporte') tipoId = '06'
 
-                // Detalles
-                const detalles: DetalleFactura[] = items.map((item: any) => ({
-                    codigoPrincipal: item.producto_id.slice(0, 10), // Truncate UUID
-                    descripcion: item.descripcion,
-                    cantidad: item.cantidad,
-                    precioUnitario: item.precio_unitario,
-                    descuento: 0, // Simplified
-                    precioTotalSinImpuesto: item.subtotal,
-                    impuestos: [{
-                        codigo: '2', // IVA
-                        codigoPorcentaje: '4', // 15%
-                        baseImponible: item.subtotal,
-                        tarifa: 15,
-                        valor: item.iva
-                    }]
-                }))
-
-                // Generate XML
-                const xmlOptions: FacturaXMLOptions = {
-                    ambiente: empresa.ambiente_sri === 'produccion' ? '2' : '1',
-                    tipoEmision: '1', // Normal
-                    establecimiento: secuencialData.establecimiento,
-                    puntoEmision: secuencialData.punto_emision,
-                    secuencial: secuencialData.secuencial
-                }
-
-                const xmlUnsigned = generateFacturaXML(datosEmisor, datosComprador, infoFactura, detalles, xmlOptions)
-
-                // Sign XML
-                let xmlSigned = xmlUnsigned
-                let estadoFactura = 'GENERADO'
-                let numeroAutorizacion = null
-                let fechaAutorizacion = null
-                let sriResponseMessages: any[] = []
-
-                try {
-                    // 1. Sign
-                    console.log('Signing invoice...')
-                    // Ensure path is correct. If it was stored relative to project root, simple join might work.
-                    // But if it's absolute (as stored in certificate route), verify access.
-                    // route.ts stored it as `path.join(uploadDir, fileName)` which is absolute process.cwd()/...
-                    xmlSigned = await SriService.signInvoice(
-                        xmlUnsigned,
-                        empresa.certificado_p12_url,
-                        empresa.certificado_password
-                    )
-                    estadoFactura = 'FIRMADO'
-
-                    // 2. Send to SRI (Recepcion)
-                    console.log('Sending to SRI Recepcion...')
-                    const recepcionParam = empresa.ambiente_sri === 'produccion' ? 'produccion' : 'pruebas'
-                    const recepcionResponse = await SriService.enviarComprobante(xmlSigned, recepcionParam)
-
-                    if (recepcionResponse.estado === 'RECIBIDA') {
-                        estadoFactura = 'EN_PROCESO'
-
-                        // 3. Authorize (Autorizacion)
-                        // SRI usually needs a small delay or retry, but for MVP request immediately
-                        console.log('Requesting Authorization...')
-                        // Small delay to ensure SRI processed it
-                        await new Promise(resolve => setTimeout(resolve, 3000))
-
-                        const claveAcceso = xmlUnsigned.match(/<claveAcceso>(.*?)<\/claveAcceso>/)?.[1] || ''
-                        const authResponse = await SriService.autorizarComprobante(claveAcceso, recepcionParam)
-
-                        if (authResponse.estado === 'AUTORIZADO') {
-                            estadoFactura = 'AUTORIZADO'
-                            numeroAutorizacion = authResponse.numeroAutorizacion
-                            // fechaAutorizacion = authResponse.fechaAutorizacion // Handle format if needed
-                        } else {
-                            estadoFactura = authResponse.estado // RECHAZADO, NO AUTORIZADO
-                            sriResponseMessages = authResponse.mensajes
+                        datosComprador = {
+                            tipoIdentificacion: tipoId as any,
+                            identificacion: venta.cliente.identificacion || '9999999999999',
+                            razonSocial: venta.cliente.nombre,
+                            direccion: venta.cliente.direccion || undefined,
+                            email: venta.cliente.email || undefined,
+                            telefono: venta.cliente.telefono || undefined
                         }
                     } else {
-                        estadoFactura = recepcionResponse.estado // DEVUELTA
-                        sriResponseMessages = recepcionResponse.mensajes
+                        datosComprador = {
+                            tipoIdentificacion: '07', // Consumidor Final
+                            identificacion: '9999999999999',
+                            razonSocial: 'CONSUMIDOR FINAL'
+                        }
                     }
 
-                } catch (signingError) {
-                    console.error('Error signing/sending invoice:', signingError)
-                    // Keep generated but not signed/sent
-                    estadoFactura = 'ERROR_ENVIO'
+                    // Info Factura
+                    const infoFactura: InfoFactura = {
+                        fechaEmision: new Date().toLocaleDateString('es-EC', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                        dirEstablecimiento: empresa.direccion || 'S/N',
+                        obligadoContabilidad: empresa.obligado_contabilidad ? 'SI' : 'NO',
+                        tipoIdentificacionComprador: datosComprador.tipoIdentificacion,
+                        razonSocialComprador: datosComprador.razonSocial,
+                        identificacionComprador: datosComprador.identificacion,
+                        direccionComprador: datosComprador.direccion,
+                        totalSinImpuestos: Number(venta.subtotal),
+                        totalDescuento: Number(venta.descuento),
+                        // Assuming all items are 15% IVA for simplicity in this MVP, 
+                        // or deriving from items. Ideally items should carry their tax code.
+                        totalConImpuestos: [{
+                            codigo: '2', // IVA
+                            codigoPorcentaje: '4', // 15%
+                            baseImponible: Number(venta.subtotal),
+                            valor: Number(venta.iva)
+                        }],
+                        propina: 0,
+                        importeTotal: Number(venta.total),
+                        moneda: 'DOLAR'
+                    }
+
+                    // Detalles
+                    const detalles: DetalleFactura[] = items.map((item: any) => ({
+                        codigoPrincipal: item.producto_id.slice(0, 10), // Truncate UUID
+                        descripcion: item.descripcion,
+                        cantidad: item.cantidad,
+                        precioUnitario: item.precio_unitario,
+                        descuento: 0, // Simplified
+                        precioTotalSinImpuesto: item.subtotal,
+                        impuestos: [{
+                            codigo: '2', // IVA
+                            codigoPorcentaje: '4', // 15%
+                            baseImponible: item.subtotal,
+                            tarifa: 15,
+                            valor: item.iva
+                        }]
+                    }))
+
+                    // Generate XML
+                    const xmlOptions: FacturaXMLOptions = {
+                        ambiente: empresa.ambiente_sri === 'produccion' ? '2' : '1',
+                        tipoEmision: '1', // Normal
+                        establecimiento: secuencialData.establecimiento,
+                        puntoEmision: secuencialData.punto_emision,
+                        secuencial: secuencialData.secuencial
+                    }
+
+                    const xmlUnsigned = generateFacturaXML(datosEmisor, datosComprador, infoFactura, detalles, xmlOptions)
+
+                    // Sign XML
+                    let xmlSigned = xmlUnsigned
+                    let estadoFactura = 'GENERADO'
+                    let numeroAutorizacion = null
+                    let fechaAutorizacion = null
+                    let sriResponseMessages: any[] = []
+
+                    try {
+                        // 1. Sign
+                        console.log('Signing invoice...')
+                        // Ensure path is correct. If it was stored relative to project root, simple join might work.
+                        // But if it's absolute (as stored in certificate route), verify access.
+                        // route.ts stored it as `path.join(uploadDir, fileName)` which is absolute process.cwd()/...
+                        xmlSigned = await SriService.signInvoice(
+                            xmlUnsigned,
+                            empresa.certificado_p12_url,
+                            empresa.certificado_password
+                        )
+                        estadoFactura = 'FIRMADO'
+
+                        // 2. Send to SRI (Recepcion)
+                        console.log('Sending to SRI Recepcion...')
+                        const recepcionParam = empresa.ambiente_sri === 'produccion' ? 'produccion' : 'pruebas'
+                        const recepcionResponse = await SriService.enviarComprobante(xmlSigned, recepcionParam)
+
+                        if (recepcionResponse.estado === 'RECIBIDA') {
+                            estadoFactura = 'EN_PROCESO'
+
+                            // 3. Authorize (Autorizacion)
+                            // SRI usually needs a small delay or retry, but for MVP request immediately
+                            console.log('Requesting Authorization...')
+                            // Small delay to ensure SRI processed it
+                            await new Promise(resolve => setTimeout(resolve, 3000))
+
+                            const claveAcceso = xmlUnsigned.match(/<claveAcceso>(.*?)<\/claveAcceso>/)?.[1] || ''
+                            const authResponse = await SriService.autorizarComprobante(claveAcceso, recepcionParam)
+
+                            if (authResponse.estado === 'AUTORIZADO') {
+                                estadoFactura = 'AUTORIZADO'
+                                numeroAutorizacion = authResponse.numeroAutorizacion
+                                // fechaAutorizacion = authResponse.fechaAutorizacion // Handle format if needed
+                            } else {
+                                estadoFactura = authResponse.estado // RECHAZADO, NO AUTORIZADO
+                                sriResponseMessages = authResponse.mensajes
+                            }
+                        } else {
+                            estadoFactura = recepcionResponse.estado // DEVUELTA
+                            sriResponseMessages = recepcionResponse.mensajes
+                        }
+
+                    } catch (signingError) {
+                        console.error('Error signing/sending invoice:', signingError)
+                        // Keep generated but not signed/sent
+                        estadoFactura = 'ERROR_ENVIO'
+                    }
+
+                    // Saving the record
+                    await prisma.facturacionElectronica.create({
+                        data: {
+                            empresa_id: empresa.id,
+                            venta_id: venta.id,
+                            numero: venta.numero, // Using Sale Number
+                            tipo_comprobante: '01', // Factura
+
+                            cliente_nombre: datosComprador.razonSocial,
+                            cliente_identificacion: datosComprador.identificacion,
+
+                            subtotal: venta.subtotal,
+                            iva: venta.iva,
+                            total: venta.total,
+
+                            clave_acceso: xmlUnsigned.match(/<claveAcceso>(.*?)<\/claveAcceso>/)?.[1] || '',
+                            numero_autorizacion: numeroAutorizacion,
+                            estado: estadoFactura.toLowerCase(),
+                            xml_generado: xmlSigned,
+                            ambiente: empresa.ambiente_sri
+                        } as any
+                    })
+
+                    if (sriResponseMessages.length > 0) {
+                        console.log('SRI Messages:', sriResponseMessages)
+                    }
                 }
 
-                // Saving the record
-                await prisma.facturacionElectronica.create({
-                    data: {
-                        empresa_id: empresa.id,
-                        venta_id: venta.id,
-                        numero: venta.numero, // Using Sale Number
-                        tipo_comprobante: '01', // Factura
-
-                        cliente_nombre: datosComprador.razonSocial,
-                        cliente_identificacion: datosComprador.identificacion,
-
-                        subtotal: venta.subtotal,
-                        iva: venta.iva,
-                        total: venta.total,
-
-                        clave_acceso: xmlUnsigned.match(/<claveAcceso>(.*?)<\/claveAcceso>/)?.[1] || '',
-                        numero_autorizacion: numeroAutorizacion,
-                        estado: estadoFactura.toLowerCase(),
-                        xml_generado: xmlSigned,
-                        ambiente: empresa.ambiente_sri
-                    } as any
-                })
-
-                if (sriResponseMessages.length > 0) {
-                    console.log('SRI Messages:', sriResponseMessages)
-                }
+            } catch (sriError) {
+                console.error('Error in SRI workflow:', sriError)
+                // We do NOT fail the sale if SRI fails.
             }
-
-        } catch (sriError) {
-            console.error('Error in SRI workflow:', sriError)
-            // We do NOT fail the sale if SRI fails.
         }
 
         return NextResponse.json(venta)
