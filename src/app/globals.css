@@ -17,8 +17,21 @@
 
 /* ========== PRINT STYLES ========== */
 @media print {
-  .no-print {
+  .no-print,
+  aside,
+  header,
+  nav,
+  .sidebar,
+  .app-sidebar,
+  .app-header {
     display: none !important;
+  }
+
+  main {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
   }
 
   body {

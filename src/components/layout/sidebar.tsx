@@ -25,6 +25,7 @@ import {
     Columns3,
     Shield,
     Crown,
+    ShoppingBag,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -53,6 +54,7 @@ const menuItems = [
             { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['superadmin', 'admin', 'tecnico', 'vendedor'] },
             { name: 'Kanban', href: '/kanban', icon: Columns3, roles: ['superadmin', 'admin', 'tecnico', 'vendedor'] },
             { name: 'Punto de Venta', href: '/pos', icon: ShoppingCart, roles: ['superadmin', 'admin', 'vendedor'] },
+            { name: 'Ventas', href: '/ventas', icon: ShoppingBag, roles: ['superadmin', 'admin', 'vendedor'] },
             { name: 'Órdenes', href: '/ordenes', icon: Wrench, roles: ['superadmin', 'admin', 'tecnico', 'vendedor'] },
         ],
     },
