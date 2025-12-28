@@ -7,9 +7,10 @@ import { getNextSecuencial } from '@/lib/secuenciales'
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const params = await context.params
         const ventaId = params.id
 
         // 1. Get Sale
