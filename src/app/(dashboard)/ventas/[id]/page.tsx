@@ -97,8 +97,9 @@ export default function VentaDetallePage() {
     const esFactura = !!venta.factura
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
-            <div className="flex items-center justify-between">
+        <div className="space-y-6 max-w-5xl mx-auto pb-10">
+            {/* Action Bar - Hidden in Print */}
+            <div className="flex items-center justify-between no-print">
                 <div className="flex items-center gap-4">
                     <Link href="/ventas">
                         <Button variant="ghost" size="icon">
@@ -107,7 +108,7 @@ export default function VentaDetallePage() {
                     </Link>
                     <div>
                         <h1 className="text-2xl font-bold flex items-center gap-2">
-                            Venta {venta.numero}
+                            Detalle de Venta
                             {esFactura ? (
                                 <Badge variant="default" className="bg-emerald-600">
                                     <CheckCircle className="w-3 h-3 mr-1" />
@@ -117,14 +118,11 @@ export default function VentaDetallePage() {
                                 <Badge variant="secondary">Nota de Venta</Badge>
                             )}
                         </h1>
-                        <p className="text-muted-foreground">
-                            {format(new Date(venta.created_at), "d MMMM yyyy, HH:mm", { locale: es })}
-                        </p>
                     </div>
                 </div>
                 <div className="flex gap-2">
                     {!esFactura && (
-                        <Button onClick={handleFacturar} disabled={isConverting}>
+                        <Button onClick={handleFacturar} disabled={isConverting} className="bg-slate-900 text-white hover:bg-slate-800">
                             {isConverting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileText className="w-4 h-4 mr-2" />}
                             Convertir a Factura
                         </Button>
@@ -136,86 +134,128 @@ export default function VentaDetallePage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="md:col-span-2">
-                    <CardHeader>
-                        <CardTitle>Items</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Descripción</TableHead>
-                                    <TableHead className="text-right">Cant</TableHead>
-                                    <TableHead className="text-right">P. Unit</TableHead>
-                                    <TableHead className="text-right">Total</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {venta.detalles?.map((item: any) => (
-                                    <TableRow key={item.id}>
-                                        <TableCell>{item.producto?.nombre || 'Producto'}</TableCell>
-                                        <TableCell className="text-right">{item.cantidad}</TableCell>
-                                        <TableCell className="text-right">${Number(item.precio_unitario).toFixed(2)}</TableCell>
-                                        <TableCell className="text-right font-medium">${Number(item.subtotal).toFixed(2)}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+            {/* The Document - This is what gets printed */}
+            <div className="bg-white shadow-xl rounded-none md:rounded-lg overflow-hidden border border-slate-200 print:shadow-none print:border-none print:m-0 print:w-full print:rounded-none">
 
-                        <div className="mt-6 flex justify-end">
-                            <div className="w-48 space-y-2">
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">Subtotal:</span>
-                                    <span>${Number(venta.subtotal).toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-muted-foreground">IVA (15%):</span>
-                                    <span>${Number(venta.iva).toFixed(2)}</span>
-                                </div>
-                                <Separator />
-                                <div className="flex justify-between font-bold text-lg">
-                                    <span>Total:</span>
-                                    <span>${Number(venta.total).toFixed(2)}</span>
-                                </div>
+                {/* Header */}
+                <div className="bg-slate-950 text-white p-8 flex justify-between items-start print:bg-slate-950 print:text-white">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            {/* Placeholder for Logo if exists */}
+                            <div className="h-10 w-10 bg-white/10 rounded-lg flex items-center justify-center border border-white/20">
+                                <span className="text-xl font-bold">R</span>
                             </div>
+                            <h2 className="text-2xl font-bold">{venta.empresa?.nombre_comercial || 'EMPRESA'}</h2>
                         </div>
-                    </CardContent>
-                </Card>
+                        <p className="text-slate-400 text-sm">{venta.empresa?.direccion || 'Dirección no registrada'}</p>
+                        <p className="text-slate-400 text-sm">RUC: {venta.empresa?.ruc || '9999999999999'}</p>
+                        <p className="text-slate-400 text-sm">{venta.empresa?.telefono || ''}</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-1">
+                            {esFactura ? 'FACTURA ELECTRÓNICA' : 'NOTA DE VENTA'}
+                        </p>
+                        <p className="text-3xl font-bold tabular-nums">Nº {venta.numero}</p>
+                        <p className="text-slate-400 mt-1">
+                            {format(new Date(venta.created_at), "d 'de' MMMM, yyyy", { locale: es })}
+                        </p>
+                    </div>
+                </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Cliente</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
+                {/* Client & Invoice Info */}
+                <div className="p-8 grid grid-cols-2 gap-12 border-b border-slate-100">
+                    <div>
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Facturado A</p>
+                        <h3 className="text-lg font-bold text-slate-900 mb-1">{venta.cliente?.nombre || 'Consumidor Final'}</h3>
+                        <div className="text-sm text-slate-600 space-y-1">
+                            {venta.cliente && (
+                                <>
+                                    <p>CI/RUC: {venta.cliente.identificacion}</p>
+                                    <p>{venta.cliente.direccion || 'Sin dirección'}</p>
+                                    <p>{venta.cliente.telefono || ''}</p>
+                                    <p>{venta.cliente.email || ''}</p>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <p className="text-sm font-medium text-muted-foreground">Nombre</p>
-                            <p className="text-lg">{venta.cliente?.nombre || 'Consumidor Final'}</p>
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Fecha de Emisión</p>
+                            <p className="text-sm font-medium text-slate-900">{format(new Date(venta.created_at), "dd/MM/yyyy")}</p>
                         </div>
                         <div>
-                            <p className="text-sm font-medium text-muted-foreground">Identificación</p>
-                            <p>{venta.cliente?.identificacion || '-'}</p>
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Forma de Pago</p>
+                            <p className="text-sm font-medium text-slate-900 capitalize">{venta.metodo_pago}</p>
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Email</p>
-                            <p className="truncate">{venta.cliente?.email || '-'}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Método de Pago</p>
-                            <p className="capitalize">{venta.metodo_pago}</p>
-                        </div>
-
                         {esFactura && (
-                            <div className="pt-4 border-t mt-4">
-                                <p className="text-sm font-medium text-muted-foreground mb-2">Datos SRI</p>
-                                <div className="text-xs space-y-1 text-slate-500 break-all">
-                                    <p><strong>Autorización:</strong> {venta.factura.numero_autorizacion}</p>
-                                    <p><strong>Clave Acceso:</strong> {venta.factura.clave_acceso}</p>
-                                </div>
+                            <div className="col-span-2 mt-2">
+                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Autorización SRI</p>
+                                <p className="text-xs font-mono bg-slate-100 p-2 rounded border border-slate-200 break-all text-slate-600">
+                                    {venta.factura.numero_autorizacion}
+                                </p>
                             </div>
                         )}
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
+
+                {/* Items Table - Using traditional HTML table for better print control */}
+                <div className="p-8">
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr className="border-b-2 border-slate-100 text-left">
+                                <th className="py-3 font-semibold text-slate-900 w-[50%]">Descripción</th>
+                                <th className="py-3 font-semibold text-slate-900 text-right">Cant.</th>
+                                <th className="py-3 font-semibold text-slate-900 text-right">Precio Unit.</th>
+                                <th className="py-3 font-semibold text-slate-900 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                            {venta.detalles?.map((item: any) => (
+                                <tr key={item.id}>
+                                    <td className="py-4 text-slate-700">
+                                        <p className="font-medium text-slate-900">{item.producto?.nombre || 'Producto'}</p>
+                                        <p className="text-xs text-slate-500">{item.producto?.codigo ? `Código: ${item.producto.codigo}` : ''}</p>
+                                    </td>
+                                    <td className="py-4 text-right text-slate-700">{item.cantidad}</td>
+                                    <td className="py-4 text-right text-slate-700">${Number(item.precio_unitario).toFixed(2)}</td>
+                                    <td className="py-4 text-right font-medium text-slate-900">${Number(item.subtotal).toFixed(2)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Totals */}
+                <div className="px-8 pb-8 flex justify-end">
+                    <div className="w-64 space-y-3">
+                        <div className="flex justify-between text-sm text-slate-600">
+                            <span>Subtotal</span>
+                            <span className="font-medium text-slate-900">${Number(venta.subtotal).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-slate-600">
+                            <span>Descuento</span>
+                            <span className="font-medium text-slate-900">${Number(venta.descuento || 0).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-slate-600">
+                            <span>IVA (15%)</span>
+                            <span className="font-medium text-slate-900">${Number(venta.iva).toFixed(2)}</span>
+                        </div>
+                        <div className="pt-3 border-t border-slate-200 flex justify-between items-center">
+                            <span className="text-base font-bold text-slate-900">Total</span>
+                            <span className="text-xl font-bold text-slate-900">${Number(venta.total).toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="bg-slate-50 p-8 border-t border-slate-100 print:bg-white print:border-t-2">
+                    <div className="text-center text-xs text-slate-500 space-y-1">
+                        <p className="font-medium text-slate-900">¡Gracias por su compra!</p>
+                        <p>Para garantías es indispensable presentar este documento.</p>
+                        <p>Generado por RepairApp v2.0</p>
+                    </div>
+                </div>
+
             </div>
         </div>
     )
