@@ -156,7 +156,7 @@ export default function FacturacionPage() {
     // Stats
     const autorizadas = facturas.filter(f => f.estado === 'autorizado').length
     const pendientes = facturas.filter(f => f.estado === 'pendiente').length
-    const totalFacturado = facturas.filter(f => f.estado === 'autorizado').reduce((acc, f) => acc + f.total, 0)
+    const totalFacturado = facturas.filter(f => f.estado === 'autorizado').reduce((acc, f) => acc + Number(f.total), 0)
 
     return (
         <motion.div
@@ -357,7 +357,7 @@ export default function FacturacionPage() {
                                                     <div className="flex items-center gap-6 justify-between md:justify-end">
                                                         <div className="text-right">
                                                             <p className="font-bold text-gray-900 text-lg">
-                                                                ${factura.total.toFixed(2)}
+                                                                ${Number(factura.total).toFixed(2)}
                                                             </p>
                                                             <p className="text-xs text-gray-500">
                                                                 {format(new Date(factura.created_at), "d MMM yyyy", { locale: es })}
