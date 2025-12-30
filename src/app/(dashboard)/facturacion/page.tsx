@@ -55,7 +55,7 @@ interface Factura {
     subtotal: number
     iva: number
     total: number
-    estado: 'pendiente' | 'autorizado' | 'rechazado' | 'anulado'
+    estado: 'pendiente' | 'autorizado' | 'rechazado' | 'anulado' | 'devuelta'
     clave_acceso: string | null
     numero_autorizacion: string | null
     created_at: string
@@ -78,6 +78,7 @@ const estadoConfig = {
     autorizado: { label: 'Autorizado', color: 'text-emerald-700', bgColor: 'bg-emerald-100', borderColor: 'border-emerald-200', icon: CheckCircle },
     rechazado: { label: 'Rechazado', color: 'text-red-700', bgColor: 'bg-red-100', borderColor: 'border-red-200', icon: XCircle },
     anulado: { label: 'Anulado', color: 'text-gray-700', bgColor: 'bg-gray-100', borderColor: 'border-gray-200', icon: AlertTriangle },
+    devuelta: { label: 'Devuelta SRI', color: 'text-orange-700', bgColor: 'bg-orange-100', borderColor: 'border-orange-200', icon: AlertTriangle },
 }
 
 const containerVariants = {
@@ -334,8 +335,8 @@ export default function FacturacionPage() {
                                 ) : (
                                     <div className="divide-y divide-gray-100">
                                         {filteredFacturas.map((factura) => {
-                                            const estado = estadoConfig[factura.estado]
-                                            const Icon = estado.icon
+                                            const estado = estadoConfig[factura.estado as keyof typeof estadoConfig] || estadoConfig['pendiente']
+                                            const Icon = estado.icon || AlertTriangle
                                             return (
                                                 <div key={factura.id} className="p-4 flex flex-col md:flex-row md:items-center justify-between hover:bg-blue-50/50 transition-colors gap-4">
                                                     <div className="flex items-center gap-4">
