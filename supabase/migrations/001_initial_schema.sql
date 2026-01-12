@@ -269,8 +269,8 @@ CREATE INDEX idx_work_orders_active ON public.work_orders(tenant_id, scheduled_d
 -- HELPER FUNCTIONS
 -- ============================================
 
--- Get tenant_id from JWT claims
-CREATE OR REPLACE FUNCTION auth.tenant_id() 
+-- Get tenant_id from JWT claims (using public schema)
+CREATE OR REPLACE FUNCTION public.get_tenant_id() 
 RETURNS UUID AS $$
   SELECT COALESCE(
     (current_setting('request.jwt.claims', true)::json->>'tenant_id')::uuid,
@@ -279,7 +279,7 @@ RETURNS UUID AS $$
 $$ LANGUAGE SQL STABLE SECURITY DEFINER;
 
 -- Check if user is super admin
-CREATE OR REPLACE FUNCTION auth.is_super_admin() 
+CREATE OR REPLACE FUNCTION public.is_super_admin() 
 RETURNS BOOLEAN AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.super_admins 
@@ -287,8 +287,8 @@ RETURNS BOOLEAN AS $$
   );
 $$ LANGUAGE SQL STABLE SECURITY DEFINER;
 
--- Get user role
-CREATE OR REPLACE FUNCTION auth.user_role() 
+-- Get user role from JWT claims
+CREATE OR REPLACE FUNCTION public.get_user_role() 
 RETURNS TEXT AS $$
   SELECT COALESCE(
     (current_setting('request.jwt.claims', true)::json->>'role'),
@@ -320,126 +320,126 @@ ALTER TABLE public.accounting_entries ENABLE ROW LEVEL SECURITY;
 
 -- PLANS (public read)
 CREATE POLICY "plans_read_all" ON public.plans FOR SELECT USING (true);
-CREATE POLICY "plans_manage_super" ON public.plans FOR ALL USING (auth.is_super_admin());
+CREATE POLICY "plans_manage_super" ON public.plans FOR ALL USING (public.is_super_admin());
 
 -- TENANTS
-CREATE POLICY "tenants_super_all" ON public.tenants FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "tenants_read_own" ON public.tenants FOR SELECT USING (id = auth.tenant_id());
+CREATE POLICY "tenants_super_all" ON public.tenants FOR ALL USING (public.is_super_admin());
+CREATE POLICY "tenants_read_own" ON public.tenants FOR SELECT USING (id = public.get_tenant_id());
 
 -- SUPER_ADMINS
-CREATE POLICY "super_admins_read" ON public.super_admins FOR SELECT USING (auth.is_super_admin());
+CREATE POLICY "super_admins_read" ON public.super_admins FOR SELECT USING (public.is_super_admin());
 
 -- SAAS_PAYMENTS
-CREATE POLICY "saas_payments_super" ON public.saas_payments FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "saas_payments_read_own" ON public.saas_payments FOR SELECT USING (tenant_id = auth.tenant_id());
+CREATE POLICY "saas_payments_super" ON public.saas_payments FOR ALL USING (public.is_super_admin());
+CREATE POLICY "saas_payments_read_own" ON public.saas_payments FOR SELECT USING (tenant_id = public.get_tenant_id());
 
 -- USERS
-CREATE POLICY "users_super_all" ON public.users FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "users_tenant_read" ON public.users FOR SELECT USING (tenant_id = auth.tenant_id());
+CREATE POLICY "users_super_all" ON public.users FOR ALL USING (public.is_super_admin());
+CREATE POLICY "users_tenant_read" ON public.users FOR SELECT USING (tenant_id = public.get_tenant_id());
 CREATE POLICY "users_admin_manage" ON public.users FOR ALL USING (
-  tenant_id = auth.tenant_id() AND 
-  auth.user_role() = 'admin'
+  tenant_id = public.get_tenant_id() AND 
+  public.get_user_role() = 'admin'
 );
 
 -- CLIENTS
-CREATE POLICY "clients_super_all" ON public.clients FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "clients_tenant_read" ON public.clients FOR SELECT USING (tenant_id = auth.tenant_id());
+CREATE POLICY "clients_super_all" ON public.clients FOR ALL USING (public.is_super_admin());
+CREATE POLICY "clients_tenant_read" ON public.clients FOR SELECT USING (tenant_id = public.get_tenant_id());
 CREATE POLICY "clients_admin_manage" ON public.clients FOR ALL USING (
-  tenant_id = auth.tenant_id() AND 
-  auth.user_role() = 'admin'
+  tenant_id = public.get_tenant_id() AND 
+  public.get_user_role() = 'admin'
 );
 
 -- WORK_ORDERS
-CREATE POLICY "work_orders_super_all" ON public.work_orders FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "work_orders_tenant_read" ON public.work_orders FOR SELECT USING (tenant_id = auth.tenant_id());
+CREATE POLICY "work_orders_super_all" ON public.work_orders FOR ALL USING (public.is_super_admin());
+CREATE POLICY "work_orders_tenant_read" ON public.work_orders FOR SELECT USING (tenant_id = public.get_tenant_id());
 CREATE POLICY "work_orders_admin_manage" ON public.work_orders FOR ALL USING (
-  tenant_id = auth.tenant_id() AND 
-  auth.user_role() = 'admin'
+  tenant_id = public.get_tenant_id() AND 
+  public.get_user_role() = 'admin'
 );
 CREATE POLICY "work_orders_tech_update" ON public.work_orders FOR UPDATE USING (
-  tenant_id = auth.tenant_id() AND 
+  tenant_id = public.get_tenant_id() AND 
   assigned_to = (SELECT id FROM public.users WHERE auth_user_id = auth.uid())
 );
 
 -- TECHNICAL_REPORTS
-CREATE POLICY "reports_super_all" ON public.technical_reports FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "reports_tenant_read" ON public.technical_reports FOR SELECT USING (tenant_id = auth.tenant_id());
+CREATE POLICY "reports_super_all" ON public.technical_reports FOR ALL USING (public.is_super_admin());
+CREATE POLICY "reports_tenant_read" ON public.technical_reports FOR SELECT USING (tenant_id = public.get_tenant_id());
 CREATE POLICY "reports_tech_create" ON public.technical_reports FOR INSERT WITH CHECK (
-  tenant_id = auth.tenant_id() AND 
+  tenant_id = public.get_tenant_id() AND 
   technician_id = (SELECT id FROM public.users WHERE auth_user_id = auth.uid())
 );
 CREATE POLICY "reports_tech_update" ON public.technical_reports FOR UPDATE USING (
-  tenant_id = auth.tenant_id() AND 
+  tenant_id = public.get_tenant_id() AND 
   technician_id = (SELECT id FROM public.users WHERE auth_user_id = auth.uid())
 );
 
 -- PRODUCT_CATEGORIES
-CREATE POLICY "categories_super_all" ON public.product_categories FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "categories_tenant_read" ON public.product_categories FOR SELECT USING (tenant_id = auth.tenant_id());
+CREATE POLICY "categories_super_all" ON public.product_categories FOR ALL USING (public.is_super_admin());
+CREATE POLICY "categories_tenant_read" ON public.product_categories FOR SELECT USING (tenant_id = public.get_tenant_id());
 CREATE POLICY "categories_admin_manage" ON public.product_categories FOR ALL USING (
-  tenant_id = auth.tenant_id() AND 
-  auth.user_role() = 'admin'
+  tenant_id = public.get_tenant_id() AND 
+  public.get_user_role() = 'admin'
 );
 
 -- PRODUCTS
-CREATE POLICY "products_super_all" ON public.products FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "products_tenant_read" ON public.products FOR SELECT USING (tenant_id = auth.tenant_id());
+CREATE POLICY "products_super_all" ON public.products FOR ALL USING (public.is_super_admin());
+CREATE POLICY "products_tenant_read" ON public.products FOR SELECT USING (tenant_id = public.get_tenant_id());
 CREATE POLICY "products_admin_manage" ON public.products FOR ALL USING (
-  tenant_id = auth.tenant_id() AND 
-  auth.user_role() = 'admin'
+  tenant_id = public.get_tenant_id() AND 
+  public.get_user_role() = 'admin'
 );
 
 -- PRODUCT_SERIALS
-CREATE POLICY "serials_super_all" ON public.product_serials FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "serials_tenant_read" ON public.product_serials FOR SELECT USING (tenant_id = auth.tenant_id());
+CREATE POLICY "serials_super_all" ON public.product_serials FOR ALL USING (public.is_super_admin());
+CREATE POLICY "serials_tenant_read" ON public.product_serials FOR SELECT USING (tenant_id = public.get_tenant_id());
 CREATE POLICY "serials_admin_manage" ON public.product_serials FOR ALL USING (
-  tenant_id = auth.tenant_id() AND 
-  auth.user_role() = 'admin'
+  tenant_id = public.get_tenant_id() AND 
+  public.get_user_role() = 'admin'
 );
 
 -- INVENTORY_MOVEMENTS
-CREATE POLICY "movements_super_all" ON public.inventory_movements FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "movements_tenant_read" ON public.inventory_movements FOR SELECT USING (tenant_id = auth.tenant_id());
+CREATE POLICY "movements_super_all" ON public.inventory_movements FOR ALL USING (public.is_super_admin());
+CREATE POLICY "movements_tenant_read" ON public.inventory_movements FOR SELECT USING (tenant_id = public.get_tenant_id());
 CREATE POLICY "movements_admin_manage" ON public.inventory_movements FOR ALL USING (
-  tenant_id = auth.tenant_id() AND 
-  auth.user_role() = 'admin'
+  tenant_id = public.get_tenant_id() AND 
+  public.get_user_role() = 'admin'
 );
 
 -- INVOICES
-CREATE POLICY "invoices_super_all" ON public.invoices FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "invoices_tenant_read" ON public.invoices FOR SELECT USING (tenant_id = auth.tenant_id());
+CREATE POLICY "invoices_super_all" ON public.invoices FOR ALL USING (public.is_super_admin());
+CREATE POLICY "invoices_tenant_read" ON public.invoices FOR SELECT USING (tenant_id = public.get_tenant_id());
 CREATE POLICY "invoices_admin_manage" ON public.invoices FOR ALL USING (
-  tenant_id = auth.tenant_id() AND 
-  auth.user_role() = 'admin'
+  tenant_id = public.get_tenant_id() AND 
+  public.get_user_role() = 'admin'
 );
 
 -- INVOICE_LINES (inherit from invoice)
-CREATE POLICY "invoice_lines_super_all" ON public.invoice_lines FOR ALL USING (auth.is_super_admin());
+CREATE POLICY "invoice_lines_super_all" ON public.invoice_lines FOR ALL USING (public.is_super_admin());
 CREATE POLICY "invoice_lines_read" ON public.invoice_lines FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM public.invoices 
     WHERE id = invoice_lines.invoice_id 
-    AND tenant_id = auth.tenant_id()
+    AND tenant_id = public.get_tenant_id()
   )
 );
 
 -- PAYMENTS
-CREATE POLICY "payments_super_all" ON public.payments FOR ALL USING (auth.is_super_admin());
-CREATE POLICY "payments_tenant_read" ON public.payments FOR SELECT USING (tenant_id = auth.tenant_id());
+CREATE POLICY "payments_super_all" ON public.payments FOR ALL USING (public.is_super_admin());
+CREATE POLICY "payments_tenant_read" ON public.payments FOR SELECT USING (tenant_id = public.get_tenant_id());
 CREATE POLICY "payments_admin_manage" ON public.payments FOR ALL USING (
-  tenant_id = auth.tenant_id() AND 
-  auth.user_role() = 'admin'
+  tenant_id = public.get_tenant_id() AND 
+  public.get_user_role() = 'admin'
 );
 
 -- ACCOUNTING_ENTRIES
-CREATE POLICY "accounting_super_all" ON public.accounting_entries FOR ALL USING (auth.is_super_admin());
+CREATE POLICY "accounting_super_all" ON public.accounting_entries FOR ALL USING (public.is_super_admin());
 CREATE POLICY "accounting_tenant_read" ON public.accounting_entries FOR SELECT USING (
-  tenant_id = auth.tenant_id() AND 
-  auth.user_role() = 'admin'
+  tenant_id = public.get_tenant_id() AND 
+  public.get_user_role() = 'admin'
 );
 CREATE POLICY "accounting_admin_manage" ON public.accounting_entries FOR ALL USING (
-  tenant_id = auth.tenant_id() AND 
-  auth.user_role() = 'admin'
+  tenant_id = public.get_tenant_id() AND 
+  public.get_user_role() = 'admin'
 );
 
 -- ============================================
