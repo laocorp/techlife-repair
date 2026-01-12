@@ -1,0 +1,203 @@
+@import "tailwindcss";
+
+/* ============================================
+   TechRepair SaaS - Linear Style Design System
+   ============================================ */
+
+:root {
+  /* Background */
+  --background: #FAFAFA;
+  --background-secondary: #F4F4F5;
+  --background-tertiary: #FFFFFF;
+  
+  /* Foreground */
+  --foreground: #18181B;
+  --foreground-secondary: #71717A;
+  --foreground-muted: #A1A1AA;
+  
+  /* Border */
+  --border: #E4E4E7;
+  --border-hover: #D4D4D8;
+  
+  /* Primary - Indigo */
+  --primary: #5C6AC4;
+  --primary-hover: #4F5AB8;
+  --primary-light: #EEF0FF;
+  --primary-foreground: #FFFFFF;
+  
+  /* Accent Colors */
+  --success: #22C55E;
+  --success-light: #F0FDF4;
+  --warning: #F59E0B;
+  --warning-light: #FFFBEB;
+  --error: #EF4444;
+  --error-light: #FEF2F2;
+  --info: #3B82F6;
+  --info-light: #EFF6FF;
+  
+  /* Radius */
+  --radius: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  
+  /* Shadows */
+  --shadow-soft: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+  --shadow-dropdown: 0 4px 6px -1px rgb(0 0 0 / 0.07);
+  --shadow-modal: 0 10px 25px -5px rgb(0 0 0 / 0.1);
+}
+
+.dark {
+  --background: #09090B;
+  --background-secondary: #18181B;
+  --background-tertiary: #1C1C1F;
+  
+  --foreground: #FAFAFA;
+  --foreground-secondary: #A1A1AA;
+  --foreground-muted: #71717A;
+  
+  --border: #27272A;
+  --border-hover: #3F3F46;
+  
+  --primary-light: #1E1B4B;
+  
+  --success-light: #052E16;
+  --warning-light: #451A03;
+  --error-light: #450A0A;
+  --info-light: #1E3A5F;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-tertiary: var(--background-tertiary);
+  --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  --color-error: var(--error);
+  --color-error-light: var(--error-light);
+  --color-info: var(--info);
+  --color-info-light: var(--info-light);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Base Styles */
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Selection */
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* Scrollbar - Linear style */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-muted);
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { 
+    opacity: 0; 
+    transform: translateY(4px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes scale-in {
+  from { 
+    opacity: 0; 
+    transform: scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.15s ease-out;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Utility Classes */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .glass {
+  background: rgba(24, 24, 27, 0.8);
+}
