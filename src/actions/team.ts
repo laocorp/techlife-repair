@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { canCreateUser } from '@/lib/plans'
 
 const InviteUserSchema = z.object({
     email: z.string().email('Email inválido'),
@@ -47,6 +48,12 @@ export async function inviteTeamMemberAction(
 
     if (!currentUser || currentUser.role !== 'admin') {
         return { errors: { _form: ['Solo administradores pueden invitar usuarios'] } }
+    }
+
+    // Check plan limits
+    const planCheck = await canCreateUser()
+    if (!planCheck.canCreate) {
+        return { errors: { _form: [planCheck.reason || 'Límite de usuarios alcanzado. Actualiza tu plan.'] } }
     }
 
     const validatedFields = InviteUserSchema.safeParse({

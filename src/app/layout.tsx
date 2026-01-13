@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   keywords: ['servicio técnico', 'SaaS', 'gestión', 'órdenes de trabajo', 'inventario'],
 }
 
+import { Toaster } from 'sonner'
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,6 +28,7 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         {children}
+        <Toaster richColors position="top-center" theme="system" />
       </body>
     </html>
   )

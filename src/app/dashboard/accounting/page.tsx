@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { Button, Badge, Card, CardContent, CardHeader, CardTitle } from '@/components/ui'
 import { Plus, TrendingUp, TrendingDown, DollarSign, Calendar } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { hasModuleAccess } from '@/lib/plans'
+import { redirect } from 'next/navigation'
 
 export const metadata = {
     title: 'Contabilidad',
@@ -47,6 +49,9 @@ async function getAccountingSummary(
 }
 
 export default async function AccountingPage() {
+    if (!await hasModuleAccess('accounting')) {
+        redirect('/dashboard')
+    }
     const supabase = await createClient()
 
     // Get current month range

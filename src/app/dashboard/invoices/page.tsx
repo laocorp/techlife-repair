@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { Button, Badge, Card, CardContent } from '@/components/ui'
 import { Plus, FileText, DollarSign, Clock, CheckCircle } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { hasModuleAccess } from '@/lib/plans'
+import { redirect } from 'next/navigation'
 
 export const metadata = {
     title: 'Facturas',
@@ -60,6 +62,9 @@ async function getInvoices(supabase: Awaited<ReturnType<typeof createClient>>): 
 }
 
 export default async function InvoicesPage() {
+    if (!await hasModuleAccess('invoices')) {
+        redirect('/dashboard')
+    }
     const supabase = await createClient()
     const invoices = await getInvoices(supabase)
 

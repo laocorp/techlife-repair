@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { Button, Badge, Card, CardContent } from '@/components/ui'
 import { Plus, Package, AlertTriangle, Layers, DollarSign } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
+import { hasModuleAccess } from '@/lib/plans'
+import { redirect } from 'next/navigation'
 
 export const metadata = {
     title: 'Inventario',
@@ -78,6 +80,9 @@ async function getCategories(supabase: Awaited<ReturnType<typeof createClient>>)
 }
 
 export default async function InventoryPage() {
+    if (!await hasModuleAccess('inventory')) {
+        redirect('/dashboard')
+    }
     const supabase = await createClient()
     const [products, categories] = await Promise.all([
         getProducts(supabase),

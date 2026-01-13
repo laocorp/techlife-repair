@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient as createSupabaseClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { canCreateClient } from '@/lib/plans'
 
 // Validation schema
 const ClientSchema = z.object({
@@ -69,6 +70,12 @@ export async function createClientAction(
         return {
             errors: validatedFields.error.flatten().fieldErrors,
         }
+    }
+
+    // Check plan limits
+    const planCheck = await canCreateClient()
+    if (!planCheck.canCreate) {
+        return { errors: { _form: [planCheck.reason || 'Límite de clientes alcanzado. Actualiza tu plan.'] } }
     }
 
     // Insert client

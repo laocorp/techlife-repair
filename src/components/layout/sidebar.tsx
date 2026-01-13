@@ -25,9 +25,10 @@ interface SidebarProps {
     tenant: {
         name: string
     }
+    availableModules?: string[]
 }
 
-export function Sidebar({ user, tenant }: SidebarProps) {
+export function Sidebar({ user, tenant, availableModules }: SidebarProps) {
     const pathname = usePathname()
     const [mobileOpen, setMobileOpen] = useState(false)
     const [expandedItems, setExpandedItems] = useState<string[]>([])
@@ -42,8 +43,34 @@ export function Sidebar({ user, tenant }: SidebarProps) {
 
     const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
+    const isModuleAllowed = (permission?: string) => {
+        if (!permission) return true
+        if (!availableModules) return true
+
+        // Extract module name from permission (e.g., 'inventory:read' -> 'inventory')
+        const [module] = permission.split(':')
+
+        // List of modules that can be restricted by plan
+        const RESTRICTED_MODULES = ['clients', 'work_orders', 'reports', 'inventory', 'invoices', 'accounting']
+
+        // If it's not a restricted module type, allow it (e.g., 'users', 'settings')
+        if (!RESTRICTED_MODULES.includes(module)) return true
+
+        return availableModules.includes(module)
+    }
+
     const renderNavItem = (item: NavItem, depth = 0) => {
-        const hasChildren = item.children && item.children.length > 0
+        // Check if module is allowed
+        if (!isModuleAllowed(item.permission)) return null
+
+        // Check children
+        const children = item.children?.filter(child => isModuleAllowed(child.permission))
+        const hasChildren = children && children.length > 0
+
+        // If it has children but none are allowed, and it's not a direct link itself (or it is?), 
+        // usually section headers with empty children should be hidden if they depend on children.
+        // But here items have hrefs too.
+
         const isExpanded = expandedItems.includes(item.href)
         const active = isActive(item.href)
 
@@ -78,7 +105,7 @@ export function Sidebar({ user, tenant }: SidebarProps) {
 
                 {hasChildren && isExpanded && (
                     <div className="mt-1 space-y-1">
-                        {item.children?.map(child => renderNavItem(child, depth + 1))}
+                        {children.map(child => renderNavItem(child, depth + 1))}
                     </div>
                 )}
             </div>

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle, Badge, Button } from '@/components/ui'
 import { Building2, Users, DollarSign, Calendar, AlertTriangle } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { TenantActions } from './tenant-actions'
 
 export const metadata = {
     title: 'Super Admin',
@@ -176,7 +177,7 @@ export default async function SuperAdminPage() {
             </div>
 
             {/* Tenants Table */}
-            <Card>
+            <Card className="overflow-visible">
                 <CardHeader>
                     <CardTitle className="text-base">Empresas Registradas</CardTitle>
                 </CardHeader>
@@ -184,7 +185,7 @@ export default async function SuperAdminPage() {
                     {tenants.length === 0 ? (
                         <p className="text-center text-foreground-muted py-8">No hay empresas</p>
                     ) : (
-                        <div className="overflow-x-auto">
+                        <div className="overflow-visible">
                             <table className="w-full text-sm">
                                 <thead className="bg-background-secondary">
                                     <tr>
@@ -193,6 +194,7 @@ export default async function SuperAdminPage() {
                                         <th className="px-3 py-2 text-left font-medium text-foreground-secondary">Estado</th>
                                         <th className="px-3 py-2 text-right font-medium text-foreground-secondary">Usuarios</th>
                                         <th className="px-3 py-2 text-left font-medium text-foreground-secondary">Creado</th>
+                                        <th className="px-3 py-2 text-center font-medium text-foreground-secondary">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border">
@@ -215,6 +217,13 @@ export default async function SuperAdminPage() {
                                             <td className="px-3 py-3 text-right">{tenant._users_count}</td>
                                             <td className="px-3 py-3 text-foreground-secondary">
                                                 {formatDate(tenant.created_at)}
+                                            </td>
+                                            <td className="px-3 py-3 text-center">
+                                                <TenantActions
+                                                    tenantId={tenant.id}
+                                                    currentStatus={tenant.status}
+                                                    subscriptionStatus={tenant.subscription_status}
+                                                />
                                             </td>
                                         </tr>
                                     ))}
