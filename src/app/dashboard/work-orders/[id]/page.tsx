@@ -63,14 +63,46 @@ async function getWorkOrder(supabase: Awaited<ReturnType<typeof createClient>>, 
     }
 }
 
+async function getTenant(supabase: Awaited<ReturnType<typeof createClient>>) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const { data: userData } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+    if (!userData?.tenant_id) return null
+
+    const { data: tenant } = await supabase
+        .from('tenants')
+        .select('*')
+        .eq('id', userData.tenant_id)
+        .single()
+
+    return tenant
+}
+
 export default async function WorkOrderDetailPage({ params }: WorkOrderPageProps) {
     const { id } = await params
     const supabase = await createClient()
 
-    const order = await getWorkOrder(supabase, id)
+    const [order, tenant] = await Promise.all([
+        getWorkOrder(supabase, id),
+        getTenant(supabase),
+    ])
 
     if (!order) {
         notFound()
+    }
+
+    const company = {
+        name: tenant?.name || 'Mi Empresa',
+        tax_id: tenant?.tax_id || null,
+        phone: tenant?.phone || null,
+        email: tenant?.email || null,
+        address: tenant?.address || null,
     }
 
     return (
@@ -125,6 +157,7 @@ export default async function WorkOrderDetailPage({ params }: WorkOrderPageProps
                             serial_number: order.device_serial,
                             client: { company_name: order.client.company_name, phone: order.client.phone },
                             technician: order.assigned_user,
+                            company: company,
                         }}
                     />
                     <Link href={`/dashboard/work-orders/${id}/edit`}>

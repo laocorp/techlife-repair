@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Button, Badge, Card, CardContent } from '@/components/ui'
+import { Button, Card } from '@/components/ui'
 import { FileText } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
 import { ReportsList } from './reports-list'
 
 export const metadata = {
@@ -21,6 +20,7 @@ interface Report {
         order_number: string
         device_type: string
         device_brand: string | null
+        device_model: string | null
         client: {
             company_name: string
         }
@@ -33,7 +33,7 @@ async function getReports(supabase: Awaited<ReturnType<typeof createClient>>): P
         .select(`
             id, diagnosis, work_performed, parts_used, recommendations, created_at,
             work_order:work_orders(
-                id, order_number, device_type, device_brand,
+                id, order_number, device_type, device_brand, device_model,
                 client:clients(company_name)
             )
         `)
@@ -51,9 +51,41 @@ async function getReports(supabase: Awaited<ReturnType<typeof createClient>>): P
     }))
 }
 
+async function getTenant(supabase: Awaited<ReturnType<typeof createClient>>) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const { data: userData } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+    if (!userData?.tenant_id) return null
+
+    const { data: tenant } = await supabase
+        .from('tenants')
+        .select('*')
+        .eq('id', userData.tenant_id)
+        .single()
+
+    return tenant
+}
+
 export default async function ReportsPage() {
     const supabase = await createClient()
-    const reports = await getReports(supabase)
+    const [reports, tenant] = await Promise.all([
+        getReports(supabase),
+        getTenant(supabase),
+    ])
+
+    const company = {
+        name: tenant?.name || 'Mi Empresa',
+        tax_id: tenant?.tax_id || null,
+        phone: tenant?.phone || null,
+        email: tenant?.email || null,
+        address: tenant?.address || null,
+    }
 
     return (
         <div className="space-y-6">
@@ -82,7 +114,7 @@ export default async function ReportsPage() {
                     </Link>
                 </div>
             ) : (
-                <ReportsList reports={reports} />
+                <ReportsList reports={reports} company={company} />
             )}
         </div>
     )

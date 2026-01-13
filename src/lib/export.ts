@@ -2,14 +2,104 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import * as XLSX from 'xlsx'
 
+// ============ COMMON TYPES ============
+interface CompanyData {
+    name: string
+    tax_id?: string
+    phone?: string
+    email?: string
+    address?: string
+}
+
+// ============ PDF HEADER - MODERN DESIGN ============
+function drawPDFHeader(doc: jsPDF, company: CompanyData, documentType: string, documentNumber: string) {
+    const pageWidth = doc.internal.pageSize.width
+
+    // Header background
+    doc.setFillColor(17, 24, 39) // Dark bg
+    doc.rect(0, 0, pageWidth, 45, 'F')
+
+    // Company name
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(20)
+    doc.setFont('helvetica', 'bold')
+    doc.text(company.name.toUpperCase(), 14, 20)
+
+    // Company info line
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'normal')
+    const companyInfo = [
+        company.tax_id && `RUC: ${company.tax_id}`,
+        company.phone && `Tel: ${company.phone}`,
+        company.email,
+    ].filter(Boolean).join(' • ')
+    if (companyInfo) {
+        doc.text(companyInfo, 14, 30)
+    }
+    if (company.address) {
+        doc.text(company.address, 14, 38)
+    }
+
+    // Document type badge
+    doc.setFillColor(59, 130, 246) // Blue accent
+    doc.roundedRect(pageWidth - 75, 10, 60, 25, 3, 3, 'F')
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'bold')
+    doc.text(documentType, pageWidth - 45, 18, { align: 'center' })
+    doc.setFontSize(11)
+    doc.text(documentNumber, pageWidth - 45, 28, { align: 'center' })
+
+    return 55 // Y position after header
+}
+
+// ============ PDF FOOTER ============
+function drawPDFFooter(doc: jsPDF, company: CompanyData) {
+    const pageWidth = doc.internal.pageSize.width
+    const pageHeight = doc.internal.pageSize.height
+
+    // Footer line
+    doc.setDrawColor(200)
+    doc.line(14, pageHeight - 25, pageWidth - 14, pageHeight - 25)
+
+    // Footer text
+    doc.setTextColor(120)
+    doc.setFontSize(8)
+    doc.text(`${company.name} • Documento generado electrónicamente`, pageWidth / 2, pageHeight - 18, { align: 'center' })
+    doc.text(`Fecha de impresión: ${new Date().toLocaleDateString('es-EC')} ${new Date().toLocaleTimeString('es-EC')}`, pageWidth / 2, pageHeight - 12, { align: 'center' })
+}
+
+// ============ SIGNATURE AREA ============
+function drawSignatureArea(doc: jsPDF, y: number) {
+    const pageWidth = doc.internal.pageSize.width
+
+    doc.setDrawColor(180)
+    doc.setLineWidth(0.5)
+
+    // Left signature
+    doc.line(20, y, 85, y)
+    doc.setFontSize(9)
+    doc.setTextColor(100)
+    doc.text('Firma del Cliente', 52.5, y + 6, { align: 'center' })
+    doc.text('C.I. ____________________', 52.5, y + 14, { align: 'center' })
+
+    // Right signature  
+    doc.line(pageWidth - 85, y, pageWidth - 20, y)
+    doc.text('Firma Autorizada', pageWidth - 52.5, y + 6, { align: 'center' })
+    doc.text('Sello de la Empresa', pageWidth - 52.5, y + 14, { align: 'center' })
+}
+
 // ============ INVOICE PDF ============
 interface InvoiceData {
     invoice_number: string
     client_name: string
+    client_address?: string
+    client_tax_id?: string
+    client_phone?: string
     issue_date: string
     due_date: string
     status: string
     subtotal: number
+    tax_rate: number
     tax_amount: number
     total: number
     lines: {
@@ -20,68 +110,134 @@ interface InvoiceData {
         total: number
     }[]
     notes?: string
+    company: CompanyData
 }
 
 export function generateInvoicePDF(invoice: InvoiceData): void {
     const doc = new jsPDF()
     const pageWidth = doc.internal.pageSize.width
 
-    doc.setFontSize(24)
-    doc.setTextColor(59, 130, 246)
-    doc.text('FACTURA', pageWidth / 2, 25, { align: 'center' })
+    let y = drawPDFHeader(doc, invoice.company, 'FACTURA', invoice.invoice_number)
 
-    doc.setFontSize(10)
+    // Client info box
+    doc.setFillColor(249, 250, 251)
+    doc.roundedRect(14, y, pageWidth - 28, 35, 3, 3, 'F')
+
     doc.setTextColor(100)
-    doc.text(`Factura: ${invoice.invoice_number}`, 14, 40)
-    doc.text(`Fecha: ${invoice.issue_date}`, 14, 46)
-    doc.text(`Vencimiento: ${invoice.due_date}`, 14, 52)
-    doc.text(`Estado: ${invoice.status}`, 14, 58)
+    doc.setFontSize(9)
+    doc.text('CLIENTE', 20, y + 8)
 
-    doc.setFontSize(12)
     doc.setTextColor(0)
-    doc.text('Cliente:', pageWidth - 14, 40, { align: 'right' })
-    doc.setFontSize(10)
-    doc.setTextColor(100)
-    doc.text(invoice.client_name, pageWidth - 14, 48, { align: 'right' })
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'bold')
+    doc.text(invoice.client_name, 20, y + 17)
 
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(80)
+    if (invoice.client_tax_id) doc.text(`RUC/CI: ${invoice.client_tax_id}`, 20, y + 25)
+    if (invoice.client_phone) doc.text(`Tel: ${invoice.client_phone}`, 20, y + 32)
+    if (invoice.client_address) doc.text(invoice.client_address, 100, y + 17)
+
+    // Dates
+    doc.setTextColor(100)
+    doc.setFontSize(9)
+    doc.text(`Fecha: ${invoice.issue_date}`, pageWidth - 60, y + 8)
+    doc.text(`Vence: ${invoice.due_date}`, pageWidth - 60, y + 16)
+
+    const statusColors: Record<string, number[]> = {
+        draft: [156, 163, 175],
+        sent: [59, 130, 246],
+        paid: [34, 197, 94],
+        overdue: [239, 68, 68],
+    }
+    const statusColor = statusColors[invoice.status] || [100, 100, 100]
+    doc.setFillColor(statusColor[0], statusColor[1], statusColor[2])
+    doc.roundedRect(pageWidth - 60, y + 22, 45, 10, 2, 2, 'F')
+    doc.setTextColor(255)
+    doc.setFontSize(8)
+    doc.text(invoice.status.toUpperCase(), pageWidth - 37.5, y + 28.5, { align: 'center' })
+
+    y += 45
+
+    // Items table
     autoTable(doc, {
-        startY: 70,
-        head: [['Descripción', 'Cant.', 'P. Unit.', 'Desc.', 'Total']],
-        body: invoice.lines.map(line => [
+        startY: y,
+        head: [['#', 'DESCRIPCIÓN', 'CANT.', 'P. UNIT.', 'DESC.', 'TOTAL']],
+        body: invoice.lines.map((line, i) => [
+            (i + 1).toString(),
             line.description,
-            line.quantity.toString(),
+            line.quantity.toFixed(2),
             `$${line.unit_price.toFixed(2)}`,
-            `${line.discount}%`,
+            line.discount > 0 ? `${line.discount}%` : '-',
             `$${line.total.toFixed(2)}`,
         ]),
-        headStyles: { fillColor: [59, 130, 246], textColor: 255 },
-        columnStyles: {
-            0: { cellWidth: 80 },
-            1: { halign: 'center' },
-            2: { halign: 'right' },
-            3: { halign: 'center' },
-            4: { halign: 'right' },
+        headStyles: {
+            fillColor: [17, 24, 39],
+            textColor: 255,
+            fontStyle: 'bold',
+            fontSize: 9,
         },
+        bodyStyles: {
+            fontSize: 9,
+            cellPadding: 4,
+        },
+        alternateRowStyles: {
+            fillColor: [249, 250, 251],
+        },
+        columnStyles: {
+            0: { cellWidth: 12, halign: 'center' },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 20, halign: 'center' },
+            3: { cellWidth: 25, halign: 'right' },
+            4: { cellWidth: 20, halign: 'center' },
+            5: { cellWidth: 30, halign: 'right' },
+        },
+        margin: { left: 14, right: 14 },
     })
 
-    const finalY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10
-    doc.setFontSize(10)
-    doc.text('Subtotal:', pageWidth - 50, finalY)
-    doc.text(`$${invoice.subtotal.toFixed(2)}`, pageWidth - 14, finalY, { align: 'right' })
-    doc.text('IVA:', pageWidth - 50, finalY + 6)
-    doc.text(`$${invoice.tax_amount.toFixed(2)}`, pageWidth - 14, finalY + 6, { align: 'right' })
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'bold')
-    doc.text('TOTAL:', pageWidth - 50, finalY + 14)
-    doc.text(`$${invoice.total.toFixed(2)}`, pageWidth - 14, finalY + 14, { align: 'right' })
+    y = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10
 
+    // Totals box
+    doc.setFillColor(249, 250, 251)
+    doc.roundedRect(pageWidth - 90, y, 75, 45, 3, 3, 'F')
+
+    doc.setTextColor(80)
+    doc.setFontSize(9)
+    doc.text('Subtotal:', pageWidth - 85, y + 10)
+    doc.text(`IVA (${invoice.tax_rate}%):`, pageWidth - 85, y + 20)
+
+    doc.setDrawColor(200)
+    doc.line(pageWidth - 85, y + 27, pageWidth - 20, y + 27)
+
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.setTextColor(0)
+    doc.text('TOTAL:', pageWidth - 85, y + 38)
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(0)
+    doc.text(`$${invoice.subtotal.toFixed(2)}`, pageWidth - 20, y + 10, { align: 'right' })
+    doc.text(`$${invoice.tax_amount.toFixed(2)}`, pageWidth - 20, y + 20, { align: 'right' })
+
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(12)
+    doc.setTextColor(59, 130, 246)
+    doc.text(`$${invoice.total.toFixed(2)}`, pageWidth - 20, y + 38, { align: 'right' })
+
+    // Notes
     if (invoice.notes) {
-        doc.setFont('helvetica', 'normal')
-        doc.setFontSize(10)
-        doc.text('Notas:', 14, finalY + 30)
         doc.setTextColor(100)
-        doc.text(invoice.notes, 14, finalY + 36)
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(9)
+        doc.text('Notas:', 14, y + 10)
+        doc.text(invoice.notes, 14, y + 18)
     }
+
+    y += 60
+    drawSignatureArea(doc, y)
+    drawPDFFooter(doc, invoice.company)
 
     doc.save(`factura-${invoice.invoice_number}.pdf`)
 }
@@ -94,6 +250,7 @@ interface WorkOrderData {
     created_at: string
     client_name: string
     client_phone?: string
+    client_address?: string
     device_type: string
     device_brand?: string
     device_model?: string
@@ -101,69 +258,139 @@ interface WorkOrderData {
     problem_description: string
     estimated_cost?: number
     technician_name?: string
+    company: CompanyData
 }
 
 export function generateWorkOrderPDF(order: WorkOrderData): void {
     const doc = new jsPDF()
     const pageWidth = doc.internal.pageSize.width
 
-    doc.setFontSize(20)
-    doc.setTextColor(59, 130, 246)
-    doc.text('ORDEN DE TRABAJO', pageWidth / 2, 25, { align: 'center' })
+    let y = drawPDFHeader(doc, order.company, 'ORDEN', order.order_number)
 
-    doc.setFontSize(14)
-    doc.setTextColor(0)
-    doc.text(order.order_number, pageWidth / 2, 35, { align: 'center' })
+    // Status and Priority badges
+    const priorityColors: Record<string, number[]> = {
+        low: [156, 163, 175],
+        normal: [59, 130, 246],
+        high: [249, 115, 22],
+        urgent: [239, 68, 68],
+    }
+    const priorityColor = priorityColors[order.priority] || [100, 100, 100]
 
-    doc.setFontSize(10)
+    doc.setFillColor(priorityColor[0], priorityColor[1], priorityColor[2])
+    doc.roundedRect(14, y, 40, 8, 2, 2, 'F')
+    doc.setTextColor(255)
+    doc.setFontSize(8)
+    doc.text(order.priority.toUpperCase(), 34, y + 5.5, { align: 'center' })
+
+    doc.setFillColor(34, 197, 94)
+    doc.roundedRect(58, y, 50, 8, 2, 2, 'F')
+    doc.text(order.status.toUpperCase(), 83, y + 5.5, { align: 'center' })
+
     doc.setTextColor(100)
-    doc.text(`Estado: ${order.status} | Prioridad: ${order.priority}`, pageWidth / 2, 45, { align: 'center' })
+    doc.setFontSize(9)
+    doc.text(`Fecha: ${order.created_at}`, pageWidth - 14, y + 5, { align: 'right' })
 
-    let y = 60
-    doc.setFontSize(12)
-    doc.setTextColor(0)
-    doc.text('CLIENTE', 14, y)
-    y += 8
+    y += 18
+
+    // Two-column layout
+    const colWidth = (pageWidth - 38) / 2
+
+    // Left: Client info
+    doc.setFillColor(249, 250, 251)
+    doc.roundedRect(14, y, colWidth, 40, 3, 3, 'F')
+
+    doc.setTextColor(59, 130, 246)
     doc.setFontSize(10)
-    doc.text(order.client_name, 14, y)
-    if (order.client_phone) {
-        y += 6
-        doc.setTextColor(100)
-        doc.text(`Tel: ${order.client_phone}`, 14, y)
+    doc.setFont('helvetica', 'bold')
+    doc.text('CLIENTE', 20, y + 10)
+
+    doc.setTextColor(0)
+    doc.setFontSize(11)
+    doc.text(order.client_name, 20, y + 20)
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(80)
+    if (order.client_phone) doc.text(`Tel: ${order.client_phone}`, 20, y + 28)
+    if (order.client_address) doc.text(order.client_address, 20, y + 36)
+
+    // Right: Device info
+    doc.setFillColor(249, 250, 251)
+    doc.roundedRect(14 + colWidth + 10, y, colWidth, 40, 3, 3, 'F')
+
+    doc.setTextColor(59, 130, 246)
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'bold')
+    doc.text('EQUIPO', 24 + colWidth, y + 10)
+
+    doc.setTextColor(0)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(10)
+    doc.text(`${order.device_brand || ''} ${order.device_model || ''}`.trim() || order.device_type, 24 + colWidth, y + 20)
+
+    doc.setFontSize(9)
+    doc.setTextColor(80)
+    doc.text(`Tipo: ${order.device_type}`, 24 + colWidth, y + 28)
+    if (order.serial_number) doc.text(`S/N: ${order.serial_number}`, 24 + colWidth, y + 36)
+
+    y += 50
+
+    // Problem description
+    doc.setFillColor(254, 243, 199) // Warm yellow bg
+    doc.roundedRect(14, y, pageWidth - 28, 45, 3, 3, 'F')
+
+    doc.setTextColor(146, 64, 14)
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'bold')
+    doc.text('PROBLEMA REPORTADO', 20, y + 10)
+
+    doc.setTextColor(0)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(10)
+    const problemLines = doc.splitTextToSize(order.problem_description, pageWidth - 48)
+    doc.text(problemLines.slice(0, 5), 20, y + 20)
+
+    y += 55
+
+    // Technician and Cost
+    if (order.technician_name || order.estimated_cost) {
+        doc.setFillColor(249, 250, 251)
+        doc.roundedRect(14, y, pageWidth - 28, 20, 3, 3, 'F')
+
+        doc.setFontSize(9)
+        doc.setTextColor(80)
+        if (order.technician_name) {
+            doc.text('Técnico asignado:', 20, y + 8)
+            doc.setTextColor(0)
+            doc.setFont('helvetica', 'bold')
+            doc.text(order.technician_name, 20, y + 15)
+        }
+        if (order.estimated_cost) {
+            doc.setTextColor(80)
+            doc.setFont('helvetica', 'normal')
+            doc.text('Costo estimado:', pageWidth - 60, y + 8)
+            doc.setTextColor(59, 130, 246)
+            doc.setFont('helvetica', 'bold')
+            doc.setFontSize(12)
+            doc.text(`$${order.estimated_cost.toFixed(2)}`, pageWidth - 20, y + 15, { align: 'right' })
+        }
+        y += 30
     }
 
-    y += 15
-    doc.setTextColor(0)
-    doc.setFontSize(12)
-    doc.text('DISPOSITIVO', 14, y)
-    y += 8
-    doc.setFontSize(10)
-    doc.text(`Tipo: ${order.device_type}`, 14, y)
-    if (order.device_brand) { y += 6; doc.text(`Marca: ${order.device_brand}`, 14, y) }
-    if (order.device_model) { y += 6; doc.text(`Modelo: ${order.device_model}`, 14, y) }
-    if (order.serial_number) { y += 6; doc.text(`Serial: ${order.serial_number}`, 14, y) }
-
-    y += 15
-    doc.setFontSize(12)
-    doc.text('PROBLEMA REPORTADO', 14, y)
-    y += 8
-    doc.setFontSize(10)
-    const problemLines = doc.splitTextToSize(order.problem_description, pageWidth - 28)
-    doc.text(problemLines, 14, y)
-    y += problemLines.length * 5
-
-    y += 10
-    if (order.technician_name) { doc.text(`Técnico: ${order.technician_name}`, 14, y); y += 6 }
-    if (order.estimated_cost) { doc.text(`Costo Estimado: $${order.estimated_cost.toFixed(2)}`, 14, y); y += 6 }
+    // Terms box
+    doc.setFillColor(243, 244, 246)
+    doc.roundedRect(14, y, pageWidth - 28, 30, 3, 3, 'F')
     doc.setTextColor(100)
-    doc.text(`Fecha: ${order.created_at}`, 14, y)
-
-    doc.setTextColor(0)
-    doc.line(14, 250, 90, 250)
-    doc.line(pageWidth - 90, 250, pageWidth - 14, 250)
     doc.setFontSize(8)
-    doc.text('Firma del Cliente', 52, 255, { align: 'center' })
-    doc.text('Firma del Técnico', pageWidth - 52, 255, { align: 'center' })
+    doc.text('TÉRMINOS Y CONDICIONES:', 20, y + 8)
+    doc.setFontSize(7)
+    doc.text('• El tiempo de reparación dependerá de la complejidad del trabajo y disponibilidad de repuestos.', 20, y + 14)
+    doc.text('• No nos responsabilizamos por datos almacenados en el dispositivo.', 20, y + 19)
+    doc.text('• El equipo no reclamado en 30 días pasará a inventario de la empresa.', 20, y + 24)
+
+    y += 40
+    drawSignatureArea(doc, y)
+    drawPDFFooter(doc, order.company)
 
     doc.save(`orden-${order.order_number}.pdf`)
 }
@@ -174,81 +401,114 @@ interface TechnicalReportData {
     client_name: string
     device_type: string
     device_brand?: string
+    device_model?: string
     diagnosis: string
     work_performed: string
     parts_used?: string
     recommendations?: string
     created_at: string
     technician_name?: string
+    company: CompanyData
 }
 
 export function generateTechnicalReportPDF(report: TechnicalReportData): void {
     const doc = new jsPDF()
     const pageWidth = doc.internal.pageSize.width
 
-    doc.setFontSize(20)
-    doc.setTextColor(59, 130, 246)
-    doc.text('INFORME TÉCNICO', pageWidth / 2, 25, { align: 'center' })
+    let y = drawPDFHeader(doc, report.company, 'INFORME', report.order_number)
 
-    doc.setFontSize(12)
+    // Info row
+    doc.setFillColor(249, 250, 251)
+    doc.roundedRect(14, y, pageWidth - 28, 25, 3, 3, 'F')
+
+    doc.setTextColor(80)
+    doc.setFontSize(9)
+    doc.text('Cliente:', 20, y + 8)
+    doc.text('Equipo:', 80, y + 8)
+    doc.text('Fecha:', pageWidth - 60, y + 8)
+
     doc.setTextColor(0)
-    doc.text(`Orden: ${report.order_number}`, pageWidth / 2, 35, { align: 'center' })
+    doc.setFont('helvetica', 'bold')
+    doc.text(report.client_name, 20, y + 17)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`${report.device_brand || ''} ${report.device_model || ''} - ${report.device_type}`, 80, y + 17)
+    doc.text(report.created_at, pageWidth - 60, y + 17)
 
-    let y = 50
-    doc.setFontSize(10)
-    doc.text(`Cliente: ${report.client_name}`, 14, y)
-    y += 6
-    doc.text(`Dispositivo: ${report.device_type} ${report.device_brand || ''}`, 14, y)
-    y += 6
-    doc.setTextColor(100)
-    doc.text(`Fecha: ${report.created_at}`, 14, y)
-    if (report.technician_name) { y += 6; doc.text(`Técnico: ${report.technician_name}`, 14, y) }
-
-    y += 15
-    doc.setTextColor(0)
-    doc.setFontSize(12)
-    doc.text('DIAGNÓSTICO', 14, y)
-    y += 8
-    doc.setFontSize(10)
-    const diagLines = doc.splitTextToSize(report.diagnosis, pageWidth - 28)
-    doc.text(diagLines, 14, y)
-    y += diagLines.length * 5 + 5
-
-    y += 10
-    doc.setFontSize(12)
-    doc.text('TRABAJO REALIZADO', 14, y)
-    y += 8
-    doc.setFontSize(10)
-    const workLines = doc.splitTextToSize(report.work_performed, pageWidth - 28)
-    doc.text(workLines, 14, y)
-    y += workLines.length * 5 + 5
-
-    if (report.parts_used) {
-        y += 10
-        doc.setFontSize(12)
-        doc.text('REPUESTOS UTILIZADOS', 14, y)
-        y += 8
-        doc.setFontSize(10)
-        const partsLines = doc.splitTextToSize(report.parts_used, pageWidth - 28)
-        doc.text(partsLines, 14, y)
-        y += partsLines.length * 5 + 5
+    if (report.technician_name) {
+        doc.setTextColor(80)
+        doc.setFontSize(8)
+        doc.text(`Técnico: ${report.technician_name}`, 20, y + 22)
     }
 
-    if (report.recommendations) {
-        y += 10
-        doc.setFontSize(12)
-        doc.text('RECOMENDACIONES', 14, y)
-        y += 8
-        doc.setFontSize(10)
-        const recLines = doc.splitTextToSize(report.recommendations, pageWidth - 28)
-        doc.text(recLines, 14, y)
+    y += 35
+
+    // Diagnosis section
+    doc.setFillColor(254, 226, 226) // Red tint
+    doc.roundedRect(14, y, pageWidth - 28, 40, 3, 3, 'F')
+    doc.setTextColor(153, 27, 27)
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'bold')
+    doc.text('DIAGNÓSTICO', 20, y + 10)
+    doc.setTextColor(0)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    const diagLines = doc.splitTextToSize(report.diagnosis, pageWidth - 48)
+    doc.text(diagLines.slice(0, 5), 20, y + 18)
+
+    y += 50
+
+    // Work performed section
+    doc.setFillColor(220, 252, 231) // Green tint
+    doc.roundedRect(14, y, pageWidth - 28, 40, 3, 3, 'F')
+    doc.setTextColor(22, 101, 52)
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'bold')
+    doc.text('TRABAJO REALIZADO', 20, y + 10)
+    doc.setTextColor(0)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    const workLines = doc.splitTextToSize(report.work_performed, pageWidth - 48)
+    doc.text(workLines.slice(0, 5), 20, y + 18)
+
+    y += 50
+
+    // Parts and Recommendations (two columns)
+    if (report.parts_used || report.recommendations) {
+        const colWidth = (pageWidth - 38) / 2
+
+        if (report.parts_used) {
+            doc.setFillColor(254, 249, 195) // Yellow tint
+            doc.roundedRect(14, y, colWidth, 35, 3, 3, 'F')
+            doc.setTextColor(113, 63, 18)
+            doc.setFontSize(10)
+            doc.setFont('helvetica', 'bold')
+            doc.text('REPUESTOS', 20, y + 10)
+            doc.setTextColor(0)
+            doc.setFont('helvetica', 'normal')
+            doc.setFontSize(9)
+            const partsLines = doc.splitTextToSize(report.parts_used, colWidth - 16)
+            doc.text(partsLines.slice(0, 4), 20, y + 18)
+        }
+
+        if (report.recommendations) {
+            doc.setFillColor(224, 231, 255) // Blue tint
+            doc.roundedRect(14 + (report.parts_used ? colWidth + 10 : 0), y, colWidth, 35, 3, 3, 'F')
+            doc.setTextColor(55, 48, 163)
+            doc.setFontSize(10)
+            doc.setFont('helvetica', 'bold')
+            doc.text('RECOMENDACIONES', 20 + (report.parts_used ? colWidth + 10 : 0), y + 10)
+            doc.setTextColor(0)
+            doc.setFont('helvetica', 'normal')
+            doc.setFontSize(9)
+            const recLines = doc.splitTextToSize(report.recommendations, colWidth - 16)
+            doc.text(recLines.slice(0, 4), 20 + (report.parts_used ? colWidth + 10 : 0), y + 18)
+        }
+
+        y += 45
     }
 
-    doc.line(14, 250, 90, 250)
-    doc.line(pageWidth - 90, 250, pageWidth - 14, 250)
-    doc.setFontSize(8)
-    doc.text('Firma del Cliente', 52, 255, { align: 'center' })
-    doc.text('Firma del Técnico', pageWidth - 52, 255, { align: 'center' })
+    drawSignatureArea(doc, y)
+    drawPDFFooter(doc, report.company)
 
     doc.save(`informe-${report.order_number}.pdf`)
 }

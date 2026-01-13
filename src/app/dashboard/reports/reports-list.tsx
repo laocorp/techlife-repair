@@ -6,6 +6,14 @@ import { ArrowRight, FileText } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { generateTechnicalReportPDF } from '@/lib/export'
 
+interface Company {
+    name: string
+    tax_id?: string | null
+    phone?: string | null
+    email?: string | null
+    address?: string | null
+}
+
 interface Report {
     id: string
     diagnosis: string | null
@@ -18,6 +26,7 @@ interface Report {
         order_number: string
         device_type: string
         device_brand: string | null
+        device_model: string | null
         client: {
             company_name: string
         }
@@ -26,20 +35,29 @@ interface Report {
 
 interface ReportsListProps {
     reports: Report[]
+    company: Company
 }
 
-export function ReportsList({ reports }: ReportsListProps) {
+export function ReportsList({ reports, company }: ReportsListProps) {
     const handlePDF = (report: Report) => {
         generateTechnicalReportPDF({
             order_number: report.work_order.order_number,
             client_name: report.work_order.client.company_name,
             device_type: report.work_order.device_type,
             device_brand: report.work_order.device_brand || undefined,
+            device_model: report.work_order.device_model || undefined,
             diagnosis: report.diagnosis || '',
             work_performed: report.work_performed || '',
             parts_used: report.parts_used || undefined,
             recommendations: report.recommendations || undefined,
             created_at: report.created_at.split('T')[0],
+            company: {
+                name: company.name,
+                tax_id: company.tax_id || undefined,
+                phone: company.phone || undefined,
+                email: company.email || undefined,
+                address: company.address || undefined,
+            },
         })
     }
 

@@ -47,6 +47,9 @@ interface Invoice {
         id: string
         company_name: string
         email: string | null
+        phone: string | null
+        tax_id: string | null
+        address: string | null
     }
     work_order: {
         id: string
@@ -78,7 +81,7 @@ async function getInvoice(supabase: Awaited<ReturnType<typeof createClient>>, id
         .from('invoices')
         .select(`
       *,
-      client:clients(id, company_name, email),
+      client:clients(id, company_name, email, phone, tax_id, address),
       work_order:work_orders(id, order_number)
     `)
         .eq('id', id)
@@ -91,6 +94,27 @@ async function getInvoice(supabase: Awaited<ReturnType<typeof createClient>>, id
         client: data.client as unknown as Invoice['client'],
         work_order: data.work_order as unknown as Invoice['work_order'],
     }
+}
+
+async function getTenant(supabase: Awaited<ReturnType<typeof createClient>>) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    const { data: userData } = await supabase
+        .from('users')
+        .select('tenant_id')
+        .eq('auth_user_id', user.id)
+        .single()
+
+    if (!userData?.tenant_id) return null
+
+    const { data: tenant } = await supabase
+        .from('tenants')
+        .select('*')
+        .eq('id', userData.tenant_id)
+        .single()
+
+    return tenant
 }
 
 async function getInvoiceLines(supabase: Awaited<ReturnType<typeof createClient>>, invoiceId: string): Promise<InvoiceLine[]> {
@@ -122,15 +146,23 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
     const { id } = await params
     const supabase = await createClient()
 
-    const [invoice, lines, products] = await Promise.all([
+    const [invoice, lines, products, tenant] = await Promise.all([
         getInvoice(supabase, id),
         getInvoiceLines(supabase, id),
         getProducts(supabase),
+        getTenant(supabase),
     ])
 
     if (!invoice) notFound()
 
     const isDraft = invoice.status === 'draft'
+    const company = {
+        name: tenant?.name || 'Mi Empresa',
+        tax_id: tenant?.tax_id || null,
+        phone: tenant?.phone || null,
+        email: tenant?.email || null,
+        address: tenant?.address || null,
+    }
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
@@ -163,6 +195,7 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
                         ...invoice,
                         issue_date: invoice.created_at.split('T')[0],
                         lines: lines,
+                        company: company,
                     }}
                 />
             </div>

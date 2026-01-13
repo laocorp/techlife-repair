@@ -4,6 +4,14 @@ import { Button } from '@/components/ui'
 import { FileText } from 'lucide-react'
 import { generateWorkOrderPDF, generateTechnicalReportPDF } from '@/lib/export'
 
+interface Company {
+    name: string
+    tax_id?: string | null
+    phone?: string | null
+    email?: string | null
+    address?: string | null
+}
+
 interface WorkOrder {
     order_number: string
     status: string
@@ -15,8 +23,13 @@ interface WorkOrder {
     device_brand: string | null
     device_model: string | null
     serial_number: string | null
-    client: { company_name: string; phone?: string | null }
+    client: {
+        company_name: string
+        phone?: string | null
+        address?: string | null
+    }
     technician?: { full_name: string } | null
+    company: Company
 }
 
 interface WorkOrderExportProps {
@@ -32,6 +45,7 @@ export function WorkOrderExportButton({ order }: WorkOrderExportProps) {
             created_at: order.created_at.split('T')[0],
             client_name: order.client.company_name,
             client_phone: order.client.phone || undefined,
+            client_address: order.client.address || undefined,
             device_type: order.device_type,
             device_brand: order.device_brand || undefined,
             device_model: order.device_model || undefined,
@@ -39,6 +53,13 @@ export function WorkOrderExportButton({ order }: WorkOrderExportProps) {
             problem_description: order.problem_description,
             estimated_cost: order.estimated_cost || undefined,
             technician_name: order.technician?.full_name || undefined,
+            company: {
+                name: order.company.name,
+                tax_id: order.company.tax_id || undefined,
+                phone: order.company.phone || undefined,
+                email: order.company.email || undefined,
+                address: order.company.address || undefined,
+            },
         })
     }
 
@@ -60,9 +81,11 @@ interface TechnicalReport {
         order_number: string
         device_type: string
         device_brand: string | null
+        device_model: string | null
         client: { company_name: string }
     }
     technician?: { full_name: string } | null
+    company: Company
 }
 
 interface TechnicalReportExportProps {
@@ -76,12 +99,20 @@ export function TechnicalReportExportButton({ report }: TechnicalReportExportPro
             client_name: report.work_order.client.company_name,
             device_type: report.work_order.device_type,
             device_brand: report.work_order.device_brand || undefined,
+            device_model: report.work_order.device_model || undefined,
             diagnosis: report.diagnosis || '',
             work_performed: report.work_performed || '',
             parts_used: report.parts_used || undefined,
             recommendations: report.recommendations || undefined,
             created_at: report.created_at.split('T')[0],
             technician_name: report.technician?.full_name || undefined,
+            company: {
+                name: report.company.name,
+                tax_id: report.company.tax_id || undefined,
+                phone: report.company.phone || undefined,
+                email: report.company.email || undefined,
+                address: report.company.address || undefined,
+            },
         })
     }
 
