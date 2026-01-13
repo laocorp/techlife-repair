@@ -12,7 +12,6 @@ export interface CreateButtonRequest {
     reference: string
     responseUrl: string
     cancellationUrl: string
-    // Optional order details could be added here
 }
 
 export interface CreateButtonResponse {
@@ -26,7 +25,7 @@ export interface ConfirmPaymentResponse {
     cardType: string
     bin: string
     lastDigits: string
-    transactionStatus: string // "Approved"
+    transactionStatus: string
     transactionId: number
     authorizationCode: string
     amount: number
@@ -34,7 +33,7 @@ export interface ConfirmPaymentResponse {
     clientTransactionId: string
     phoneNumber?: string
     document?: string
-    optionalParameter4?: string // CardHolder Name?
+    optionalParameter4?: string
 }
 
 export class PayphoneClient {
@@ -43,7 +42,7 @@ export class PayphoneClient {
 
     constructor(config: PayphoneConfig) {
         this.config = config
-        this.baseUrl = config.region || 'https://pay.payphonetodoesposible.com' // Production URL
+        this.baseUrl = config.region || 'https://pay.payphonetodoesposible.com'
     }
 
     private get headers() {
@@ -54,15 +53,28 @@ export class PayphoneClient {
     }
 
     async createLink(request: CreateButtonRequest): Promise<CreateButtonResponse> {
-        // Using /api/button/Prepare as recommended
+        // Using /api/button/Prepare
         const payload = {
-            ...request,
-            storeId: this.config.storeId,
-            tax: request.amount - request.amountWithoutTax,
-            amountWithTax: 0, // Simplified: assuming all tax logic handled or simple
+            amount: request.amount,
+            amountWithoutTax: request.amountWithoutTax,
+            amountWithTax: 0,
+            tax: 0,
             service: 0,
             tip: 0,
+            currency: request.currency,
+            clientTransactionId: request.clientTransactionId,
+            reference: request.reference,
+            responseUrl: request.responseUrl,
+            cancellationUrl: request.cancellationUrl,
+            storeId: this.config.storeId,
         }
+
+        console.log('Payphone Config Check:', {
+            hasToken: !!this.config.token,
+            storeId: this.config.storeId,
+            baseUrl: this.baseUrl
+        })
+        console.log('Payphone Request Payload:', JSON.stringify(payload, null, 2))
 
         const res = await fetch(`${this.baseUrl}/api/button/Prepare`, {
             method: 'POST',
@@ -71,8 +83,9 @@ export class PayphoneClient {
         })
 
         if (!res.ok) {
-            const error = await res.text()
-            throw new Error(`Payphone Error: ${error}`)
+            const errorText = await res.text()
+            console.error('Payphone Response Error:', res.status, errorText)
+            throw new Error(`Payphone Error: ${res.statusText} - Check server logs for HTML detail`)
         }
 
         return res.json()

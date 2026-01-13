@@ -106,7 +106,7 @@ export async function requestPlanUpgrade(
             storeId: process.env.PAYPHONE_STORE_ID!,
         })
 
-        const clientTransactionId = crypto.randomUUID()
+        const clientTransactionId = crypto.randomUUID().replace(/-/g, '').substring(0, 30)
         const amountInCents = Math.round(plan.price_monthly * 100)
 
         // Create Transaction Record
