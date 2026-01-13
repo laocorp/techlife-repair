@@ -10,6 +10,8 @@ import {
     Settings,
     CreditCard,
     BarChart3,
+    DollarSign,
+    Shield,
     type LucideIcon,
 } from 'lucide-react'
 import type { Permission } from '@/lib/permissions'
@@ -83,10 +85,22 @@ export const DASHBOARD_NAV: NavItem[] = [
         permission: 'accounting:read',
     },
     {
+        title: 'Pagos',
+        href: '/dashboard/payments',
+        icon: DollarSign,
+        permission: 'invoices:read',
+    },
+    {
         title: 'Equipo',
         href: '/dashboard/team',
         icon: Users,
         permission: 'users:read',
+    },
+    {
+        title: 'Super Admin',
+        href: '/dashboard/admin',
+        icon: Shield,
+        permission: 'saas:manage',
     },
 ]
 
