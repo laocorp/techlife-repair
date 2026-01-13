@@ -1,12 +1,42 @@
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui'
+import { SecurityForm } from './security-form'
 
 export const metadata = {
     title: 'Seguridad',
 }
 
-export default function SecuritySettingsPage() {
+interface UserData {
+    id: string
+    full_name: string
+    email: string
+    phone: string | null
+}
+
+async function getUser(supabase: Awaited<ReturnType<typeof createClient>>): Promise<UserData | null> {
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) return null
+
+    const { data } = await supabase
+        .from('users')
+        .select('id, full_name, email, phone')
+        .eq('auth_user_id', authUser.id)
+        .single()
+
+    return data as UserData | null
+}
+
+export default async function SecuritySettingsPage() {
+    const supabase = await createClient()
+
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    if (!authUser) redirect('/login')
+
+    const userData = await getUser(supabase)
+    if (!userData) redirect('/dashboard')
+
     return (
         <div className="max-w-2xl mx-auto space-y-6">
             <div>
@@ -19,21 +49,11 @@ export default function SecuritySettingsPage() {
                 </Link>
                 <h1 className="text-2xl font-semibold text-foreground">Seguridad</h1>
                 <p className="text-foreground-secondary">
-                    Contraseña y autenticación
+                    Tu perfil y contraseña
                 </p>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-base">Próximamente</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-foreground-muted">
-                        Esta sección estará disponible en la próxima actualización.
-                        Podrás cambiar tu contraseña y configurar autenticación de dos factores.
-                    </p>
-                </CardContent>
-            </Card>
+            <SecurityForm user={userData} authEmail={authUser.email || ''} />
         </div>
     )
 }

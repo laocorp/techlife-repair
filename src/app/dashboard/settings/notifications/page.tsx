@@ -1,12 +1,33 @@
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui'
+import { NotificationsForm } from './notifications-form'
 
 export const metadata = {
     title: 'Notificaciones',
 }
 
-export default function NotificationsSettingsPage() {
+export default async function NotificationsSettingsPage() {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) redirect('/login')
+
+    // Get current settings (if stored)
+    const { data: userData } = await supabase
+        .from('users')
+        .select('notification_settings')
+        .eq('auth_user_id', user.id)
+        .single()
+
+    const currentSettings = userData?.notification_settings || {
+        email_orders: true,
+        email_payments: true,
+        email_low_stock: true,
+        email_marketing: false,
+    }
+
     return (
         <div className="max-w-2xl mx-auto space-y-6">
             <div>
@@ -23,17 +44,7 @@ export default function NotificationsSettingsPage() {
                 </p>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-base">Próximamente</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-foreground-muted">
-                        Esta sección estará disponible en la próxima actualización.
-                        Podrás configurar notificaciones por email y alertas del sistema.
-                    </p>
-                </CardContent>
-            </Card>
+            <NotificationsForm settings={currentSettings} />
         </div>
     )
 }

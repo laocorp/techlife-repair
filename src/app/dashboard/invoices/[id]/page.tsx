@@ -6,6 +6,7 @@ import { ArrowLeft, Trash2, DollarSign } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { InvoiceLines } from './invoice-lines'
 import { InvoiceStatusActions } from './invoice-status-actions'
+import { InvoiceExportButtons } from '@/components/export'
 
 const STATUS_LABELS: Record<string, string> = {
     draft: 'Borrador',
@@ -157,6 +158,13 @@ export default async function InvoiceDetailPage({ params }: InvoiceDetailPagePro
                         {invoice.client.company_name}
                     </p>
                 </div>
+                <InvoiceExportButtons
+                    invoice={{
+                        ...invoice,
+                        issue_date: invoice.created_at.split('T')[0],
+                        lines: lines,
+                    }}
+                />
             </div>
 
             {/* Status Actions */}

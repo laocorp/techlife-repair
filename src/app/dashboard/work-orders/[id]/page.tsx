@@ -6,6 +6,7 @@ import { ArrowLeft, Pencil, User, Clock, Smartphone, FileText, DollarSign } from
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { ORDER_STATUS_LABELS, PRIORITY_LABELS } from '@/lib/constants/statuses'
 import { StatusActions } from './status-actions'
+import { WorkOrderExportButton } from '@/components/export'
 
 interface WorkOrderPageProps {
     params: Promise<{ id: string }>
@@ -110,6 +111,22 @@ export default async function WorkOrderDetailPage({ params }: WorkOrderPageProps
                 </div>
 
                 <div className="flex items-center gap-2">
+                    <WorkOrderExportButton
+                        order={{
+                            order_number: order.order_number,
+                            status: ORDER_STATUS_LABELS[order.status as keyof typeof ORDER_STATUS_LABELS] || order.status,
+                            priority: PRIORITY_LABELS[order.priority as keyof typeof PRIORITY_LABELS] || order.priority,
+                            created_at: order.created_at,
+                            problem_description: order.problem_description,
+                            estimated_cost: order.estimated_cost,
+                            device_type: order.device_type || 'Dispositivo',
+                            device_brand: order.device_brand,
+                            device_model: order.device_model,
+                            serial_number: order.device_serial,
+                            client: { company_name: order.client.company_name, phone: order.client.phone },
+                            technician: order.assigned_user,
+                        }}
+                    />
                     <Link href={`/dashboard/work-orders/${id}/edit`}>
                         <Button variant="outline">
                             <Pencil className="h-4 w-4" />

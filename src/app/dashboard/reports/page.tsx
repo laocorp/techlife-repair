@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button, Badge, Card, CardContent } from '@/components/ui'
-import { FileText, ArrowRight } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import { ReportsList } from './reports-list'
 
 export const metadata = {
     title: 'Informes Técnicos',
@@ -11,6 +12,9 @@ export const metadata = {
 interface Report {
     id: string
     diagnosis: string | null
+    work_performed: string | null
+    parts_used: string | null
+    recommendations: string | null
     created_at: string
     work_order: {
         id: string
@@ -27,7 +31,7 @@ async function getReports(supabase: Awaited<ReturnType<typeof createClient>>): P
     const { data, error } = await supabase
         .from('technical_reports')
         .select(`
-            id, diagnosis, created_at,
+            id, diagnosis, work_performed, parts_used, recommendations, created_at,
             work_order:work_orders(
                 id, order_number, device_type, device_brand,
                 client:clients(company_name)
@@ -78,40 +82,7 @@ export default async function ReportsPage() {
                     </Link>
                 </div>
             ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {reports.map((report) => (
-                        <Link
-                            key={report.id}
-                            href={`/dashboard/work-orders/${report.work_order.id}`}
-                        >
-                            <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
-                                <CardContent className="pt-6">
-                                    <div className="flex items-start justify-between mb-3">
-                                        <Badge variant="info">
-                                            {report.work_order.order_number}
-                                        </Badge>
-                                        <ArrowRight className="h-4 w-4 text-foreground-muted" />
-                                    </div>
-                                    <h3 className="font-medium text-foreground mb-1">
-                                        {report.work_order.device_type}
-                                        {report.work_order.device_brand && ` ${report.work_order.device_brand}`}
-                                    </h3>
-                                    <p className="text-sm text-foreground-secondary mb-2">
-                                        {report.work_order.client.company_name}
-                                    </p>
-                                    {report.diagnosis && (
-                                        <p className="text-xs text-foreground-muted line-clamp-2">
-                                            {report.diagnosis}
-                                        </p>
-                                    )}
-                                    <p className="text-xs text-foreground-muted mt-3">
-                                        {formatDate(report.created_at)}
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        </Link>
-                    ))}
-                </div>
+                <ReportsList reports={reports} />
             )}
         </div>
     )
