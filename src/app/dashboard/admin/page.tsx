@@ -99,11 +99,6 @@ const STATUS_VARIANTS: Record<string, 'success' | 'warning' | 'error' | 'info' |
 export default async function SuperAdminPage() {
     const supabase = await createClient()
 
-    const isSuperAdmin = await checkSuperAdmin(supabase)
-    if (!isSuperAdmin) {
-        redirect('/dashboard')
-    }
-
     const [tenants, stats] = await Promise.all([
         getTenants(supabase),
         getStats(supabase),

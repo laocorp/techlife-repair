@@ -9,11 +9,28 @@ import {
   Zap,
   ArrowRight,
   Check,
+  X,
   Building2,
   Wrench
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import { formatCurrency } from '@/lib/utils'
 
-export default function LandingPage() {
+async function getPlans() {
+  const supabase = await createClient()
+  const { data: plans } = await supabase
+    .from('plans')
+    .select('*')
+    .eq('is_active', true)
+    .order('price_monthly', { ascending: true })
+    .limit(3)
+
+  return plans || []
+}
+
+export default async function LandingPage() {
+  const plans = await getPlans()
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -154,7 +171,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
+      {/* Pricing Section - DYNAMIC from DB */}
       <section id="pricing" className="py-20 px-4">
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-16">
@@ -167,85 +184,79 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                name: 'Starter',
-                price: '$29',
-                description: 'Para equipos pequeños',
-                features: [
-                  'Hasta 3 usuarios',
-                  '50 clientes',
-                  'Órdenes de trabajo',
-                  'Informes técnicos',
-                  'Soporte por email',
-                ],
-              },
-              {
-                name: 'Profesional',
-                price: '$59',
-                description: 'Para empresas en crecimiento',
-                popular: true,
-                features: [
-                  'Hasta 10 usuarios',
-                  '200 clientes',
-                  'Todo lo de Starter',
-                  'Inventario completo',
-                  'Facturación',
-                  'Soporte prioritario',
-                ],
-              },
-              {
-                name: 'Enterprise',
-                price: '$99',
-                description: 'Para grandes operaciones',
-                features: [
-                  'Usuarios ilimitados',
-                  'Clientes ilimitados',
-                  'Todo lo de Profesional',
-                  'Contabilidad básica',
-                  'API access',
-                  'Soporte dedicado',
-                ],
-              },
-            ].map((plan) => (
-              <div
-                key={plan.name}
-                className={`relative rounded-xl border p-8 ${plan.popular
+            {plans.map((plan, index) => {
+              const isPopular = index === 1
+              const planModules = plan.features?.modules || []
+              const allModules = [
+                { id: 'clients', label: 'Clientes' },
+                { id: 'work_orders', label: 'Órdenes de Trabajo' },
+                { id: 'reports', label: 'Informes Técnicos' },
+                { id: 'inventory', label: 'Inventario' },
+                { id: 'invoices', label: 'Facturación' },
+                { id: 'accounting', label: 'Contabilidad' },
+              ]
+
+              return (
+                <div
+                  key={plan.id}
+                  className={`relative rounded-xl border p-8 ${isPopular
                     ? 'border-primary bg-primary-light shadow-lg scale-105'
                     : 'border-border bg-background-tertiary'
-                  }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
-                    Más popular
+                    }`}
+                >
+                  {isPopular && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
+                      Más popular
+                    </div>
+                  )}
+                  <div className="text-center mb-6">
+                    <h3 className="text-lg font-semibold text-foreground">{plan.name}</h3>
+                    <p className="text-sm text-foreground-secondary mt-1">
+                      {plan.max_users === -1 ? 'Usuarios ilimitados' : `Hasta ${plan.max_users} usuarios`}
+                    </p>
+                    <div className="mt-4">
+                      <span className="text-4xl font-bold text-foreground">
+                        {formatCurrency(plan.price_monthly)}
+                      </span>
+                      <span className="text-foreground-secondary">/mes</span>
+                    </div>
+                    <p className="text-xs text-foreground-muted mt-1">
+                      o {formatCurrency(plan.price_yearly)}/año
+                    </p>
                   </div>
-                )}
-                <div className="text-center mb-6">
-                  <h3 className="text-lg font-semibold text-foreground">{plan.name}</h3>
-                  <p className="text-sm text-foreground-secondary">{plan.description}</p>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                    <span className="text-foreground-secondary">/mes</span>
-                  </div>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3 text-sm">
+
+                  <ul className="space-y-3 mb-8">
+                    <li className="flex items-center gap-3 text-sm">
                       <Check className="h-4 w-4 text-success shrink-0" />
-                      <span className="text-foreground-secondary">{feature}</span>
+                      <span className="text-foreground-secondary">
+                        {plan.max_clients === -1 ? 'Clientes ilimitados' : `${plan.max_clients} clientes`}
+                      </span>
                     </li>
-                  ))}
-                </ul>
-                <Link href="/register" className="block">
-                  <Button
-                    className="w-full"
-                    variant={plan.popular ? 'primary' : 'outline'}
-                  >
-                    Empezar ahora
-                  </Button>
-                </Link>
-              </div>
-            ))}
+                    {allModules.map((module) => (
+                      <li key={module.id} className="flex items-center gap-3 text-sm">
+                        {planModules.includes(module.id) ? (
+                          <Check className="h-4 w-4 text-success shrink-0" />
+                        ) : (
+                          <X className="h-4 w-4 text-foreground-muted shrink-0" />
+                        )}
+                        <span className={planModules.includes(module.id) ? 'text-foreground-secondary' : 'text-foreground-muted'}>
+                          {module.label}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link href="/register" className="block">
+                    <Button
+                      className="w-full"
+                      variant={isPopular ? 'primary' : 'outline'}
+                    >
+                      Empezar ahora
+                    </Button>
+                  </Link>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>

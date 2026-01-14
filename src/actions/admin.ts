@@ -143,3 +143,121 @@ export async function deleteTenantAction(
     revalidatePath('/dashboard/admin')
     return { success: true }
 }
+
+// ========== NEW: Global User Management ==========
+
+export async function updateUserRoleAction(
+    userId: string,
+    role: 'admin' | 'technician' | 'user'
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient()
+
+    if (!await checkSuperAdmin(supabase)) {
+        return { success: false, error: 'No autorizado' }
+    }
+
+    const { error } = await supabase
+        .from('users')
+        .update({ role })
+        .eq('id', userId)
+
+    if (error) {
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/dashboard/admin/users')
+    return { success: true }
+}
+
+export async function toggleUserStatusAction(
+    userId: string,
+    isActive: boolean
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient()
+
+    if (!await checkSuperAdmin(supabase)) {
+        return { success: false, error: 'No autorizado' }
+    }
+
+    const { error } = await supabase
+        .from('users')
+        .update({ is_active: isActive })
+        .eq('id', userId)
+
+    if (error) {
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/dashboard/admin/users')
+    return { success: true }
+}
+
+// ========== NEW: Plan Management ==========
+
+export async function upsertPlanAction(
+    plan: {
+        id?: string
+        name: string
+        price_monthly: number
+        price_yearly: number
+        max_users: number
+        max_clients: number
+        max_work_orders: number
+        features: { modules?: string[] }
+        is_active: boolean
+    }
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient()
+
+    if (!await checkSuperAdmin(supabase)) {
+        return { success: false, error: 'No autorizado' }
+    }
+
+    const { error } = await supabase
+        .from('plans')
+        .upsert({
+            ...plan,
+        })
+
+    if (error) {
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/dashboard/admin/plans')
+    revalidatePath('/dashboard/settings/billing')
+    revalidatePath('/')
+    return { success: true }
+}
+
+export async function deletePlanAction(
+    planId: string
+): Promise<{ success: boolean; error?: string }> {
+    const supabase = await createClient()
+
+    if (!await checkSuperAdmin(supabase)) {
+        return { success: false, error: 'No autorizado' }
+    }
+
+    // Check if plan has tenants
+    const { data: tenants } = await supabase
+        .from('tenants')
+        .select('id')
+        .eq('plan_id', planId)
+        .limit(1)
+
+    if (tenants && tenants.length > 0) {
+        return { success: false, error: 'No puedes eliminar un plan que tiene empresas asignadas' }
+    }
+
+    const { error } = await supabase
+        .from('plans')
+        .delete()
+        .eq('id', planId)
+
+    if (error) {
+        return { success: false, error: error.message }
+    }
+
+    revalidatePath('/dashboard/admin/plans')
+    return { success: true }
+}
