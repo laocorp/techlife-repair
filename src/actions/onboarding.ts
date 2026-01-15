@@ -59,7 +59,7 @@ export async function completeOnboarding(
         }
     }
 
-    // Check if slug is available
+    // Check if slug is available (Pre-check for better UX, though RPC checks too)
     const { data: existingTenant } = await supabase
         .from('tenants')
         .select('id')
@@ -77,39 +77,25 @@ export async function completeOnboarding(
         .eq('name', 'Starter')
         .single()
 
-    // Create tenant
-    const { data: newTenant, error: tenantError } = await supabase
-        .from('tenants')
-        .insert({
-            name: validatedFields.data.company_name,
-            slug: validatedFields.data.slug,
-            status: 'trial',
-            plan_id: defaultPlan?.id || null,
-            payment_due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days trial
-        })
-        .select('id')
-        .single()
+    // Create tenant and user atomically via RPC (Bypasses RLS issues)
+    const { data: result, error: rpcError } = await supabase.rpc('complete_user_onboarding', {
+        p_company_name: validatedFields.data.company_name,
+        p_slug: validatedFields.data.slug,
+        p_full_name: validatedFields.data.full_name,
+        p_phone: validatedFields.data.phone || '', // Handle optional
+        p_plan_id: defaultPlan?.id || null
+    })
 
-    if (tenantError || !newTenant) {
-        return { errors: { _form: [tenantError?.message || 'Error al crear la empresa'] } }
+    if (rpcError) {
+        return { errors: { _form: [`Error del sistema: ${rpcError.message}`] } }
     }
 
-    // Create user record linked to tenant
-    const { error: userError } = await supabase
-        .from('users')
-        .insert({
-            tenant_id: newTenant.id,
-            auth_user_id: user.id,
-            role: 'admin',
-            full_name: validatedFields.data.full_name,
-            email: user.email || '',
-            phone: validatedFields.data.phone || null,
-        })
+    // RPC returns a JSON object, we need to cast or check it
+    // The RPC returns { success: boolean, error?: string, ... }
+    const response = result as { success: boolean; error?: string }
 
-    if (userError) {
-        // Rollback: delete the tenant
-        await supabase.from('tenants').delete().eq('id', newTenant.id)
-        return { errors: { _form: [userError.message] } }
+    if (!response || !response.success) {
+        return { errors: { _form: [response?.error || 'Error al crear la empresa'] } }
     }
 
     redirect('/dashboard')

@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui'
-import { Settings, Building2, CreditCard, Bell, Shield } from 'lucide-react'
+import { Settings, Building2, CreditCard, Bell, Shield, Webhook } from 'lucide-react'
+
 
 export const metadata = {
     title: 'Configuración',
@@ -22,6 +23,12 @@ const SETTINGS_SECTIONS = [
         icon: CreditCard,
     },
     {
+        title: 'Webhooks',
+        description: 'Automatiza con n8n y otras plataformas',
+        href: '/dashboard/settings/webhooks',
+        icon: Webhook,
+    },
+    {
         title: 'Notificaciones',
         description: 'Preferencias de email y alertas',
         href: '/dashboard/settings/notifications',
@@ -34,6 +41,7 @@ const SETTINGS_SECTIONS = [
         icon: Shield,
     },
 ]
+
 
 export default async function SettingsPage() {
     const supabase = await createClient()

@@ -12,6 +12,7 @@ import {
     BarChart3,
     DollarSign,
     Shield,
+    Webhook,
     type LucideIcon,
 } from 'lucide-react'
 import type { Permission } from '@/lib/permissions'
@@ -122,6 +123,12 @@ export const SETTINGS_NAV: NavItem[] = [
         href: '/dashboard/settings/billing',
         icon: CreditCard,
         permission: 'billing:read',
+    },
+    {
+        title: 'Webhooks',
+        href: '/dashboard/settings/webhooks',
+        icon: Webhook,
+        permission: 'settings:read',
     },
 ]
 
