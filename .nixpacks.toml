@@ -1,0 +1,14 @@
+# Nixpacks configuration for Dokploy/Railway deployment
+# Specifies Node.js 22 LTS which is fully compatible with Next.js 16
+
+[phases.setup]
+nixPkgs = ["nodejs_22", "npm"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm run start"
