@@ -33,10 +33,10 @@ DECLARE
     v_code VARCHAR(6);
     v_expires_at TIMESTAMPTZ;
 BEGIN
-    -- Find tenant by slug
+    -- Find tenant by slug (case-insensitive)
     SELECT id INTO v_tenant_id 
     FROM public.tenants 
-    WHERE slug = p_tenant_slug;
+    WHERE LOWER(slug) = LOWER(p_tenant_slug);
     
     IF v_tenant_id IS NULL THEN
         RETURN json_build_object('success', false, 'error', 'Empresa no encontrada');

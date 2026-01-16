@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Wrench, Phone, Mail, MapPin, Clock, Search, User } from 'lucide-react'
+import { Wrench, Phone, Mail, MapPin, Search, User } from 'lucide-react'
 
 interface TenantPageProps {
     params: Promise<{ slug: string }>
@@ -10,10 +10,11 @@ interface TenantPageProps {
 async function getTenant(slug: string) {
     const supabase = await createClient()
 
+    // Case-insensitive lookup
     const { data: tenant } = await supabase
         .from('tenants')
         .select('*')
-        .eq('slug', slug)
+        .ilike('slug', slug)
         .single()
 
     return tenant
@@ -41,6 +42,9 @@ export default async function TenantPublicPage({ params }: TenantPageProps) {
         notFound()
     }
 
+    // Use the actual slug from database for links (preserves case)
+    const tenantSlug = tenant.slug
+
     return (
         <div className="min-h-screen bg-[#09090B] text-zinc-100 antialiased">
             {/* Header */}
@@ -57,7 +61,7 @@ export default async function TenantPublicPage({ params }: TenantPageProps) {
                     </div>
 
                     <Link
-                        href={`/${slug}/portal`}
+                        href={`/${tenantSlug}/portal`}
                         className="text-xs text-zinc-400 hover:text-zinc-100 transition-colors flex items-center gap-1.5"
                     >
                         <User className="w-3.5 h-3.5" />
@@ -79,7 +83,7 @@ export default async function TenantPublicPage({ params }: TenantPageProps) {
                     {/* Action Cards */}
                     <div className="grid sm:grid-cols-2 gap-4">
                         <Link
-                            href={`/${slug}/tracking`}
+                            href={`/${tenantSlug}/tracking`}
                             className="p-6 rounded-xl bg-zinc-900 hover:bg-zinc-800 transition-colors text-left group"
                         >
                             <div className="w-10 h-10 rounded-lg bg-zinc-800 group-hover:bg-zinc-700 flex items-center justify-center mb-4 transition-colors">
@@ -92,7 +96,7 @@ export default async function TenantPublicPage({ params }: TenantPageProps) {
                         </Link>
 
                         <Link
-                            href={`/${slug}/portal`}
+                            href={`/${tenantSlug}/portal`}
                             className="p-6 rounded-xl bg-zinc-900 hover:bg-zinc-800 transition-colors text-left group"
                         >
                             <div className="w-10 h-10 rounded-lg bg-zinc-800 group-hover:bg-zinc-700 flex items-center justify-center mb-4 transition-colors">

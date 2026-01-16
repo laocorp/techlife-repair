@@ -15,11 +15,11 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Get tenant by slug
+    // Get tenant by slug (case-insensitive)
     const { data: tenant } = await supabase
         .from('tenants')
         .select('id')
-        .eq('slug', slug)
+        .ilike('slug', slug)
         .single()
 
     if (!tenant) {
