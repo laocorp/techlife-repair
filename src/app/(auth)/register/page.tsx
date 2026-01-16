@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui'
 import { createClient } from '@/lib/supabase/client'
+import { ArrowRight, Loader2, Check } from 'lucide-react'
 
 export default function RegisterPage() {
     const router = useRouter()
@@ -28,7 +28,6 @@ export default function RegisterPage() {
         e.preventDefault()
         setError('')
 
-        // Validate passwords match
         if (formData.password !== formData.confirmPassword) {
             setError('Las contraseñas no coinciden')
             return
@@ -44,7 +43,6 @@ export default function RegisterPage() {
         try {
             const supabase = createClient()
 
-            // Sign up user
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email: formData.email,
                 password: formData.password,
@@ -63,13 +61,12 @@ export default function RegisterPage() {
 
             if (authData.user) {
                 setSuccess(true)
-                // If email confirmation is disabled, redirect to dashboard
                 if (authData.session) {
                     router.push('/onboarding')
                 }
             }
         } catch {
-            setError('Error al crear la cuenta. Intenta de nuevo.')
+            setError('Error al crear la cuenta')
         } finally {
             setLoading(false)
         }
@@ -77,121 +74,143 @@ export default function RegisterPage() {
 
     if (success) {
         return (
-            <Card className="animate-fade-in">
-                <CardHeader className="text-center">
-                    <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-success-light flex items-center justify-center">
-                        <svg className="h-6 w-6 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                    </div>
-                    <CardTitle className="text-xl">¡Cuenta creada!</CardTitle>
-                    <CardDescription>
-                        Revisa tu correo electrónico para confirmar tu cuenta.
-                    </CardDescription>
-                </CardHeader>
-                <CardFooter className="justify-center">
-                    <Link href="/login">
-                        <Button variant="outline">Ir a Iniciar Sesión</Button>
-                    </Link>
-                </CardFooter>
-            </Card>
+            <div className="space-y-6 text-center">
+                <div className="mx-auto h-12 w-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                    <Check className="h-6 w-6 text-emerald-500" />
+                </div>
+                <div>
+                    <h1 className="text-xl font-medium mb-2">¡Cuenta creada!</h1>
+                    <p className="text-sm text-zinc-500">
+                        Revisa tu correo para confirmar tu cuenta.
+                    </p>
+                </div>
+                <Link
+                    href="/login"
+                    className="inline-flex h-9 px-4 bg-zinc-900 hover:bg-zinc-800 text-zinc-100 rounded-md text-sm font-medium items-center gap-2 transition-colors"
+                >
+                    Ir a Iniciar Sesión
+                </Link>
+            </div>
         )
     }
 
     return (
-        <Card className="animate-fade-in">
-            <CardHeader className="text-center">
-                <CardTitle className="text-xl">Crear Cuenta</CardTitle>
-                <CardDescription>
-                    Comienza tu prueba gratuita de 14 días
-                </CardDescription>
-            </CardHeader>
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="text-center">
+                <h1 className="text-xl font-medium mb-2">Crear Cuenta</h1>
+                <p className="text-sm text-zinc-500">
+                    Prueba gratuita de 14 días
+                </p>
+            </div>
 
-            <form onSubmit={handleSubmit}>
-                <CardContent className="space-y-4">
-                    {error && (
-                        <div className="rounded-md bg-error-light border border-error/20 p-3 text-sm text-error">
-                            {error}
-                        </div>
-                    )}
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                    <div className="rounded-md bg-red-500/10 border border-red-500/20 px-3 py-2 text-xs text-red-400">
+                        {error}
+                    </div>
+                )}
 
-                    <Input
-                        label="Nombre de la Empresa"
+                <div className="space-y-1.5">
+                    <label className="text-xs text-zinc-400">Nombre de la Empresa</label>
+                    <input
+                        type="text"
                         name="companyName"
                         placeholder="Mi Empresa S.A."
                         value={formData.companyName}
                         onChange={handleChange}
                         required
+                        className="w-full h-9 px-3 rounded-md bg-zinc-900 border border-zinc-800/40 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
                     />
+                </div>
 
-                    <Input
-                        label="Tu Nombre Completo"
+                <div className="space-y-1.5">
+                    <label className="text-xs text-zinc-400">Tu Nombre</label>
+                    <input
+                        type="text"
                         name="fullName"
                         placeholder="Juan Pérez"
                         value={formData.fullName}
                         onChange={handleChange}
                         required
+                        className="w-full h-9 px-3 rounded-md bg-zinc-900 border border-zinc-800/40 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
                     />
+                </div>
 
-                    <Input
-                        label="Correo Electrónico"
-                        name="email"
+                <div className="space-y-1.5">
+                    <label className="text-xs text-zinc-400">Correo Electrónico</label>
+                    <input
                         type="email"
+                        name="email"
                         placeholder="tu@email.com"
                         value={formData.email}
                         onChange={handleChange}
                         required
                         autoComplete="email"
+                        className="w-full h-9 px-3 rounded-md bg-zinc-900 border border-zinc-800/40 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
                     />
+                </div>
 
-                    <Input
-                        label="Contraseña"
-                        name="password"
+                <div className="space-y-1.5">
+                    <label className="text-xs text-zinc-400">Contraseña</label>
+                    <input
                         type="password"
+                        name="password"
                         placeholder="••••••••"
                         value={formData.password}
                         onChange={handleChange}
                         required
                         autoComplete="new-password"
-                        hint="Mínimo 8 caracteres"
+                        className="w-full h-9 px-3 rounded-md bg-zinc-900 border border-zinc-800/40 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
                     />
+                    <p className="text-[10px] text-zinc-600">Mínimo 8 caracteres</p>
+                </div>
 
-                    <Input
-                        label="Confirmar Contraseña"
-                        name="confirmPassword"
+                <div className="space-y-1.5">
+                    <label className="text-xs text-zinc-400">Confirmar Contraseña</label>
+                    <input
                         type="password"
+                        name="confirmPassword"
                         placeholder="••••••••"
                         value={formData.confirmPassword}
                         onChange={handleChange}
                         required
                         autoComplete="new-password"
+                        className="w-full h-9 px-3 rounded-md bg-zinc-900 border border-zinc-800/40 text-sm placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
                     />
-                </CardContent>
+                </div>
 
-                <CardFooter className="flex-col gap-4">
-                    <Button type="submit" className="w-full" loading={loading}>
-                        Crear Cuenta
-                    </Button>
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-9 bg-zinc-100 text-zinc-900 rounded-md text-sm font-medium hover:bg-zinc-300 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                    {loading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <>
+                            Crear Cuenta
+                            <ArrowRight className="h-3.5 w-3.5" />
+                        </>
+                    )}
+                </button>
 
-                    <p className="text-sm text-foreground-secondary text-center">
-                        Al registrarte, aceptas nuestros{' '}
-                        <Link href="/terms" className="text-primary hover:text-primary-hover">
-                            Términos de Servicio
-                        </Link>{' '}
-                        y{' '}
-                        <Link href="/privacy" className="text-primary hover:text-primary-hover">
-                            Política de Privacidad
-                        </Link>
-                    </p>
-
-                    <p className="text-sm text-foreground-secondary">
-                        ¿Ya tienes cuenta?{' '}
-                        <Link href="/login" className="text-primary hover:text-primary-hover font-medium">
-                            Inicia Sesión
-                        </Link>
-                    </p>
-                </CardFooter>
+                <p className="text-[10px] text-zinc-600 text-center">
+                    Al registrarte, aceptas nuestros{' '}
+                    <Link href="/terms" className="text-zinc-400 hover:text-zinc-100">Términos</Link>
+                    {' '}y{' '}
+                    <Link href="/privacy" className="text-zinc-400 hover:text-zinc-100">Privacidad</Link>
+                </p>
             </form>
-        </Card>
+
+            {/* Footer */}
+            <p className="text-center text-xs text-zinc-500">
+                ¿Ya tienes cuenta?{' '}
+                <Link href="/login" className="text-zinc-100 hover:underline">
+                    Inicia Sesión
+                </Link>
+            </p>
+        </div>
     )
 }
