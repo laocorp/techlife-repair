@@ -147,7 +147,18 @@ export async function createWebhookAction(
     // Generar secret si no se proporcionó
     const secret = webhook.secret || generateSecret()
 
-    const { data: { user } } = await supabase.auth.getUser()
+    // Get current user ID from users table (not auth.users)
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+
+    if (!authUser) {
+        return { success: false, error: 'Usuario no autenticado' }
+    }
+
+    const { data: currentUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', authUser.id)
+        .single()
 
     const { data, error } = await supabase
         .from('webhooks')
@@ -161,7 +172,7 @@ export async function createWebhookAction(
             headers: webhook.headers || {},
             is_active: webhook.is_active ?? true,
             max_retries: webhook.max_retries ?? 3,
-            created_by: user?.id,
+            created_by: currentUser?.id, // Use users.id, not auth.uid
         })
         .select('id')
         .single()
@@ -271,40 +282,23 @@ export async function testWebhookAction(
         return { success: false, error: 'Webhook no encontrado' }
     }
 
-    // Prepare test payload
-    const testPayload = {
-        test: true,
-        message: 'Este es un evento de prueba desde TechRepair',
-        timestamp: new Date().toISOString(),
-        webhook_id: webhook.id,
-        webhook_name: webhook.name,
-    }
-
     try {
-        // Call Edge Function (cuando esté implementada en Fase 4)
-        // Por ahora, solo registramos el intento
-        const { error } = await supabase.from('webhook_logs').insert({
-            webhook_id: webhook.id,
-            event_type: 'test',
-            payload: testPayload,
-            request_url: webhook.url,
-            request_headers: {
-                'Content-Type': 'application/json',
-                'X-Webhook-Event': 'test',
-                ...webhook.headers,
-            },
-            status_code: null,
-            response_body: 'Test pendiente - Edge Function se implementará en Fase 4',
-            error: 'Función de envío pendiente',
-            retry_count: 0,
-            completed_at: new Date().toISOString(),
+        // Call the new RPC function to send a real test webhook
+        const { data, error } = await supabase.rpc('send_test_webhook', {
+            p_webhook_id: webhook.id
         })
 
         if (error) throw error
 
+        // RPC returns JSON with result
+        const result = data as any
+        if (result && !result.success) {
+            throw new Error(result.error || 'Error desconocido al enviar webhook')
+        }
+
         return {
             success: true,
-            error: 'Test registrado (envío real se habilitará en Fase 4 con Edge Function)'
+            error: 'Test enviado correctamente a n8n (Async)'
         }
     } catch (error: any) {
         return { success: false, error: error.message }

@@ -31,10 +31,17 @@ export function WebhookForm({ webhook, isEdit = false }: WebhookFormProps) {
 
     // Load available events
     useEffect(() => {
+        console.log('🔄 Loading webhook events...')
         getWebhookEventsAction().then(result => {
+            console.log('📦 getWebhookEventsAction result:', result)
             if (result.success && result.data) {
+                console.log('✅ Events loaded:', result.data.length, 'events')
                 setAvailableEvents(result.data)
+            } else {
+                console.error('❌ Failed to load events:', result.error)
             }
+        }).catch(err => {
+            console.error('💥 Exception loading events:', err)
         })
     }, [])
 
