@@ -498,7 +498,7 @@ export default async function LandingPage() {
             <div className="flex items-center gap-3">
               <span>© {new Date().getFullYear()} TechRepair</span>
               <span className="text-zinc-700">•</span>
-              <span>Creado por <a href="https://laocorp.com" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-100 transition-colors">LAOCORP</a></span>
+              <span>Desarrollado por <a href="https://laocorp.lat" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-zinc-100 transition-colors">LAOCORP</a> — Agencia de IA en Ecuador</span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
